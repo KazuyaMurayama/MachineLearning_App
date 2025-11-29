@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venvScriptsactivate)",
+      "Bash(pip install:*)",
+      "Bash(streamlit run:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(python:*)",
+      "Bash(streamlit cache clear:*)",
+      "Bash(dir:*)",
+      "Bash(test:*)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
