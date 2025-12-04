@@ -177,6 +177,110 @@ def create_bar_plot(
     return fig
 
 
+def check_japanese_font_available() -> bool:
+    """
+    日本語フォントが利用可能かチェック
+
+    Returns
+    -------
+    bool
+        日本語フォントが利用可能ならTrue
+    """
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+    japanese_fonts = ['Noto Sans CJK JP', 'Noto Sans JP', 'Yu Gothic', 'MS Gothic', 'Meiryo']
+
+    for font in japanese_fonts:
+        if font in available_fonts:
+            return True
+    return False
+
+
+def convert_columns_to_romaji(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    日本語カラム名をローマ字に変換（フォールバック用）
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        変換対象のDataFrame
+
+    Returns
+    -------
+    pd.DataFrame
+        カラム名を変換したDataFrame
+    """
+    # 簡易的な日本語→ローマ字マッピング
+    translation_map = {
+        # 年収予測
+        '年齢': 'Age',
+        '経験年数': 'Experience_Years',
+        '学歴': 'Education',
+        '部署': 'Department',
+        '役職': 'Position',
+        '残業時間': 'Overtime_Hours',
+        'プロジェクト数': 'Projects',
+        '資格数': 'Certifications',
+        '年収': 'Annual_Salary',
+
+        # 不動産
+        '専有面積': 'Floor_Area',
+        '築年数': 'Building_Age',
+        '階数': 'Floor_Number',
+        '駅徒歩分': 'Station_Minutes',
+        '部屋数': 'Rooms',
+        '向き': 'Direction',
+        'エリア': 'Area',
+        '最寄り駅種別': 'Station_Type',
+        'リフォーム済': 'Renovated',
+        '価格': 'Price',
+
+        # 売上
+        '来店客数': 'Customer_Count',
+        '平均客単価': 'Avg_Spending',
+        '従業員数': 'Staff_Count',
+        '店舗面積': 'Store_Area',
+        'キャンペーン実施': 'Campaign',
+        '曜日': 'Day_of_Week',
+        '天気': 'Weather',
+        '立地': 'Location',
+        '駐車場': 'Parking',
+        '日次売上': 'Daily_Sales',
+
+        # LTV
+        '初回購入額': 'First_Purchase',
+        '購入回数': 'Purchase_Count',
+        '平均購入単価': 'Avg_Purchase',
+        '会員歴月数': 'Membership_Months',
+        'メール開封率': 'Email_Open_Rate',
+        'レビュー投稿数': 'Review_Count',
+        '会員ランク': 'Member_Rank',
+        '利用チャネル': 'Channel',
+        'LTV': 'LTV',
+
+        # 離職
+        '勤続年数': 'Tenure_Years',
+        '月給': 'Monthly_Salary',
+        '有給消化率': 'PTO_Usage_Rate',
+        '評価スコア': 'Rating_Score',
+        '異動回数': 'Transfer_Count',
+        '直近昇給': 'Recent_Raise',
+        '離職リスクスコア': 'Turnover_Risk_Score',
+    }
+
+    # カラム名を変換
+    df_renamed = df.copy()
+    new_columns = []
+    for col in df.columns:
+        if col in translation_map:
+            new_columns.append(translation_map[col])
+        else:
+            # マッピングにない場合はそのまま
+            new_columns.append(col)
+
+    df_renamed.columns = new_columns
+    return df_renamed
+
+
 def display_shap_plots(
     model: lgb.LGBMRegressor,
     X: pd.DataFrame,
@@ -184,7 +288,7 @@ def display_shap_plots(
 ) -> None:
     """
     SHAP可視化をStreamlitに表示
-    
+
     Parameters
     ----------
     model : lgb.LGBMRegressor
@@ -194,8 +298,17 @@ def display_shap_plots(
     max_samples : int
         SHAP計算に使用する最大サンプル数
     """
+    # 日本語フォントが利用できない場合は英語にフォールバック
+    use_english = not check_japanese_font_available()
+
+    if use_english:
+        st.warning("⚠️ 日本語フォントが利用できないため、特徴量名を英語で表示します")
+        X_display = convert_columns_to_romaji(X)
+    else:
+        X_display = X
+
     with st.spinner("SHAP値を計算中..."):
-        shap_values, X_sample = calculate_shap_values(model, X, max_samples)
+        shap_values, X_sample = calculate_shap_values(model, X_display, max_samples)
     
     # Summary Plot
     st.subheader("📊 SHAP Summary Plot")
