@@ -57,12 +57,83 @@ if 'y_test' not in st.session_state:
     st.session_state.y_test = None
 if 'target_col' not in st.session_state:
     st.session_state.target_col = None
+if 'using_default_data' not in st.session_state:
+    st.session_state.using_default_data = False
+if 'default_data_loaded' not in st.session_state:
+    st.session_state.default_data_loaded = False
+
+# デフォルトデータの自動読み込み（初回のみ）
+import os
+if not st.session_state.default_data_loaded:
+    default_train_path = "sample_data/4_ltv_train.csv"
+    default_target_path = "sample_data/4_ltv_target.csv"
+
+    # デフォルトデータが存在する場合のみ読み込む
+    if os.path.exists(default_train_path) and os.path.exists(default_target_path):
+        try:
+            # デフォルトデータの読み込み
+            default_train_df = pd.read_csv(default_train_path)
+            default_target_df = pd.read_csv(default_target_path)
+
+            st.session_state.train_df = default_train_df
+            st.session_state.target_df = default_target_df
+            st.session_state.target_col = 'LTV'
+            st.session_state.using_default_data = True
+            st.session_state.default_data_loaded = True
+
+            # デフォルトデータでモデルを自動学習
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+
+                feature_cols = [col for col in default_train_df.columns if col != 'LTV']
+                st.session_state.feature_cols = feature_cols
+
+                # データの前処理
+                df_processed, label_encoders = preprocess_data(
+                    default_train_df.copy(),
+                    'LTV',
+                    is_training=True
+                )
+
+                # Train/Test分割
+                X_train, X_test, y_train, y_test = split_data(
+                    df_processed.copy(),
+                    'LTV',
+                    test_size=0.2,
+                    random_state=42
+                )
+
+                # モデル学習
+                model = train_model(X_train, y_train)
+
+                # テストデータで予測
+                y_pred = predict(model, X_test)
+
+                # 評価指標を計算
+                metrics = calculate_metrics(y_test, y_pred)
+
+                # セッション状態に保存
+                st.session_state.model = model
+                st.session_state.label_encoders = label_encoders
+                st.session_state.trained = True
+                st.session_state.X_test = X_test
+                st.session_state.y_test = y_test
+                st.session_state.metrics = metrics
+
+        except Exception as e:
+            # エラーが発生してもアプリは続行（デフォルトデータなしでも使える）
+            st.session_state.default_data_loaded = True
+            pass
 
 # =============================================================================
 # サイドバー
 # =============================================================================
 st.sidebar.title("🤖 ML予測アプリ")
 st.sidebar.markdown("---")
+
+# デフォルトデータ使用中の通知
+if st.session_state.using_default_data:
+    st.sidebar.info("💡 デモデータ（LTV予測）を使用中です。独自データをアップロードすることも可能です。")
 
 st.sidebar.subheader("📁 教師データ")
 train_file = st.sidebar.file_uploader(
@@ -84,12 +155,23 @@ st.sidebar.markdown("---")
 target_col = None
 feature_cols = []
 
-if train_file is not None and 'train_df' in st.session_state and st.session_state.train_df is not None:
+# ユーザーがファイルをアップロードした場合、デフォルトデータを上書き
+if train_file is not None:
+    st.session_state.using_default_data = False
+
+# train_dfが存在する場合（デフォルトまたはアップロード）
+if (train_file is not None or st.session_state.using_default_data) and 'train_df' in st.session_state and st.session_state.train_df is not None:
     st.sidebar.subheader("🎯 目的変数")
+
+    # デフォルト値の設定
+    default_index = len(st.session_state.train_df.columns) - 1
+    if st.session_state.target_col is not None and st.session_state.target_col in st.session_state.train_df.columns:
+        default_index = st.session_state.train_df.columns.tolist().index(st.session_state.target_col)
+
     target_col = st.sidebar.selectbox(
         "予測する変数を選択",
         options=st.session_state.train_df.columns.tolist(),
-        index=len(st.session_state.train_df.columns) - 1  # デフォルトは最後の列
+        index=default_index
     )
 
     # 特徴量の自動設定
@@ -106,9 +188,12 @@ if train_file is not None and 'train_df' in st.session_state and st.session_stat
 
 st.sidebar.markdown("---")
 
-# 学習実行ボタン
-if train_file is not None and target_col is not None:
-    if st.sidebar.button("▶️ モデル学習", type="primary", use_container_width=True):
+# 学習実行ボタン（デフォルトデータまたはアップロードされたデータがある場合）
+if (train_file is not None or st.session_state.using_default_data) and target_col is not None:
+    # デフォルトデータで既に学習済みの場合は「再学習」ボタン表示
+    button_label = "🔄 再学習" if st.session_state.trained else "▶️ モデル学習"
+
+    if st.sidebar.button(button_label, type="primary", use_container_width=True):
         with st.spinner("🔄 モデルを学習中..."):
             # 警告を完全に抑制
             with warnings.catch_warnings():
@@ -231,6 +316,12 @@ with tab1:
 
             # セッションに保存
             st.session_state.train_df = train_df
+    elif st.session_state.using_default_data and st.session_state.train_df is not None:
+        # デフォルトデータの表示
+        st.subheader("📊 教師データ（デモデータ）")
+        display_data_info(st.session_state.train_df, "教師データ")
+        st.markdown("##### 先頭10行のプレビュー")
+        display_preview(st.session_state.train_df, n_rows=10)
     else:
         st.info("👈 サイドバーから教師データをアップロードしてください")
 
@@ -245,6 +336,12 @@ with tab1:
 
             # セッションに保存
             st.session_state.target_df = target_df
+    elif st.session_state.using_default_data and st.session_state.target_df is not None:
+        # デフォルトターゲットデータの表示
+        st.subheader("🎯 ターゲットデータ（デモデータ）")
+        display_data_info(st.session_state.target_df, "ターゲットデータ")
+        st.markdown("##### 先頭10行のプレビュー")
+        display_preview(st.session_state.target_df, n_rows=10)
 
 # -----------------------------------------------------------------------------
 # Tab 2: 評価指標
@@ -292,7 +389,7 @@ with tab3:
 with tab4:
     st.header("予測結果")
 
-    if st.session_state.trained and target_file is not None and 'target_df' in st.session_state and st.session_state.target_df is not None:
+    if st.session_state.trained and (target_file is not None or st.session_state.using_default_data) and 'target_df' in st.session_state and st.session_state.target_df is not None:
         target_df = st.session_state.target_df
         feature_cols = st.session_state.feature_cols
         label_encoders = st.session_state.label_encoders
