@@ -13,19 +13,31 @@ from typing import Tuple, Optional
 import lightgbm as lgb
 import matplotlib.font_manager as fm
 import sys
+import os
+
+# matplotlibのフォントキャッシュをリセット（初回のみ）
+try:
+    cache_dir = fm.get_cachedir()
+    if cache_dir and os.path.exists(cache_dir):
+        fm._rebuild()
+except Exception:
+    pass
 
 # 日本語フォントの設定
 def setup_japanese_font():
     """
     matplotlibで日本語を表示するためのフォント設定
+    Windows/Linux（Streamlit Cloud）両対応
     """
-    # Windows環境での日本語フォント候補
+    # 日本語フォント候補（優先順位順）
     japanese_fonts = [
+        'Noto Sans CJK JP',    # Linux（Streamlit Cloud用）
+        'Noto Sans JP',        # Linux代替
         'Yu Gothic',           # 游ゴシック（Windows 10+）
-        'MS Gothic',           # MSゴシック
-        'Meiryo',              # メイリオ
-        'Yu Mincho',           # 游明朝
-        'MS Mincho',           # MS明朝
+        'MS Gothic',           # MSゴシック（Windows）
+        'Meiryo',              # メイリオ（Windows）
+        'Yu Mincho',           # 游明朝（Windows）
+        'MS Mincho',           # MS明朝（Windows）
         'DejaVu Sans',         # フォールバック（英語）
     ]
 
@@ -40,7 +52,15 @@ def setup_japanese_font():
             plt.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け対策
             return font
 
-    # フォントが見つからない場合は警告
+    # フォントが見つからない場合でもエラーにしない
+    # Noto Sans CJKの代替パス（Streamlit Cloud）
+    try:
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'DejaVu Sans']
+        plt.rcParams['axes.unicode_minus'] = False
+    except Exception:
+        pass
+
     return None
 
 # モジュール読み込み時にフォント設定を実行
