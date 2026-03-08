@@ -232,6 +232,7 @@ body {
 <a href="#step4_marketing_strategy" class="nav-item" onclick="showSection('step4_marketing_strategy')"><span class="nav-step">Step 4</span><span class="nav-title">マーケティング戦略</span><span class="nav-sub">STP/4P/ジャーニー/KPI/予算</span></a>
 <a href="#step5_strategy_review" class="nav-item" onclick="showSection('step5_strategy_review')"><span class="nav-step">Step 5</span><span class="nav-title">多角的レビュー</span><span class="nav-sub">5つの思考パターンで問題特定</span></a>
 <a href="#step6_revised_strategy" class="nav-item" onclick="showSection('step6_revised_strategy')"><span class="nav-step">Step 6</span><span class="nav-title">修正戦略 v2</span><span class="nav-sub">PMF検証+KPI修正+ピボット設計</span></a>
+<a href="#step7_second_review" class="nav-item" onclick="showSection('step7_second_review')"><span class="nav-step">Step 7</span><span class="nav-title">第2回レビュー</span><span class="nav-sub">Step 6検証+最終提言</span></a>
 </nav>
 
 <main class="main">
@@ -2664,6 +2665,473 @@ M8目標: MRR 40万円（累計8社、月次純増2社）
 <tr><td>9</td><td>深層インタビュー5社</td><td>W5-6</td><td>営業/創業者</td></tr>
 <tr><td>10</td><td>Go/No-Go判定会議</td><td>W6末</td><td>全員</td></tr>
 </table></div>
+</section>
+<section id="step7_second_review" class="doc-section" style="display:none"><h1 id="step-7-第2回多角的レビュー--step-6修正戦略の検証と最終提言">Step 7: 第2回多角的レビュー — Step 6修正戦略の検証と最終提言</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-08</blockquote>
+<blockquote>レビュー対象: Step 1〜6 全ドキュメント（Step 6修正戦略を中心に）</blockquote>
+<hr>
+<h2 id="レビュー手法">レビュー手法</h2>
+<p>Step 5と同様に5つの独立した思考パターンでStep 1〜6全体を再レビューし、<strong>特にStep 6の修正が十分かを検証</strong>した。</p>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>思考パターン</th><th>今回の焦点</th></tr>
+<tr><td>1</td><td><strong>批判的思考</strong></td><td>Step 6の修正は表面的でないか、残存する前提の弱さ</td></tr>
+<tr><td>2</td><td><strong>グロース思考</strong></td><td>PLG・スケーラビリティ・組織設計の深化</td></tr>
+<tr><td>3</td><td><strong>水平思考</strong></td><td>Step 5アイデアの進化、新たな非常識なアイデア</td></tr>
+<tr><td>4</td><td><strong>論理的思考</strong></td><td>数値トレーサビリティ、フレームワーク適用の完全性</td></tr>
+<tr><td>5</td><td><strong>デザイン思考</strong></td><td>ペルソナ深化、サービスブループリント、定着設計</td></tr>
+</table></div>
+<hr>
+<h2 id="目次">目次</h2>
+<ul>
+<li><a href="#1-step-6の修正評価サマリー">Step 6の修正評価サマリー</a></li>
+<li><a href="#2-批判的思考からの指摘">批判的思考からの指摘</a></li>
+<li><a href="#3-グロース思考からの提案">グロース思考からの提案</a></li>
+<li><a href="#4-水平思考からのアイデア">水平思考からのアイデア</a></li>
+<li><a href="#5-論理的思考からの検証結果">論理的思考からの検証結果</a></li>
+<li><a href="#6-デザイン思考からの提案">デザイン思考からの提案</a></li>
+<li><a href="#7-統合アクションプランstep-8に向けた最終提言">統合アクションプラン（最終版）</a></li>
+</ul>
+<hr>
+<h2 id="1-step-6の修正評価サマリー">1. Step 6の修正評価サマリー</h2>
+<h3 id="step-5で指摘された4つの重大問題の解消状況">Step 5で指摘された4つの重大問題の解消状況</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>問題</th><th>Step 6での対応</th><th>解消度</th><th>残課題</th></tr>
+<tr><td>1</td><td>顧客検証の完全な欠如</td><td>フェーズ0（6週間PMF検証）を新設</td><td><strong>B+</strong></td><td>インタビュー設計が浅い（後述）</td></tr>
+<tr><td>2</td><td>ファネルKPIの数値矛盾</td><td>逆算モデルを再構築</td><td><strong>A-</strong></td><td>M8以降の成長前提が未検証</td></tr>
+<tr><td>3</td><td>Step間の数値不整合</td><td>KPIを統一（MRR25万、PoC転換率25%等）</td><td><strong>A</strong></td><td>概ね解消</td></tr>
+<tr><td>4</td><td>プロダクト未完成でのマーケ計画</td><td>プロダクト/マーケ統合タイムラインを作成</td><td><strong>B+</strong></td><td>開発工数の見積もりが楽観的</td></tr>
+</table></div>
+<h3 id="全体評価">全体評価</h3>
+<div class="table-wrap"><table>
+<tr><th>評価軸</th><th>Step 4時点</th><th>Step 6時点</th><th>改善度</th></tr>
+<tr><td>数値の信頼性</td><td>C+</td><td><strong>B+</strong></td><td>+2段階</td></tr>
+<tr><td>実行可能性</td><td>B-</td><td><strong>B+</strong></td><td>+1段階</td></tr>
+<tr><td>顧客中心性</td><td>C</td><td><strong>B</strong></td><td>+2段階</td></tr>
+<tr><td>リスク管理</td><td>C+</td><td><strong>A-</strong></td><td>+2段階</td></tr>
+<tr><td>戦略の独自性</td><td>B+</td><td><strong>A-</strong></td><td>+1段階</td></tr>
+</table></div>
+<p><strong>総評</strong>: Step 6は構造的な問題の大半を修正できているが、「現場の生の声」が一切含まれていない時点での設計であることは変わらない。以下の5エージェントレビューで、<strong>フェーズ0で確実に検証すべき新たな盲点</strong>を特定した。</p>
+<hr>
+<h2 id="2-批判的思考からの指摘">2. 批判的思考からの指摘</h2>
+<h3 id="2-1-フェーズ0の実現可能性の問題">2-1. フェーズ0の実現可能性の問題</h3>
+<p><strong>6週間の計画は圧縮しすぎている。</strong></p>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>計画</th><th>批判的検証</th></tr>
+<tr><td>W1</td><td>MVP完成 + 初回訪問3社</td><td>Issue #1〜#4の完成が「1週間」は非現実的。現在の開発状況（CLAUDE.mdでは#1の途中）から、最低3-4週間を要する</td></tr>
+<tr><td>W2</td><td>データ分析レポート5社に提供</td><td>5社分のデータ借用→NDA→クレンジング→分析→レポート作成を1週間で実施するのは無理。2-3社が現実的</td></tr>
+<tr><td>W3</td><td>デモ動画テスト5名</td><td>妥当。ただし「55歳以上の非IT職5名」の募集方法が未計画</td></tr>
+<tr><td>W4</td><td>有料PoC提案</td><td>W2のレポート提供先に提案するが、意思決定に通常2-4週間かかる中小製造業で即座の反応は期待薄</td></tr>
+<tr><td>W5-6</td><td>インタビュー + Go/No-Go</td><td>有料PoCの回答を待つ期間として短い</td></tr>
+</table></div>
+<p><strong>修正提案</strong>: フェーズ0を6週間→<strong>10週間</strong>に延長すべき。MVP完成に3-4週間、顧客検証に6週間が現実的。</p>
+<h3 id="2-2-財務モデルの残存リスク">2-2. 財務モデルの残存リスク</h3>
+<p>Step 6で年間チャーン率を15%→30%に修正したが、以下の点で依然として楽観的:</p>
+<ul>
+<li><strong>PMF前のB2B SaaSの実態</strong>: Bessemer Venture PartnersのCloud Index 2025によれば、PMF前のスタートアップの年間チャーン率は40-60%が一般的</li>
+<li><strong>中小製造業特有のリスク</strong>: IT投資の優先度が低く、景気悪化時に真っ先に解約される。季節変動も大きい</li>
+<li><strong>ARPUの成長前提</strong>: 5万円→8万円（1.6倍）のアップセルを12ヶ月で見込んでいるが、「見積もり精緻化」の1ユースケースで5万円を払う顧客が、追加のユースケースにさらに3万円を払う根拠が不明</li>
+</ul>
+<p><strong>修正提案</strong>: 保守的シナリオとして年間チャーン率<strong>40%</strong>（月3.9%）でもユニットエコノミクスが成立するか検証すべき。LTV = 6.5万円 × 25.6ヶ月 = 166万円 → 目標CAC ≤ 55万円。</p>
+<h3 id="2-3-競合環境の2026年時点での再評価">2-3. 競合環境の2026年時点での再評価</h3>
+<p>Step 5で「LLMベースの代替」リスクが指摘されたが、Step 6の対応は「SHAP解析の深さ+製造業特化テンプレートで差別化」という定性的な記述に留まっている。</p>
+<p><strong>2026年3月時点の競合状況</strong>:</p>
+<div class="table-wrap"><table>
+<tr><th>競合</th><th>脅威度</th><th>本アプリとの差</th></tr>
+<tr><td>ChatGPT/Claude + Code Interpreter</td><td><strong>高</strong></td><td>CSV→予測→可視化が会話ベースで可能。ただしSHAP解析の再現性・業務フローへの組み込みは弱い</td></tr>
+<tr><td>Google Vertex AI AutoML</td><td><strong>中</strong></td><td>ノーコード予測が可能だが、中小製造業にとって学習コストが高い</td></tr>
+<tr><td>DataRobot / H2O.ai</td><td><strong>低</strong></td><td>価格帯が全く異なる（月数十万〜数百万円）</td></tr>
+<tr><td>Microsoft Fabric + Copilot</td><td><strong>中〜高</strong></td><td>Excel連携の予測機能が強化されており、Excelユーザーにとって最も自然な移行先になりうる</td></tr>
+<tr><td>業界特化SaaS（meviy、CADDi等）</td><td><strong>中</strong></td><td>見積もりの自動化に特化し、既に製造業での実績がある</td></tr>
+</table></div>
+<p><strong>最大の見落とし</strong>: <strong>CADDi</strong>（キャディ）が製造業の見積もり自動化で急成長中。2025年時点でシリーズCまで調達し、図面データからの見積もりAIを展開。直接的な競合として認識すべき。</p>
+<h3 id="2-4-やらない判断の再検証">2-4. 「やらない判断」の再検証</h3>
+<p>Step 3でEC大手やSaaS大手を「やらない」と判断した根拠は合理的だが、Step 6で追加された「不動産バーティカル」オプション（Step 5論理的思考で提案）が十分に検討されていない。</p>
+<p>不動産は適合度5が6件と最多、市場12万社超という巨大裾野がある。製造業でPMFが確認できない場合の第一ピボット候補として、フェーズ0と並行してデスクリサーチを進めるべき。</p>
+<h3 id="2-5-批判的思考の改善提案-top-5">2-5. 批判的思考の改善提案 Top 5</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>提案</th><th>インパクト</th><th>緊急度</th></tr>
+<tr><td>1</td><td><strong>フェーズ0を10週間に延長</strong>（MVP完成に3-4週間を確保）</td><td>高</td><td>S</td></tr>
+<tr><td>2</td><td><strong>チャーン率40%シナリオでの財務モデル検証</strong></td><td>中</td><td>A</td></tr>
+<tr><td>3</td><td><strong>CADDi等の直接競合の詳細分析をフェーズ0に追加</strong></td><td>高</td><td>A</td></tr>
+<tr><td>4</td><td><strong>不動産バーティカルの並行デスクリサーチ</strong></td><td>中</td><td>B</td></tr>
+<tr><td>5</td><td><strong>Microsoft Fabric + Copilotの「見積もり予測」機能の動向監視</strong></td><td>中</td><td>B</td></tr>
+</table></div>
+<hr>
+<h2 id="3-グロース思考からの提案">3. グロース思考からの提案</h2>
+<h3 id="3-1-plg設計の深化">3-1. PLG設計の深化</h3>
+<p>Step 6でFree枠の再設計（回数制限→行数500行、SHAP上位3変数開放）が行われたが、PLGの全体設計が不足している。</p>
+<p><strong>PLGフライホイールの設計</strong>:</p>
+<pre><code>1. Acquisition（獲得）
+   │ SEO記事 + 140ユースケースのプログラマティックLP（Step 5提案、未実装）
+   ↓
+2. Activation（活性化）
+   │ サンプルデータで即座にAha Moment到達
+   │ ★ ここが最重要 ★ サインアップ→初回予測完了まで3分以内
+   ↓
+3. Revenue（収益化）
+   │ 500行超のデータで予測したい → Starter契約
+   │ チーム共有したい → Professional契約
+   ↓
+4. Retention（継続）
+   │ 週次の「予測 vs 実績」レポート自動送付
+   │ 新しいユースケースのサジェスト
+   ↓
+5. Referral（紹介）
+   │ SHAP可視化結果の「共有ボタン」
+   │ 「この予測を同僚にも見せたい」 → チーム招待 → 有料化
+   ↓
+   1に戻る
+</code></pre>
+<p><strong>現在の設計に欠けているPLG要素</strong>:</p>
+<div class="table-wrap"><table>
+<tr><th>要素</th><th>現状</th><th>改善案</th></tr>
+<tr><td><strong>セルフサーブオンボーディング</strong></td><td>未設計</td><td>3ステップウィザード（データ選択→目的変数選択→予測実行）で5分以内に完了</td></tr>
+<tr><td><strong>プロダクト内ナッジ</strong></td><td>未設計</td><td>Free枠の限界に近づいたら「Starterプランなら全変数のSHAP分析が可能」と表示</td></tr>
+<tr><td><strong>チーム招待フロー</strong></td><td>未設計</td><td>「この結果を上司にメールで送る」ボタン → 受信者がサインアップ → チーム形成</td></tr>
+<tr><td><strong>プロダクト分析基盤</strong></td><td>未設計</td><td>Mixpanel/Amplitudeでユーザー行動を計測（Aha Moment到達率等）</td></tr>
+</table></div>
+<h3 id="3-2-ネットワーク効果とバイラルの設計">3-2. ネットワーク効果とバイラルの設計</h3>
+<p>Step 5の水平思考で「匿名化ベンチマーク」と「予測テンプレート・マーケットプレイス」が提案されたが、Step 6では「フェーズ2以降で検討」として先送りされている。</p>
+<p><strong>ネットワーク効果を生む最小単位の提案</strong>:</p>
+<p>早期段階でも実装可能な「ミニ・ネットワーク効果」:</p>
+<ul>
+<li><strong>業界別平均精度レポート</strong>: 「金属加工業の見積もりモデルの平均R²は0.82です。あなたのモデルは0.87で上位30%」</li>
+<li><strong>匿名化特徴量ランキング</strong>: 「金属加工業全体で見積もりに最も影響する変数は&quot;材質&quot;です」</li>
+<li><strong>利用企業数のリアルタイム表示</strong>: 「現在○社の製造業がデータ分析中」（社会的証明）</li>
+</ul>
+<p>これらは個人情報を含まず、参加企業が増えるほど価値が上がるネットワーク効果を持つ。</p>
+<h3 id="3-3-組織資金海外展開の議論不足">3-3. 組織・資金・海外展開の議論不足</h3>
+<p>Step 1〜6を通じて、以下が完全に欠落している:</p>
+<div class="table-wrap"><table>
+<tr><th>欠落テーマ</th><th>重要性</th><th>提案</th></tr>
+<tr><td><strong>チーム構成</strong></td><td>高</td><td>フェーズ0: 創業者1-2名で十分。フェーズ1: エンジニア1名+営業1名追加。フェーズ2: CS専任1名</td></tr>
+<tr><td><strong>資金計画</strong></td><td>高</td><td>フェーズ0の5万円は自己資金。フェーズ1で120万円投資 → 外部資金が必要か否かの判断基準を明記すべき</td></tr>
+<tr><td><strong>法人化の時期</strong></td><td>中</td><td>有料顧客3社以上で法人化を検討</td></tr>
+<tr><td><strong>海外展開</strong></td><td>低（現時点）</td><td>Streamlitの国際化は容易。東南アジアの製造業が中長期ターゲット</td></tr>
+<tr><td><strong>技術負債管理</strong></td><td>高</td><td>Streamlitの限界（同時接続数、レスポンス速度）への対策。フェーズ2でFastAPI+React移行の検討</td></tr>
+</table></div>
+<h3 id="3-4-saas成長モデルとの整合性">3-4. SaaS成長モデルとの整合性</h3>
+<p>Step 6のMRR予測（M6: 25万 → M12: 80万）は、T2D3モデル（Triple, Triple, Double, Double, Double）と比較して:</p>
+<pre><code>T2D3の最低ライン（ARR $1M到達に3-4年）:
+  Y1: ARR 120万円（MRR 10万円）
+  Y2: ARR 360万円（MRR 30万円）× 3
+  Y3: ARR 1,080万円（MRR 90万円）× 3
+  Y4: ARR 2,160万円（MRR 180万円）× 2
+
+Step 6の計画:
+  Y1(M12): MRR 80万円 = ARR 960万円 → T2D3のY3水準
+</code></pre>
+<p>Step 6の計画はT2D3のペースを大きく上回っており、楽観的な可能性がある。ただしSMB向けSaaSはARPUが低い分、成長速度が遅い傾向がある。</p>
+<h3 id="3-5-グロース思考の改善提案-top-5">3-5. グロース思考の改善提案 Top 5</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>提案</th><th>インパクト</th></tr>
+<tr><td>1</td><td><strong>PLGフライホイールの全体設計を完成させる</strong>（特にActivation→Revenue→Referralの導線）</td><td>S</td></tr>
+<tr><td>2</td><td><strong>プロダクト分析基盤を初日から導入</strong>（Aha Moment到達率を計測できなければ改善できない）</td><td>S</td></tr>
+<tr><td>3</td><td><strong>チーム構成と資金計画のセクションを追加</strong></td><td>A</td></tr>
+<tr><td>4</td><td><strong>業界別ミニ・ネットワーク効果を早期に実装</strong></td><td>A</td></tr>
+<tr><td>5</td><td><strong>Streamlitの技術的限界を評価し、移行計画を策定</strong></td><td>B</td></tr>
+</table></div>
+<hr>
+<h2 id="4-水平思考からのアイデア">4. 水平思考からのアイデア</h2>
+<h3 id="4-1-逆転発想からの新アイデア">4-1. 逆転発想からの新アイデア</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>逆転の前提</th><th>新アイデア</th></tr>
+<tr><td>1</td><td>「顧客がデータを持っている」を逆転</td><td><strong>「データがない企業」向けモデル</strong>: 業界の公開統計データ（経産省工業統計、中小企業実態基本調査）で事前学習した「業界標準モデル」を提供。顧客は自社データなしでも「うちの業界の平均的な見積もりパターン」を参照可能。自社データを追加すると精度が上がる（転移学習的アプローチ）</td></tr>
+<tr><td>2</td><td>「ツールを売る」を逆転</td><td><strong>「分析レポートを売る」モデル</strong>: ツールのサブスクではなく、月1回の分析レポート（PDF 10ページ）を5万円で販売。顧客はツールに触る必要すらない。Step 6のフェーズ0 Week 2のレポート提供をビジネスモデル化</td></tr>
+<tr><td>3</td><td>「精度を追求する」を逆転</td><td><strong>「外れ値こそ価値」モデル</strong>: 予測が大きく外れた案件を自動検出し、「なぜ外れたか」をSHAPで分析するサービス。精度よりも「異常検知」の価値を訴求。中小製造業の赤字案件の事前発見に直結</td></tr>
+</table></div>
+<h3 id="4-2-異業種製造業の融合アイデア">4-2. 異業種×製造業の融合アイデア</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>応用元</th><th>アイデア</th></tr>
+<tr><td>1</td><td><strong>保険業（アクチュアリー）</strong></td><td>「見積もりリスクスコア」: 各見積もり案件に対して「赤字になる確率」をスコアリング。保険の引受査定と同じ発想。受注前にリスクを可視化</td></tr>
+<tr><td>2</td><td><strong>ゲーム業界（ランキング）</strong></td><td>「見積もりスコアボード」: 社内の見積もり担当者間で予測精度を競う。月間MVP表彰。ゲーミフィケーションで利用継続率を向上</td></tr>
+<tr><td>3</td><td><strong>音楽業界（Spotify Wrapped）</strong></td><td>「年末見積もりレポート」: 1年間の見積もりデータを可視化した年次レポート。「今年最も利益率が高かった案件」「最も精度が向上した月」等。SNSシェアで認知拡大</td></tr>
+<tr><td>4</td><td><strong>農業（収穫予測）</strong></td><td>「受注の種まき→収穫カレンダー」: 引き合い→見積もり→受注→納品→入金のパイプラインを農業の「種まき→収穫」に見立てて可視化。経営者向けダッシュボード</td></tr>
+</table></div>
+<h3 id="4-3-破壊的シナリオ">4-3. 破壊的シナリオ</h3>
+<p><strong>シナリオ1: 「見積もりAI」がコモディティ化した世界</strong></p>
+<p>2027年、Microsoft Excelに「予測分析」機能が標準搭載され、CSVの回帰予測は無料で誰でもできるようになる。この場合、本アプリの差別化は:</p>
+<ul>
+<li><strong>業界特化の知見</strong>（どの変数が重要か、どのデータ構造が最適か）</li>
+<li><strong>コミュニティ</strong>（製造業同士の匿名化ベンチマーク）</li>
+<li><strong>コンサルティング</strong>（データの読み方、業務への組み込み方）</li>
+</ul>
+<p>→ ツール販売 → <strong>ナレッジプラットフォーム</strong> への転換が必要になる</p>
+<p><strong>シナリオ2: 製造業のデータ連携基盤になった世界</strong></p>
+<p>本アプリを起点に、製造業のサプライチェーン全体のデータ連携基盤を構築。見積もり→受注→生産→出荷→請求のデータを一気通貫で予測。</p>
+<ul>
+<li>製造業→物流→発注元（大手メーカー）へとデータが流れる</li>
+<li>各社の予測精度が上がるほど、サプライチェーン全体の効率が向上</li>
+<li><strong>産業プラットフォーム</strong> としてのポジション確立</li>
+</ul>
+<h3 id="4-4-step-5アイデアの深掘り進化">4-4. Step 5アイデアの深掘り・進化</h3>
+<div class="table-wrap"><table>
+<tr><th>Step 5アイデア</th><th>進化版</th></tr>
+<tr><td>AI vs 匠 対決機能</td><td>→ <strong>「匠のデジタルツイン」</strong>: ベテランの判断パターンを個別モデルとして保存。退職後もそのモデルで予測可能。「佐藤モデル」「田中モデル」として社内資産化。月額10万円の付加価値</td></tr>
+<tr><td>成果報酬型無料プラン</td><td>→ <strong>「見積もり保険」型モデル</strong>: 予測精度が目標を下回った月は無料。上回った月は成果に応じて課金。顧客のリスクをゼロにする究極のプライシング</td></tr>
+<tr><td>予測テンプレート・マーケットプレイス</td><td>→ <strong>「予測レシピ共有プラットフォーム」</strong>: ユーザーが匿名で「このデータ構造+この特徴量で精度○%出た」というレシピを共有。料理のクックパッドモデル。ネットワーク効果で競合参入障壁を構築</td></tr>
+</table></div>
+<h3 id="4-5-最もインパクトの大きいアイデア-top-5">4-5. 最もインパクトの大きいアイデア Top 5</h3>
+<div class="table-wrap"><table>
+<tr><th>順位</th><th>アイデア</th><th>インパクトの根拠</th></tr>
+<tr><td><strong>1</strong></td><td><strong>匠のデジタルツイン</strong>（ベテランの判断モデルの永久保存）</td><td>「ベテランの退職」という不可逆で巨大なペインを解決。月10万円でも安い。唯一無二の価値提案</td></tr>
+<tr><td><strong>2</strong></td><td><strong>データがない企業向け業界標準モデル</strong></td><td>「データがない」という最大の導入障壁を破壊。公開データで事前学習→自社データで精度向上の2段階モデル</td></tr>
+<tr><td><strong>3</strong></td><td><strong>分析レポート販売モデル</strong>（ツール不要）</td><td>顧客のITリテラシーを問わない。フェーズ0のレポート提供をそのまま事業化可能。検証コストゼロ</td></tr>
+<tr><td><strong>4</strong></td><td><strong>見積もりリスクスコア</strong></td><td>「赤字案件の事前発見」は経営者が最も求める価値。保険業のアプローチを製造業に移植</td></tr>
+<tr><td><strong>5</strong></td><td><strong>年末見積もりレポート（Spotify Wrapped型）</strong></td><td>SNSシェアで認知拡大。顧客参加型のバイラルマーケティング。制作コスト低</td></tr>
+</table></div>
+<hr>
+<h2 id="5-論理的思考からの検証結果">5. 論理的思考からの検証結果</h2>
+<h3 id="5-1-mece検証結果step-6の改善度">5-1. MECE検証結果（Step 6の改善度）</h3>
+<div class="table-wrap"><table>
+<tr><th>対象</th><th>Step 5評価</th><th>Step 6改善度</th><th>残課題</th></tr>
+<tr><td>市場セグメント</td><td>B+</td><td><strong>A-</strong></td><td>TAM/SAM/SOMが追加されたが、SOMの根拠が「推定」のまま</td></tr>
+<tr><td>評価フレームワーク</td><td>B</td><td><strong>A</strong></td><td>AARRR追加で大幅改善</td></tr>
+<tr><td>リスク分類</td><td>C+</td><td><strong>B+</strong></td><td>LLM競合リスクの対策が定性的</td></tr>
+<tr><td>チャネル</td><td>B</td><td><strong>A-</strong></td><td>アーンドメディア追加で改善</td></tr>
+<tr><td>ステークホルダー</td><td>C</td><td><strong>B</strong></td><td>佐藤さん追加だが深掘り不足（デザイン思考参照）</td></tr>
+</table></div>
+<h3 id="5-2-仮説ピラミッドの再検証">5-2. 仮説ピラミッドの再検証</h3>
+<pre><code>最終目標: M12でMRR 80万円を達成する
+│
+├── Q1: フェーズ0でPMFの兆候を確認できるか？
+│   ├── H1-1: 見積もり属人化は5社中3社の課題 → 【検証設計あり】OK
+│   ├── H1-2: 月5万円の支払い意思がある → 【検証設計あり】OK
+│   └── H1-3: 非IT層でも操作可能 → 【検証設計あり、ただし設計に改善余地】
+│
+├── Q2: フェーズ1でMRR 25万円を達成できるか？
+│   ├── H2-1: 月次1社の新規獲得ペース → 【ファネル逆算済み】OK
+│   ├── H2-2: LP→デモ→商談→成約の転換率が想定通り → 【★未検証★】
+│   └── H2-3: チャーン率30%以下 → 【★未検証★】
+│
+├── Q3: フェーズ1→2の加速が可能か？
+│   ├── H3-1: 建設業への隣接展開が機能する → 【★未検証★】
+│   ├── H3-2: 月次2社獲得に営業チャネルが耐える → 【チーム構成未設計★】
+│   └── H3-3: ARPUが5万→8万に成長する → 【★アップセルの根拠不明★】
+│
+└── Q4: 外部環境リスクに耐えられるか？
+    ├── H4-1: LLMが直接的代替にならない → 【★高リスク★】
+    ├── H4-2: CADDi等の競合が参入しない → 【★未分析★】
+    └── H4-3: 景気後退が来ない → 【対策は記述あり】OK
+</code></pre>
+<p><strong><span class="star">★</span>マークの未検証仮説が8つ</strong>残存。特にH4-1（LLM代替リスク）とH3-3（アップセル根拠）は戦略の成否を左右する。</p>
+<h3 id="5-3-数値トレーサビリティの最終検証">5-3. 数値トレーサビリティの最終検証</h3>
+<p>Step 6で数値の統一が行われたが、以下の不整合が残存:</p>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>Step 3</th><th>Step 6</th><th>状態</th></tr>
+<tr><td>フェーズ1のMRR目標</td><td>25〜50万円</td><td>25万円</td><td>✅ 下限採用で整合</td></tr>
+<tr><td>フェーズ2のMRR目標</td><td>100〜200万円</td><td>80万円（M12）</td><td>⚠️ Step 3の下限より低い</td></tr>
+<tr><td>有料顧客数(Y1)</td><td>15社</td><td>16社（M12）</td><td>✅ ほぼ整合</td></tr>
+<tr><td>価格帯</td><td>Starter 5万円</td><td>Starter 19,800円</td><td>⚠️ Step 3の「月3〜8万」レンジから逸脱</td></tr>
+<tr><td>CAC目標</td><td>136万円以下</td><td>25万円（Fully Loaded）</td><td>⚠️ 大幅変更だが根拠が異なる</td></tr>
+</table></div>
+<p><strong>Starterプラン19,800円の影響</strong>: ARPU 5万円の前提が崩れる可能性。Starterが主力プランになった場合、MRR 25万円達成に必要な顧客数は13社に増加。ファネル逆算の全体が変動する。</p>
+<h3 id="5-4-追加フレームワークの適用">5-4. 追加フレームワークの適用</h3>
+<p>Step 5で「適用すべきだったフレームワーク」として5つが指摘され、Step 6でTAM/SAM/SOMとAARRRが追加された。しかし以下が依然として未適用:</p>
+<div class="table-wrap"><table>
+<tr><th>フレームワーク</th><th>適用状況</th><th>影響</th></tr>
+<tr><td>TAM/SAM/SOM</td><td>✅ 追加済み</td><td>-</td></tr>
+<tr><td>AARRR</td><td>✅ 追加済み</td><td>-</td></tr>
+<tr><td>ユニットエコノミクス</td><td>✅ 改善済み</td><td>-</td></tr>
+<tr><td><strong>5Forces</strong></td><td>❌ 未適用</td><td>CADDi等の直接競合の脅威分析が不足。新規参入の脅威（LLM）への定量評価がない</td></tr>
+<tr><td><strong>バリューチェーン分析</strong></td><td>❌ 未適用</td><td>顧客のバリューチェーン上のどこに位置するかの明確化。見積もり→受注→生産→出荷のどのステップにアプリが効くか</td></tr>
+<tr><td><strong>PMFピラミッド</strong></td><td>△ 部分的</td><td>フェーズ0で検証するが、PMFの定義（&quot;5社中何社が「このツールがなくなったら困る」と回答するか&quot;）が未設定</td></tr>
+</table></div>
+<h3 id="5-5-戦略オプション比較の改善">5-5. 戦略オプション比較の改善</h3>
+<p>Step 5で「検討されていない戦略オプション」としてB〜D案が提示された。Step 6ではピボット候補として5案が列挙されたが、定量的な比較がされていない。</p>
+<div class="table-wrap"><table>
+<tr><th>戦略オプション</th><th>初期投資</th><th>PMF検証期間</th><th>推定M12 MRR</th><th>リスク</th><th>推奨度</th></tr>
+<tr><td>A: 製造業集中（現行）</td><td>5万円</td><td>10週間</td><td>80万円</td><td>中（CADDi競合）</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td></tr>
+<tr><td>B: PLG先行（SaaS/EC向け）</td><td>30万円</td><td>6週間</td><td>50万円</td><td>低（自然獲得）</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td></tr>
+<tr><td>C: コンサル再販先行</td><td>0円</td><td>8週間</td><td>30万円</td><td>低（コスト小）</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td></tr>
+<tr><td>D: 不動産バーティカル</td><td>5万円</td><td>8週間</td><td>60万円</td><td>中（法規制）</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td></tr>
+<tr><td>E: 分析レポート販売（水平思考）</td><td>0円</td><td>4週間</td><td>40万円</td><td>低（MVP不要）</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td></tr>
+</table></div>
+<p><strong>新たな発見</strong>: 水平思考の「分析レポート販売モデル」が戦略オプションEとして最も検証コストが低く、フェーズ0と並行して即座にテスト可能。</p>
+<h3 id="5-6-論理的思考の改善提案-top-5">5-6. 論理的思考の改善提案 Top 5</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>提案</th><th>根拠</th></tr>
+<tr><td>1</td><td><strong>Starterプラン19,800円のARPUへの影響を再計算し、ファネル逆算を修正</strong></td><td>全体の数値整合性が崩れる</td></tr>
+<tr><td>2</td><td><strong>5Forces分析を追加し、CADDi・Microsoft Fabric等の脅威を定量評価</strong></td><td>競合リスクが最大の未知数</td></tr>
+<tr><td>3</td><td><strong>PMFの定義を明確化</strong>（「5社中3社が&quot;なくなったら困る&quot;」等）</td><td>フェーズ0のGo/No-Go基準が曖昧</td></tr>
+<tr><td>4</td><td><strong>戦略オプションE（分析レポート販売）の並行テスト</strong></td><td>検証コストゼロで最も早くPMFシグナルを得られる</td></tr>
+<tr><td>5</td><td><strong>バリューチェーン分析で「見積もり業務」の前後工程も含めた価値提供範囲を定義</strong></td><td>アップセルの論理的根拠を構築</td></tr>
+</table></div>
+<hr>
+<h2 id="6-デザイン思考からの提案">6. デザイン思考からの提案</h2>
+<h3 id="6-1-ペルソナと共感の深化">6-1. ペルソナと共感の深化</h3>
+<p>Step 5で「ベテランの佐藤さん（62歳）」が第4のペルソナとして提起されたが、田中工場長・鈴木主任と同水準の詳細ペルソナシートが存在しない。</p>
+<p><strong>佐藤さんペルソナの完成版</strong>:</p>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>詳細</th></tr>
+<tr><td><strong>名前</strong></td><td>佐藤 勇（仮名）</td></tr>
+<tr><td><strong>役職</strong></td><td>見積もり担当 主査（実質的に見積もりの最終判断者）</td></tr>
+<tr><td><strong>年齢</strong></td><td>62歳（定年まで3年）</td></tr>
+<tr><td><strong>経歴</strong></td><td>入社40年。現場作業→営業→見積もり担当30年</td></tr>
+<tr><td><strong>ITスキル</strong></td><td>Excelの基本操作のみ。関数はSUMとIF程度</td></tr>
+<tr><td><strong>日常業務</strong></td><td>1日15〜20件の見積もり確認・修正。電話で取引先と交渉</td></tr>
+<tr><td><strong>強み</strong></td><td>材質×加工難易度×取引先の価格感度を瞬時に判断できる「勘」</td></tr>
+<tr><td><strong>恐れ</strong></td><td>「AIに置き換えられる」→「自分の40年が否定される」</td></tr>
+<tr><td><strong>誇り</strong></td><td>「自分がいるから、この精度で見積もりが出せている」</td></tr>
+<tr><td><strong>情報収集</strong></td><td>テレビ、業界紙、同僚との会話。SNSは使わない</td></tr>
+<tr><td><strong>このツールへの態度</strong></td><td><strong>最大の抵抗勢力であり、最大の協力者になりうる</strong></td></tr>
+</table></div>
+<p><strong>追加すべきペルソナ</strong>:</p>
+<ul>
+<li><strong>新人の見積もり担当（25歳前後）</strong>: 佐藤さんの後継者。「教えてもらう機会が少なく不安」というジョブ</li>
+<li><strong>経理担当</strong>: 見積もり精度のバラつきを「利益率の不安定性」として受け止める存在</li>
+<li><strong>発注元の購買担当</strong>: 見積もりの根拠を求めてくる。SHAPの出力を対外的に使うシナリオ</li>
+</ul>
+<h3 id="6-2-jtbd再検証--感情的社会的ジョブの追加">6-2. JTBD再検証 — 感情的・社会的ジョブの追加</h3>
+<div class="table-wrap"><table>
+<tr><th>ジョブ層</th><th>田中工場長</th><th>佐藤さん</th><th>鈴木主任</th></tr>
+<tr><td><strong>Functional</strong></td><td>見積もり精度を上げたい</td><td>自分のやり方を効率化したい</td><td>上司に聞かずに見積もりを完成させたい</td></tr>
+<tr><td><strong>Emotional</strong></td><td>佐藤さん退職後の不安を減らしたい</td><td>自分の40年が無駄でなかったと認められたい</td><td>残業を減らして家族との時間を増やしたい</td></tr>
+<tr><td><strong>Social</strong></td><td>同業者の集まりで「DXやってる」と言いたい</td><td>後輩から「佐藤さんのおかげで仕組みが残った」と感謝されたい</td><td>社内で「DXを推進した人」と評価されたい</td></tr>
+</table></div>
+<p><strong>最も重要な発見</strong>: Social Jobが購買決定の「最後の一押し」になる。事例記事のフレーミングを「○○社が見積もり精度を改善」→「<strong>○○社の佐藤さん（仮名）の40年の経験が、会社の財産になった</strong>」に変更すべき。</p>
+<h3 id="6-3-サービスブループリント新規追加">6-3. サービスブループリント（新規追加）</h3>
+<p>Step 1〜6を通じてサービスブループリントが一度も作成されていない。これはデザイン思考の観点から最も重大な欠落。</p>
+<pre><code>【顧客の行動】
+ 問合せ → NDA → データ提供 → レポート受取 → 社内共有 → PoC契約 → 日常利用 → 更新判断
+
+【フロントステージ（顧客接点）】
+ 電話/メール → 訪問 → データ受領 → プレゼン → フォロー → 契約 → 月次レビュー → 更新面談
+
+【バックステージ（見えない業務）】
+ リード管理 → NDA作成 → データクレンジング → モデル構築 → レポート作成 → 利用モニタリング
+
+【サポートプロセス】
+ CRM / NDAテンプレート / データ品質チェックリスト / レポートテンプレート / 利用分析DB
+
+【失敗ポイント（Fail Points）】
+ ・★ データの列名が不統一で読み込めない
+ ・★ 精度が低く「使えない」と判断される
+ ・★★ 佐藤さんが「自分の方が正確だ」と反発 ← 最大リスク
+ ・★ レポートの内容が経営層に伝わらない
+ ・★ 月次レビューを怠り、利用が自然消滅する
+</code></pre>
+<h3 id="6-4-ベテラン佐藤さんを味方にする具体的施策">6-4. ベテラン（佐藤さん）を味方にする具体的施策</h3>
+<div class="table-wrap"><table>
+<tr><th>施策</th><th>タイミング</th><th>効果</th></tr>
+<tr><td>導入前に佐藤さんに「<strong>監修者</strong>」の肩書きを付与</td><td>PoC開始前</td><td>「自分が選ばれた」感情的満足</td></tr>
+<tr><td>佐藤さんの過去見積もりデータでモデル構築し「<strong>佐藤さんの判断パターン</strong>」として可視化</td><td>PoC初週</td><td>「自分の経験がデータとして認められた」体験</td></tr>
+<tr><td>AI vs 佐藤さんの精度比較を非公開で実施し、佐藤さんが<strong>勝った項目を強調</strong></td><td>PoC 2週目</td><td>面子を守りつつツールの価値も示す</td></tr>
+<tr><td>佐藤さんを「<strong>予測レビュー担当</strong>」に任命。AIの出力を佐藤さんがレビュー・補正</td><td>日常運用時</td><td>暗黙知が補正データとして蓄積</td></tr>
+<tr><td>社内で「<strong>佐藤さんの知恵がAIに組み込まれました</strong>」と発表</td><td>3ヶ月後</td><td>組織的承認。佐藤さんのレガシー化</td></tr>
+</table></div>
+<h3 id="6-5-導入後90日間の定着プログラム">6-5. 導入後90日間の定着プログラム</h3>
+<div class="table-wrap"><table>
+<tr><th>期間</th><th>施策</th><th>目的</th></tr>
+<tr><td>契約後1週間</td><td>初回データ投入の伴走（画面共有30分）</td><td>最初の成功体験を確実にする</td></tr>
+<tr><td>2週目</td><td>「予測 vs 実績」の比較レポート自動送付</td><td>精度を実感し信頼を構築</td></tr>
+<tr><td>月1回</td><td>月次レビュー会（30分、オンライン）</td><td>質問解消、追加ユースケース提案</td></tr>
+<tr><td>3ヶ月目</td><td>「導入3ヶ月レポート」の自動生成</td><td>ROI可視化。更新判断の材料</td></tr>
+<tr><td>6ヶ月目</td><td>他部門展開の提案（歩留まり予測等）</td><td>アップセルの自然な導線</td></tr>
+</table></div>
+<h3 id="6-6-ユーザーテスト設計の改善">6-6. ユーザーテスト設計の改善</h3>
+<p>フェーズ0 Week 3のテスト設計を以下に改善:</p>
+<div class="table-wrap"><table>
+<tr><th>現在の設計</th><th>改善案</th></tr>
+<tr><td>「15分以内に予測完了」のみ</td><td>+ 「SHAPの結果を見て意思決定を1つ言語化できるか」</td></tr>
+<tr><td>「55歳以上の非IT職5名」</td><td>「製造業で見積もり業務に関わる方5名」に限定</td></tr>
+<tr><td>デモ動画視聴直後のテスト</td><td>「動画なし群」と「動画あり群」の比較テスト</td></tr>
+<tr><td>感情面の計測なし</td><td>SUSスコア＋「同僚に勧めたいか」の10段階評価を追加</td></tr>
+</table></div>
+<h3 id="6-7-デザイン思考の改善提案-top-5">6-7. デザイン思考の改善提案 Top 5</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>提案</th><th>理由</th></tr>
+<tr><td>1</td><td><strong>フェーズ0のインタビューにEmotional/Social JTBDの質問を追加</strong></td><td>購買動機の深層を捉え損ねるリスク</td></tr>
+<tr><td>2</td><td><strong>サービスブループリントを完成させ、Fail Point対応プロトコルを設計</strong></td><td>チャーンの「サイレントな原因」が未対策</td></tr>
+<tr><td>3</td><td><strong>佐藤さんペルソナを完成させ「監修者任命」プロトコルを設計</strong></td><td>現場導入の最大リスクが未管理</td></tr>
+<tr><td>4</td><td><strong>ユーザーテストを「意思決定の変化」まで拡張</strong></td><td>タスク完了≠業務活用</td></tr>
+<tr><td>5</td><td><strong>契約後90日間の定着プログラムを設計</strong></td><td>カスタマージャーニーが「購入」で終わっている</td></tr>
+</table></div>
+<hr>
+<h2 id="7-統合アクションプランstep-8に向けた最終提言">7. 統合アクションプラン（Step 8に向けた最終提言）</h2>
+<h3 id="7-1-全エージェントの指摘の統合マトリクス">7-1. 全エージェントの指摘の統合マトリクス</h3>
+<div class="table-wrap"><table>
+<tr><th>テーマ</th><th>批判的</th><th>グロース</th><th>水平</th><th>論理的</th><th>デザイン</th><th>対応優先度</th></tr>
+<tr><td>フェーズ0の期間延長（6→10週間）</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>S</strong></td></tr>
+<tr><td>PLGフライホイール全体設計</td><td><span class="star">★</span></td><td><strong>S</strong></td></tr>
+<tr><td>プロダクト分析基盤の初日導入</td><td><span class="star">★</span></td><td><strong>S</strong></td></tr>
+<tr><td>Starterプラン価格のファネル影響再計算</td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>5Forces分析（CADDi等）</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>佐藤さんペルソナの完成+監修者プロトコル</td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>サービスブループリント作成</td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>JTBD感情的・社会的ジョブの追加</td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>分析レポート販売モデルの並行テスト</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>匠のデジタルツイン構想</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>業界標準モデル（データなし企業向け）</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>チーム構成・資金計画の追加</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>90日定着プログラム設計</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>チャーン率40%シナリオの財務検証</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>Streamlit技術的限界の評価</td><td><span class="star">★</span></td><td><strong>C</strong></td></tr>
+</table></div>
+<h3 id="7-2-フェーズ0修正版10週間計画">7-2. フェーズ0修正版（10週間計画）</h3>
+<pre><code>W1-3   MVP完成（Issue #1〜#7）
+       サンプルデータ3種作成
+       佐藤さんペルソナ完成
+       サービスブループリント作成
+
+W4     製造業3社訪問・シャドウイング
+       インタビュー（Emotional/Social JTBDを含む）
+       プロダクト分析基盤の導入（Mixpanel等）
+
+W5     データ分析レポートを3社に提供
+       ★並行★ 分析レポート販売モデルのテスト（2社に5万円で提案）
+
+W6     デモ動画テスト（動画あり/なし比較、SUSスコア計測）
+       ユーザーテスト（意思決定変化まで計測）
+
+W7-8   有料PoC提案（3社に）
+       佐藤さん「監修者」任命テスト（1社で）
+       5Forces分析完了（CADDi詳細分析含む）
+
+W9     深層インタビュー5社
+       チャーン率40%シナリオの財務モデル検証
+
+W10    Go/No-Go判定会議
+       ピボット判断（必要な場合は不動産バーティカル or 分析レポート販売モデルへ）
+</code></pre>
+<h3 id="7-3-gono-go判定基準修正版">7-3. Go/No-Go判定基準（修正版）</h3>
+<div class="table-wrap"><table>
+<tr><th>条件</th><th>基準</th><th>修正理由</th></tr>
+<tr><td>課題の実在</td><td>5社中3社以上が「お金を払ってでも解決したい」</td><td>変更なし</td></tr>
+<tr><td>課金意欲</td><td><strong>有料PoC 1社以上 or 分析レポート購入2社以上</strong></td><td>レポート販売の並行テストを反映</td></tr>
+<tr><td>操作可能性</td><td>5名中4名が15分以内に予測完了 + <strong>SHAPを見て意思決定を言語化</strong></td><td>テスト基準を拡張</td></tr>
+<tr><td>佐藤さんリスク</td><td><strong>1社で監修者プロトコルを試し、ベテランの拒否反応が管理可能</strong></td><td>新規追加</td></tr>
+<tr><td>PMF定義</td><td><strong>PoC顧客の過半数が「このツールがなくなったら困る」と回答</strong></td><td>新規追加</td></tr>
+</table></div>
+<h3 id="7-4-戦略の核心メッセージ最終版">7-4. 戦略の核心メッセージ（最終版）</h3>
+<pre><code>【一文で言うと】
+ベテランの40年分の経験を、いつものExcelデータから読み解き、
+会社の財産として次世代に残すツール。
+
+【禁止用語】AI、機械学習、LightGBM、SHAP、R²、回帰、ノーコード
+【推奨用語】データ活用、見える化、匠の知恵、会社の財産、Excel分析の延長
+</code></pre>
+<hr>
+<h2 id="付録-5エージェント評価クロスリファレンス">付録: 5エージェント評価クロスリファレンス</h2>
+<div class="table-wrap"><table>
+<tr><th>テーマ</th><th>批判的</th><th>グロース</th><th>水平</th><th>論理的</th><th>デザイン</th><th>合計</th></tr>
+<tr><td>フェーズ0期間の妥当性</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>財務モデルの前提</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>3</td></tr>
+<tr><td>競合分析の不足</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>PLG設計の不足</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>ペルソナの深掘り不足</td><td><span class="star">★</span></td><td>1</td></tr>
+<tr><td>サービスブループリント欠如</td><td><span class="star">★</span></td><td>1</td></tr>
+<tr><td>定着フェーズの未設計</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>ネットワーク効果の構築</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>組織・チーム設計の欠如</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>価格のARPU影響</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>新規ビジネスモデル案</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+<tr><td>ベテラン対応プロトコル</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td>2</td></tr>
+</table></div>
+<p><span class="star">★</span> = 当該エージェントが指摘/提案した項目</p>
+<hr>
+<blockquote>次のステップ: Step 8では、本レビュー結果を反映した最終実行計画v3を策定する。特にフェーズ0の10週間計画、佐藤さんプロトコル、分析レポート販売の並行テスト、5Forces分析を統合した実行可能な計画書とする。</blockquote>
 </section>
 </main>
 

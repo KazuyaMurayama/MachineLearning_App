@@ -22,6 +22,7 @@ STEPS = [
     ("step4_marketing_strategy.md", "Step 4: マーケティング戦略", "STP/4P/ジャーニー/KPI/予算"),
     ("step5_strategy_review.md", "Step 5: 多角的レビュー", "5つの思考パターンで問題特定"),
     ("step6_revised_strategy.md", "Step 6: 修正戦略 v2", "PMF検証+KPI修正+ピボット設計"),
+    ("step7_second_review.md", "Step 7: 第2回レビュー", "Step 6検証+最終提言"),
 ]
 
 
