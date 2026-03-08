@@ -22,50 +22,6 @@ import numpy as np
 np.set_printoptions(legacy='1.25')
 
 
-def handle_missing_values(df: pd.DataFrame, target_col: Optional[str] = None) -> Tuple[pd.DataFrame, dict]:
-    """
-    欠損値の自動処理
-    - 数値列: 中央値で補完
-    - カテゴリ列: '__MISSING__'で補完
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        入力データ
-    target_col : str, optional
-        目的変数（欠損行は削除）
-
-    Returns
-    -------
-    Tuple[pd.DataFrame, dict]
-        処理済みDataFrameと処理レポート
-    """
-    df_processed = df.copy()
-    report = {'filled_cols': {}, 'dropped_rows': 0}
-
-    # 目的変数の欠損行は削除
-    if target_col is not None and target_col in df_processed.columns:
-        before_len = len(df_processed)
-        df_processed = df_processed.dropna(subset=[target_col])
-        report['dropped_rows'] = before_len - len(df_processed)
-
-    # 特徴量の欠損値補完
-    for col in df_processed.columns:
-        if col == target_col:
-            continue
-        missing_count = df_processed[col].isnull().sum()
-        if missing_count > 0:
-            if df_processed[col].dtype in ['int64', 'float64']:
-                fill_val = df_processed[col].median()
-                df_processed[col] = df_processed[col].fillna(fill_val)
-                report['filled_cols'][col] = f"中央値({fill_val:.2f})で補完"
-            else:
-                df_processed[col] = df_processed[col].fillna('__MISSING__')
-                report['filled_cols'][col] = "'__MISSING__'で補完"
-
-    return df_processed, report
-
-
 def preprocess_data(
     df: pd.DataFrame,
     target_col: Optional[str] = None,
