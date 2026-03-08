@@ -2823,14 +2823,40 @@ Step 6の計画:
   Y1(M12): MRR 80万円 = ARR 960万円 → T2D3のY3水準
 </code></pre>
 <p>Step 6の計画はT2D3のペースを大きく上回っており、楽観的な可能性がある。ただしSMB向けSaaSはARPUが低い分、成長速度が遅い傾向がある。</p>
-<h3 id="3-5-グロース思考の改善提案-top-5">3-5. グロース思考の改善提案 Top 5</h3>
+<h3 id="3-5-free有料転換の摩擦点分析">3-5. Free→有料転換の摩擦点分析</h3>
+<p>Step 6でFree枠の改善が行われたが、<strong>転換の瞬間のUX設計</strong>が欠如している。</p>
+<div class="table-wrap"><table>
+<tr><th>摩擦点</th><th>現状の対応</th><th>改善案</th></tr>
+<tr><td>500行の壁</td><td>Free枠として設定</td><td>501行目アップロード時にアップグレード導線を表示。単なるエラーでは離脱する</td></tr>
+<tr><td>SHAP上位3変数の制限</td><td>Free枠として設定</td><td>4位以降を「ぼかし表示」して好奇心を刺激（非表示ではなく）</td></tr>
+<tr><td>決裁プロセス</td><td>補助金支援</td><td>19,800円は「消耗品費」枠で社長決裁可能か要検証。49,800円は稟議が必要</td></tr>
+<tr><td><strong>支払い手段</strong></td><td><strong>未言及</strong></td><td><strong>中小製造業はクレジットカード未対応が多い。請求書払い（月末締め翌月末）必須</strong></td></tr>
+<tr><td>データ移行の不安</td><td>ローカル実行訴求</td><td>Free→有料で「データ・モデルが引き継がれるか」の不安解消が必要</td></tr>
+</table></div>
+<h3 id="3-6-組織資金計画の致命的欠落">3-6. 組織・資金計画の致命的欠落</h3>
+<p>Step 1〜6の全ドキュメントを通じて、<strong>誰が・何人で・いくらで</strong>実行するかが議論されていない。</p>
+<p><strong>チーム体制の最低限の設計</strong>:</p>
+<div class="table-wrap"><table>
+<tr><th>フェーズ</th><th>必要チーム</th><th>月次バーンレート（推定）</th></tr>
+<tr><td>Phase 0</td><td>創業者1-2名（開発+営業兼務）</td><td>0円（自己資金・人件費含まず）</td></tr>
+<tr><td>Phase 1前半</td><td>+エンジニア1名（業務委託）</td><td>50-80万円</td></tr>
+<tr><td>Phase 1後半</td><td>+営業/CS 1名</td><td>100-150万円</td></tr>
+<tr><td>Phase 2</td><td>+マーケ1名、CS専任1名</td><td>200-300万円</td></tr>
+</table></div>
+<p><strong>資金調達の論点</strong>:</p>
+<ul>
+<li>Phase 0-1の累計投資135万円 + 人件費6ヶ月分 = <strong>約600-1,000万円</strong>が必要</li>
+<li>自己資金 or エンジェルラウンド（500-1,000万円）のどちらで賄うか</li>
+<li>MRR 25万円（Phase 1目標）ではバーンレートをカバーできない → <strong>ランウェイの明確化が急務</strong></li>
+</ul>
+<h3 id="3-7-グロース思考の改善提案-top-5">3-7. グロース思考の改善提案 Top 5</h3>
 <div class="table-wrap"><table>
 <tr><th>#</th><th>提案</th><th>インパクト</th></tr>
-<tr><td>1</td><td><strong>PLGフライホイールの全体設計を完成させる</strong>（特にActivation→Revenue→Referralの導線）</td><td>S</td></tr>
-<tr><td>2</td><td><strong>プロダクト分析基盤を初日から導入</strong>（Aha Moment到達率を計測できなければ改善できない）</td><td>S</td></tr>
-<tr><td>3</td><td><strong>チーム構成と資金計画のセクションを追加</strong></td><td>A</td></tr>
-<tr><td>4</td><td><strong>業界別ミニ・ネットワーク効果を早期に実装</strong></td><td>A</td></tr>
-<tr><td>5</td><td><strong>Streamlitの技術的限界を評価し、移行計画を策定</strong></td><td>B</td></tr>
+<tr><td>1</td><td><strong>Phase 0に「チーム体制・資金計画」の策定を追加</strong>（誰がいくらで実行するか）</td><td>S</td></tr>
+<tr><td>2</td><td><strong>Free→有料転換の「摩擦点マッピング」をプロダクト設計に反映</strong></td><td>S</td></tr>
+<tr><td>3</td><td><strong>バイラル係数をk&gt;0.1にする最低限の仕組み</strong>（SHAP共有ボタン、診断士紹介インセンティブ）</td><td>A</td></tr>
+<tr><td>4</td><td><strong>チャーン率30%→20%に改善するリテンション施策</strong>（月次レビュー自動送信、3ヶ月未利用アラート）</td><td>A</td></tr>
+<tr><td>5</td><td><strong>SaaS企業向けMRR予測のライトPMF検証をPhase 0と並行実施</strong></td><td>B</td></tr>
 </table></div>
 <hr>
 <h2 id="4-水平思考からのアイデア">4. 水平思考からのアイデア</h2>
@@ -3067,6 +3093,10 @@ Step 6の計画:
 <tr><td>チーム構成・資金計画の追加</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
 <tr><td>90日定着プログラム設計</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
 <tr><td>チャーン率40%シナリオの財務検証</td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>Free→有料転換の摩擦点UX設計</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>請求書払い対応（中小製造業必須）</td><td><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>チーム体制・バーンレート・ランウェイの明文化</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>S</strong></td></tr>
+<tr><td>SaaS向けMRR予測の並行ライトPMF検証</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><strong>B</strong></td></tr>
 <tr><td>Streamlit技術的限界の評価</td><td><span class="star">★</span></td><td><strong>C</strong></td></tr>
 </table></div>
 <h3 id="7-2-フェーズ0修正版10週間計画">7-2. フェーズ0修正版（10週間計画）</h3>
