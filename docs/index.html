@@ -1,0 +1,2690 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML予測アプリ — マネタイズ戦略ドキュメント</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface2: #334155;
+  --border: #475569;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --green: #4ade80;
+  --orange: #fb923c;
+  --red: #f87171;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* サイドバー */
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h1 {
+  font-size: 16px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.sidebar-header p {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.nav-item {
+  display: block;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: var(--text);
+  border-bottom: 1px solid rgba(71,85,105,0.3);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.nav-item:hover { background: var(--surface2); }
+.nav-item.active {
+  background: var(--surface2);
+  border-left: 3px solid var(--accent);
+}
+.nav-step {
+  display: block;
+  font-size: 10px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.nav-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nav-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* メインコンテンツ */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 60px;
+  max-width: 900px;
+}
+.main h1 {
+  font-size: 28px;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.main h2 {
+  font-size: 22px;
+  color: var(--accent2);
+  margin-top: 36px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.main h3 {
+  font-size: 17px;
+  color: var(--green);
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+.main h4 {
+  font-size: 15px;
+  color: var(--orange);
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+.main p {
+  margin-bottom: 10px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.main ul, .main ol {
+  margin-bottom: 12px;
+  padding-left: 24px;
+}
+.main li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+.main blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 10px 16px;
+  margin: 12px 0;
+  background: rgba(56,189,248,0.08);
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.main hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+.main pre {
+  background: #0c1222;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.main pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+  font-size: 13px;
+  color: var(--green);
+  background: none;
+  padding: 0;
+}
+.main code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--orange);
+}
+.main strong { color: #f1f5f9; }
+.main del { color: var(--red); text-decoration: line-through; }
+.star { color: #facc15; }
+
+/* テーブル */
+.table-wrap {
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.main table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+.main th {
+  background: var(--surface2);
+  color: var(--accent);
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.main td {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+.main tr:nth-child(even) td {
+  background: rgba(30,41,59,0.5);
+}
+.main tr:hover td {
+  background: rgba(56,189,248,0.06);
+}
+
+/* スクロールバー */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; min-width: 100%; max-height: 200px; }
+  .main { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <h1>ML予測アプリ</h1>
+    <p>マネタイズ戦略ドキュメント</p>
+    <p style="margin-top:4px;color:#4ade80;font-size:10px;">最終更新: 2026-03-08</p>
+  </div>
+  <a href="#step1_usecase_catalog" class="nav-item" onclick="showSection('step1_usecase_catalog')"><span class="nav-step">Step 1</span><span class="nav-title">ユースケースカタログ</span><span class="nav-sub">18業界×140件のユースケース調査</span></a>
+<a href="#step2_monetization_scoring" class="nav-item" onclick="showSection('step2_monetization_scoring')"><span class="nav-step">Step 2</span><span class="nav-title">マネタイズ評価</span><span class="nav-sub">6軸×30点満点スコアリング</span></a>
+<a href="#step3_prioritization" class="nav-item" onclick="showSection('step3_prioritization')"><span class="nav-step">Step 3</span><span class="nav-title">優先順位付け</span><span class="nav-sub">GTM+リスク+ポートフォリオ統合</span></a>
+<a href="#step4_marketing_strategy" class="nav-item" onclick="showSection('step4_marketing_strategy')"><span class="nav-step">Step 4</span><span class="nav-title">マーケティング戦略</span><span class="nav-sub">STP/4P/ジャーニー/KPI/予算</span></a>
+<a href="#step5_strategy_review" class="nav-item" onclick="showSection('step5_strategy_review')"><span class="nav-step">Step 5</span><span class="nav-title">多角的レビュー</span><span class="nav-sub">5つの思考パターンで問題特定</span></a>
+<a href="#step6_revised_strategy" class="nav-item" onclick="showSection('step6_revised_strategy')"><span class="nav-step">Step 6</span><span class="nav-title">修正戦略 v2</span><span class="nav-sub">PMF検証+KPI修正+ピボット設計</span></a>
+</nav>
+
+<main class="main">
+  <section id="step1_usecase_catalog" class="doc-section" style="display:block"><h1 id="step-1-ユースケースカタログ業界職種企業規模別">Step 1: ユースケースカタログ（業界・職種・企業規模別）</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-04</blockquote>
+<hr>
+<h2 id="調査概要">調査概要</h2>
+<p>5つの専門エージェントチーム（製造・物流、小売・EC・飲食、金融・不動産・保険、HR・医療・教育・SaaS、マーケ・広告・コンサル・ニッチ業界）が並列で調査を実施し、<strong>計100件超のユースケース</strong>を特定した。本ドキュメントはその統合レポートである。</p>
+<hr>
+<h2 id="目次">目次</h2>
+<ul>
+<li><a href="#1-製造業">製造業</a></li>
+<li><a href="#2-物流業">物流業</a></li>
+<li><a href="#3-小売業">小売業</a></li>
+<li><a href="#4-ec業界">EC業界</a></li>
+<li><a href="#5-飲食業">飲食業</a></li>
+<li><a href="#6-金融業銀行証券フィンテック">金融業</a></li>
+<li><a href="#7-不動産業">不動産業</a></li>
+<li><a href="#8-保険業">保険業</a></li>
+<li><a href="#9-hr人事--全業種横断">HR（人事）— 全業種横断</a></li>
+<li><a href="#10-医療ヘルスケア">医療・ヘルスケア</a></li>
+<li><a href="#11-教育業界">教育業界</a></li>
+<li><a href="#12-saasit企業">SaaS・IT企業</a></li>
+<li><a href="#13-マーケティング部門職種横断">マーケティング部門（職種横断）</a></li>
+<li><a href="#14-広告代理店デジタルマーケ会社">広告代理店・デジタルマーケ会社</a></li>
+<li><a href="#15-コンサルティングファーム">コンサルティングファーム</a></li>
+<li><a href="#16-農業">農業</a></li>
+<li><a href="#17-エネルギー">エネルギー</a></li>
+<li><a href="#18-建設">建設</a></li>
+<li><a href="#横断分析まとめ">横断分析まとめ</a></li>
+</ul>
+<hr>
+<h2 id="1-製造業">1. 製造業</h2>
+<h3 id="大企業従業員1000人以上">大企業（従業員1,000人以上）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>教師データ例</th><th>想定ユーザー</th><th>現状の課題</th></tr>
+<tr><td>1</td><td>製品品質予測（不良率予測）</td><td>ロットごとの不良率(%)</td><td>設備温度、湿度、原材料ロット、金型使用回数、射出圧力 等</td><td>品質管理部 部長・課長</td><td>熟練者の経験則に属人化。SQCはExcelだが多変量の相互作用を捉えきれない</td></tr>
+<tr><td>2</td><td>設備故障までの残存寿命予測</td><td>故障までの残り稼働時間</td><td>振動センサー値、モーター電流値、軸受温度、累積稼働時間 等</td><td>生産技術部 設備保全課</td><td>定期保全で過剰交換↔突発故障でライン停止。IoTデータCSVが死蔵</td></tr>
+<tr><td>3</td><td>需要予測・生産計画最適化</td><td>SKU別の翌月出荷数量</td><td>過去出荷実績、季節指数、販促有無、為替レート、景況指数 等</td><td>SCM部門、生産管理部</td><td>営業の勘と生産管理のExcelが乖離し、過剰在庫・欠品が常態化</td></tr>
+<tr><td>4</td><td>エネルギーコスト予測</td><td>工場の日次/月次電力消費量</td><td>生産量、外気温、稼働ライン数、設備メンテナンス有無 等</td><td>環境・エネルギー管理部門</td><td>CN対応で削減目標があるが変動要因の定量分析ができていない</td></tr>
+</table></div>
+<h3 id="中企業従業員100-999人">中企業（従業員100-999人）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>教師データ例</th><th>想定ユーザー</th><th>現状の課題</th></tr>
+<tr><td>1</td><td>加工条件最適化（歩留まり予測）</td><td>歩留まり率(%)</td><td>切削速度、工具摩耗量、クーラント濃度、室温 等</td><td>製造部 課長、生産技術者</td><td>ベテラン退職時のリスク大。日報Excelが分析されていない</td></tr>
+<tr><td>2</td><td>原材料コスト予測</td><td>翌月の調達単価(円/kg)</td><td>国際商品相場、為替、原油価格、発注ロットサイズ 等</td><td>購買部バイヤー</td><td>サプライヤー通知後に後手対応。価格交渉の材料不足</td></tr>
+<tr><td>3</td><td>製品リードタイム予測</td><td>受注→出荷の日数</td><td>製品カテゴリ、注文数量、仕掛在庫量、外注比率 等</td><td>営業部、生産管理部</td><td>一律の標準LTで回答→実績と乖離し信頼喪失</td></tr>
+<tr><td>4</td><td>従業員の残業時間予測</td><td>部門ごとの月間残業時間</td><td>受注件数、欠勤者数、設備トラブル件数 等</td><td>人事部、工場管理者</td><td>月末まで実態不明、働き方改革対応が後手</td></tr>
+</table></div>
+<h3 id="小企業従業員100人未満">小企業（従業員100人未満）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>教師データ例</th><th>想定ユーザー</th><th>現状の課題</th></tr>
+<tr><td>1</td><td>見積もり金額の精緻化</td><td>適正見積もり金額(円)</td><td>製品サイズ、材質、加工工程数、数量、過去実績原価 等</td><td>社長、営業兼工場長</td><td>社長1人の勘頼み。安すぎると赤字、高すぎると失注</td></tr>
+<tr><td>2</td><td>設備消耗品の交換時期予測</td><td>残り使用可能回数</td><td>累積使用回数、加工材質比率、振動値変化 等</td><td>現場リーダー</td><td>ホワイトボード管理で属人判断。突発折損で不良品発生</td></tr>
+<tr><td>3</td><td>月次売上予測</td><td>翌月の月間売上高(万円)</td><td>過去月次売上、受注残、引き合い件数、季節指数 等</td><td>社長、経理</td><td>資金繰りの見通しが立たず銀行説明も感覚的</td></tr>
+</table></div>
+<hr>
+<h2 id="2-物流業">2. 物流業</h2>
+<h3 id="大企業">大企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>配送所要時間予測</td><td>拠点間配送時間(分)</td><td>運行管理部</td><td>デジタコCSVを活用。荷積み荷降ろし含む</td></tr>
+<tr><td>2</td><td>倉庫作業員の必要人数予測</td><td>日次必要作業員数</td><td>物流センター長</td><td>派遣手配の精度向上で人余り/人手不足を解消</td></tr>
+<tr><td>3</td><td>燃料消費量予測</td><td>車両月間燃料消費量(L)</td><td>車両管理部</td><td>エコドライブ研修の効果測定にも</td></tr>
+<tr><td>4</td><td>貨物破損リスクスコア予測</td><td>ロットごとの破損率</td><td>品質管理部</td><td>高リスク出荷の事前特定で未然防止</td></tr>
+</table></div>
+<h3 id="中企業">中企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>荷主からの受注物量予測</td><td>翌週/翌月の委託物量</td><td>営業部</td><td>スポット便の高コスト回避</td></tr>
+<tr><td>2</td><td>ドライバー離職リスク予測</td><td>3ヶ月以内の離職スコア</td><td>人事部</td><td>2024年問題対応。連鎖退職の予防</td></tr>
+<tr><td>3</td><td>トラック稼働率予測</td><td>月間稼働率(%)</td><td>配車担当</td><td>空車率の改善で収益性向上</td></tr>
+<tr><td>4</td><td>配送先ごとの荷降ろし時間予測</td><td>荷降ろし時間(分)</td><td>運行管理者</td><td>拘束時間削減と配送効率向上</td></tr>
+</table></div>
+<h3 id="小企業">小企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>日次売上・粗利予測</td><td>日次粗利額(万円)</td><td>社長</td><td>月中の着地予測で資金繰り改善</td></tr>
+<tr><td>2</td><td>タイヤ・部品の交換時期予測</td><td>残り使用可能走行距離(km)</td><td>整備担当</td><td>バースト防止で安全性+費用削減</td></tr>
+<tr><td>3</td><td>顧客別の運賃適正価格予測</td><td>案件ごとの適正運賃(円)</td><td>社長</td><td>赤字案件の事前回避。待機料請求の根拠にも</td></tr>
+</table></div>
+<hr>
+<h2 id="3-小売業">3. 小売業</h2>
+<h3 id="大企業">大企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>店舗別・日別の来客数予測</td><td>日別来客数</td><td>営業本部</td><td>人員配置最適化、レジ待ち解消</td></tr>
+<tr><td>2</td><td>商品別の需要予測（発注最適化）</td><td>SKU別日次/週次販売数量</td><td>商品部バイヤー</td><td>廃棄ロス+欠品を年間数億円規模で削減</td></tr>
+<tr><td>3</td><td>販促キャンペーンのROI予測</td><td>キャンペーン別の売上増加額</td><td>マーケティング本部</td><td>数十億円の販促予算の最適配分</td></tr>
+<tr><td>4</td><td>店舗売上の中期予測（出退店判断）</td><td>新規出店候補地の月商</td><td>経営企画部</td><td>出退店判断の標準化</td></tr>
+</table></div>
+<h3 id="中企業">中企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>日別売上予測（シフト最適化）</td><td>日別・時間帯別売上高</td><td>エリアマネージャー</td><td>人手不足下でシフト精度が生命線</td></tr>
+<tr><td>2</td><td>在庫回転日数予測（滞留在庫早期発見）</td><td>カテゴリ別在庫回転日数</td><td>商品管理部</td><td>値引きタイミングの最適化</td></tr>
+<tr><td>3</td><td>顧客単価の予測</td><td>会員別の次月購買金額</td><td>CRM担当</td><td>ポイントカードデータの活用促進</td></tr>
+</table></div>
+<h3 id="小企業">小企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>週次売上予測（仕入れ量決定）</td><td>来週の売上金額</td><td>オーナー</td><td>廃棄ロス削減が利益に直結</td></tr>
+<tr><td>2</td><td>客単価の変動要因分析と予測</td><td>日別平均客単価</td><td>オーナー</td><td>SHAP解析で打ち手を発見</td></tr>
+<tr><td>3</td><td>月次売上予測（資金繰り）</td><td>翌月〜3ヶ月先の月次売上</td><td>オーナー</td><td>銀行への融資相談の根拠</td></tr>
+</table></div>
+<hr>
+<h2 id="4-ec業界">4. EC業界</h2>
+<h3 id="大企業">大企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>商品別販売数量予測（在庫/物流最適化）</td><td>SKU別日次/週次販売数量</td><td>SCM部門</td><td>数十万SKUの在庫最適配置</td></tr>
+<tr><td>2</td><td>顧客生涯価値（LTV）予測</td><td>今後12ヶ月の累計購買金額</td><td>マーケティング部CRM担当</td><td>広告投資ROI算出・セグメント別施策</td></tr>
+<tr><td>3</td><td>返品率予測</td><td>商品別/注文別の返品率</td><td>CS部門</td><td>アパレルEC返品率15-30%の削減</td></tr>
+<tr><td>4</td><td>広告費用対効果（ROAS）予測</td><td>キャンペーン別ROAS</td><td>デジタルマーケ部</td><td>年間数億-数十億の広告予算最適化</td></tr>
+</table></div>
+<h3 id="中企業">中企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>カゴ落ち金額予測</td><td>カート投入→未購入金額</td><td>EC事業部</td><td>カゴ落ち率70%の改善施策のトリガーに</td></tr>
+<tr><td>2</td><td>配送リードタイム予測</td><td>注文→配送完了日数</td><td>物流担当</td><td>正確な配送日表示で顧客体験向上</td></tr>
+<tr><td>3</td><td>メルマガ・LINE経由の売上予測</td><td>配信ごとの経由売上</td><td>CRM担当</td><td>配信条件の最適化</td></tr>
+</table></div>
+<h3 id="小企業">小企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>月次売上予測（仕入れ/CF管理）</td><td>翌月売上</td><td>ECオーナー</td><td>D2Cの素材先行発注判断</td></tr>
+<tr><td>2</td><td>商品レビュースコア予測</td><td>新商品の予想レビュー評価点</td><td>ECオーナー</td><td>出品前の品質リスク評価</td></tr>
+<tr><td>3</td><td>SNS投稿からのCV数予測</td><td>投稿後24h以内の注文数</td><td>SNS運用担当</td><td>投稿のPDCA高速化</td></tr>
+</table></div>
+<hr>
+<h2 id="5-飲食業">5. 飲食業</h2>
+<h3 id="大企業チェーン">大企業（チェーン）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>来客数予測（食材発注/シフト）</td><td>店舗別日別/時間帯別来客数</td><td>店舗運営本部</td><td>フードロス率3-5%削減。年間数億円規模</td></tr>
+<tr><td>2</td><td>メニュー別売上予測</td><td>新メニューの月間販売数量</td><td>商品開発部</td><td>ヒット率20-30%の向上</td></tr>
+<tr><td>3</td><td>原材料費予測</td><td>主要食材の翌月仕入れ単価</td><td>購買部バイヤー</td><td>先行仕入れ・代替食材の早期検討</td></tr>
+<tr><td>4</td><td>デリバリー注文数予測</td><td>日別/時間帯別注文数</td><td>デリバリー事業部</td><td>調理キャパシティの最適化</td></tr>
+</table></div>
+<h3 id="中企業">中企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>日別売上予測（食材ロス削減）</td><td>店舗日別売上/来客数</td><td>エリアマネージャー</td><td>店舗間のロス率格差を標準化</td></tr>
+<tr><td>2</td><td>客単価予測</td><td>時間帯別/客層別の平均客単価</td><td>営業企画部</td><td>アップセル戦略の定量判断</td></tr>
+<tr><td>3</td><td>人件費予測</td><td>月次店舗別人件費総額</td><td>管理部</td><td>売上比30-35%の最大コスト管理</td></tr>
+</table></div>
+<h3 id="小企業個人店含む">小企業（個人店含む）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>日別来客数予測（仕込み量決定）</td><td>明日〜1週間先の来客数</td><td>オーナーシェフ</td><td>高単価食材の廃棄=即赤字</td></tr>
+<tr><td>2</td><td>月次売上予測（資金繰り）</td><td>翌月〜3ヶ月先の月次売上</td><td>オーナー</td><td>家賃・固定費の支払い計画</td></tr>
+<tr><td>3</td><td>テイクアウト販売数予測</td><td>日別テイクアウト注文数</td><td>オーナー</td><td>イートインと異なる需要パターン把握</td></tr>
+</table></div>
+<hr>
+<h2 id="6-金融業銀行証券フィンテック">6. 金融業（銀行・証券・フィンテック）</h2>
+<h3 id="大企業メガバンク大手証券">大企業（メガバンク・大手証券）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>住宅ローン貸倒損失額予測</td><td>個別案件の予想損失額</td><td>リスク管理部</td><td>金融庁のモデルリスク管理対応。SHAP説明力</td></tr>
+<tr><td>2</td><td>法人融資のスプレッド最適化</td><td>適正スプレッド(bp)</td><td>法人営業部</td><td>営業の勘→データベースのプライシング</td></tr>
+<tr><td>3</td><td>投資信託の解約額予測</td><td>ファンド別/月次解約額</td><td>資産運用部門</td><td>リテンション施策の事前投入</td></tr>
+<tr><td>4</td><td>クレジットカード利用額予測</td><td>顧客別翌月利用額</td><td>カード事業部</td><td>ターゲティング精度向上</td></tr>
+</table></div>
+<h3 id="中企業地方銀行中堅証券">中企業（地方銀行・中堅証券）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>事業性融資の回収可能額予測</td><td>延滞先の最終回収額</td><td>融資管理部</td><td>引当金計上精度の向上</td></tr>
+<tr><td>2</td><td>ATM現金需要量予測</td><td>拠点別/日別ATM出金額</td><td>事務統括部</td><td>ATM運営コスト削減</td></tr>
+<tr><td>3</td><td>個人ローン早期完済額予測</td><td>早期完済時期（残存月数）</td><td>ALM担当</td><td>CF変動の予測精度向上</td></tr>
+</table></div>
+<h3 id="小企業信金信組フィンテックsu">小企業（信金・信組・フィンテックSU）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>融資先の年間売上高予測</td><td>翌期売上高</td><td>融資課</td><td>定性審査→定量裏付け</td></tr>
+<tr><td>2</td><td>定期預金の満期時継続額予測</td><td>満期継続額</td><td>預金業務課</td><td>資金運用計画の精度向上</td></tr>
+<tr><td>3</td><td>延滞発生までの日数予測</td><td>初回延滞までの予測日数</td><td>審査担当</td><td>審査ノウハウの標準化</td></tr>
+</table></div>
+<hr>
+<h2 id="7-不動産業">7. 不動産業</h2>
+<h3 id="大企業デベロッパーreit">大企業（デベロッパー・REIT）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>分譲マンション販売価格予測</td><td>住戸別の適正販売価格</td><td>事業企画部</td><td>価格決定の透明化・迅速化</td></tr>
+<tr><td>2</td><td>オフィスビル賃料予測</td><td>区画別の成約坪単価</td><td>アセットマネジメント部</td><td>REIT運用報告の説明根拠</td></tr>
+<tr><td>3</td><td>大規模修繕工事費用予測</td><td>1棟あたりの修繕費用</td><td>管理事業部</td><td>修繕積立金計画の精緻化</td></tr>
+<tr><td>4</td><td>キャップレート予測</td><td>取引キャップレート(%)</td><td>投資運用部</td><td>入札判断の迅速化</td></tr>
+</table></div>
+<h3 id="中企業">中企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>賃貸物件の空室期間予測</td><td>退去後の空室日数</td><td>賃貸管理部</td><td>オーナーへの改善提案力向上</td></tr>
+<tr><td>2</td><td>成約価格と売出価格の乖離額予測</td><td>乖離額(万円)</td><td>売買仲介部門</td><td>適正売出価格の設定支援</td></tr>
+<tr><td>3</td><td>リノベ後の想定賃料予測</td><td>リノベ後成約賃料</td><td>リノベーション事業部</td><td>投資回収期間の精緻化</td></tr>
+</table></div>
+<h3 id="小企業">小企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>中古戸建ての査定価格予測</td><td>適正査定価格(万円)</td><td>代表者（宅建士）</td><td>高額査定ツール不要。売主への説明力向上</td></tr>
+<tr><td>2</td><td>月間来店客数予測</td><td>月間来店客数</td><td>店長</td><td>広告費配分の最適化</td></tr>
+<tr><td>3</td><td>管理物件の修繕費用予測</td><td>年間修繕費用(万円)</td><td>管理担当</td><td>オーナーへの根拠提示</td></tr>
+</table></div>
+<hr>
+<h2 id="8-保険業">8. 保険業</h2>
+<h3 id="大企業大手生損保">大企業（大手生損保）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>自動車保険の保険金支払額予測</td><td>事故1件あたりの最終支払額</td><td>損害サービス部</td><td>IBNR準備金の精度向上</td></tr>
+<tr><td>2</td><td>自然災害損害額予測</td><td>地域別/災害別予想損害額</td><td>自然災害リスク管理部</td><td>気候変動対応のモデル更新</td></tr>
+<tr><td>3</td><td>生命保険の給付金請求額予測</td><td>入院給付金1件あたり支払額</td><td>保険金部</td><td>日帰り手術増加等の変化への対応</td></tr>
+<tr><td>4</td><td>保険料収入予測</td><td>代理店別/月別保険料収入額</td><td>営業企画部</td><td>経営計画の精緻化</td></tr>
+</table></div>
+<h3 id="中企業中堅損保共済">中企業（中堅損保・共済）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>医療保険の入院日数予測</td><td>請求1件あたりの入院日数</td><td>数理部門</td><td>金融庁認可申請の説明資料にも</td></tr>
+<tr><td>2</td><td>自動車保険の解約率予測</td><td>月次解約件数</td><td>営業推進部</td><td>SHAPで解約要因特定→リテンション</td></tr>
+<tr><td>3</td><td>共済掛金の適正水準予測</td><td>年間支払共済金/加入者</td><td>共済事業部</td><td>アクチュアリー不在でもデータドリブンに</td></tr>
+</table></div>
+<h3 id="小企業代理店少額短期保険">小企業（代理店・少額短期保険）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>顧客あたり年間手数料収入予測</td><td>年間手数料(万円)</td><td>代理店経営者</td><td>顧客ポートフォリオの優先順位客観化</td></tr>
+<tr><td>2</td><td>月間保険金請求件数予測</td><td>月間請求件数</td><td>経営管理担当</td><td>人員配置の事前最適化</td></tr>
+<tr><td>3</td><td>追加提案による単価アップ額予測</td><td>追加保険料額(万円/年)</td><td>営業担当</td><td>クロスセル機会の定量化</td></tr>
+</table></div>
+<hr>
+<h2 id="9-hr人事----全業種横断">9. HR（人事） -- 全業種横断</h2>
+<h3 id="大企業">大企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>離職リスクスコア予測</td><td>離職までの推定月数</td><td>人事部HRBP</td><td>早期介入で離職防止</td></tr>
+<tr><td>2</td><td>内定承諾確度スコア予測</td><td>承諾確率スコア(0-100)</td><td>採用チーム</td><td>辞退率30-40%の対策優先度</td></tr>
+<tr><td>3</td><td>エンゲージメントスコア予測</td><td>次回サーベイの部署別スコア</td><td>CHRO</td><td>事前介入で低下防止</td></tr>
+<tr><td>4</td><td>昇格試験合格点予測</td><td>対象者の取得予測点数</td><td>人材開発部</td><td>育成すべきスキルギャップの特定</td></tr>
+<tr><td>5</td><td>年間人件費予測</td><td>部門別人件費総額</td><td>経営企画部</td><td>予算策定の精度向上</td></tr>
+</table></div>
+<h3 id="中企業">中企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>中途採用の採用単価予測</td><td>1名あたり採用コスト(万円)</td><td>採用担当リーダー</td><td>媒体使い分けの最適化</td></tr>
+<tr><td>2</td><td>残業時間予測（労務リスク管理）</td><td>翌月の残業時間(h)</td><td>労務管理担当</td><td>36協定上限超過の事前察知</td></tr>
+<tr><td>3</td><td>研修効果スコア予測</td><td>業務パフォーマンス向上度</td><td>人材開発担当</td><td>研修ROIの可視化</td></tr>
+</table></div>
+<h3 id="小企業">小企業</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>営業担当の月間売上貢献額予測</td><td>翌月売上額</td><td>代表取締役</td><td>1人の不振が業績直撃する小規模組織</td></tr>
+<tr><td>2</td><td>求人応募数予測</td><td>1ヶ月間の応募者数</td><td>経営者</td><td>限られた採用予算の最大効果</td></tr>
+<tr><td>3</td><td>新入社員の試用期間中パフォーマンス予測</td><td>試用期間終了時の業務評価</td><td>経営者</td><td>ミスマッチ採用のダメージ軽減</td></tr>
+</table></div>
+<hr>
+<h2 id="10-医療ヘルスケア">10. 医療・ヘルスケア</h2>
+<h3 id="大規模病院医療法人">大規模病院・医療法人</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>患者の入院日数予測</td><td>各患者の予測入院日数</td><td>病院経営企画室</td><td>DPC制度下の在院日数管理・ベッドコントロール</td></tr>
+<tr><td>2</td><td>外来患者数の日次予測</td><td>診療科別翌日〜1週間先の外来数</td><td>事務部長</td><td>スタッフシフト最適化、待ち時間削減</td></tr>
+<tr><td>3</td><td>医療機器の故障間隔予測</td><td>次回故障までの推定日数</td><td>臨床工学技士長</td><td>MRI/CT等の突発故障による診療停止防止</td></tr>
+<tr><td>4</td><td>患者あたり診療収入予測</td><td>1入院あたり診療報酬額</td><td>医事課長</td><td>診療科別収益管理の精緻化</td></tr>
+<tr><td>5</td><td>看護必要度スコア予測</td><td>翌日の看護必要度スコア</td><td>看護部長</td><td>病棟間応援調整の先手対応</td></tr>
+</table></div>
+<h3 id="中小クリニック調剤薬局">中小クリニック・調剤薬局</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>月間レセプト件数予測</td><td>翌月レセプト件数</td><td>院長</td><td>収入変動の事前把握</td></tr>
+<tr><td>2</td><td>処方箋受付枚数予測</td><td>日次処方箋受付枚数</td><td>薬局長</td><td>薬剤師シフト最適化、調剤過誤リスク低減</td></tr>
+<tr><td>3</td><td>患者の再来院間隔予測</td><td>次回来院までの日数</td><td>院長</td><td>慢性疾患患者の通院中断防止</td></tr>
+</table></div>
+<hr>
+<h2 id="11-教育業界">11. 教育業界</h2>
+<h3 id="大学専門学校">大学・専門学校</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>学生の最終GPA予測</td><td>卒業時GPA予測値</td><td>学務部</td><td>1年前期の段階でリスク学生に早期介入</td></tr>
+<tr><td>2</td><td>入学辞退率予測（歩留まり管理）</td><td>合格者の入学確率スコア</td><td>入試広報部</td><td>少子化下の定員充足。追加合格判断</td></tr>
+<tr><td>3</td><td>就職決定までの所要月数予測</td><td>就活開始→内定承諾の月数</td><td>キャリアセンター</td><td>支援リソースの最適配分</td></tr>
+<tr><td>4</td><td>中退リスクスコア予測</td><td>中退までの推定残存学期数</td><td>学部長</td><td>中退率は大学評価・学費収入に直結</td></tr>
+</table></div>
+<h3 id="学習塾予備校">学習塾・予備校</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>次回模試偏差値予測</td><td>次回模試の偏差値</td><td>教室長</td><td>保護者面談での客観的根拠</td></tr>
+<tr><td>2</td><td>退塾リスクスコア予測</td><td>退塾までの推定月数</td><td>エリアマネージャー</td><td>SHAP解析で退塾要因を可視化</td></tr>
+<tr><td>3</td><td>合格可能性スコア予測</td><td>志望校合格可能性(0-100)</td><td>進路指導講師</td><td>受験校選定の客観データ</td></tr>
+</table></div>
+<hr>
+<h2 id="12-saasit企業">12. SaaS・IT企業</h2>
+<h3 id="大企業arr数十億規模">大企業（ARR数十億規模）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>顧客チャーン予測</td><td>解約までの残存月数</td><td>CS部長</td><td>大量顧客のCS優先順位付け</td></tr>
+<tr><td>2</td><td>MRR予測</td><td>翌月/翌四半期のMRR</td><td>CFO / FP&amp;A</td><td>投資家・取締役会への業績報告精度向上</td></tr>
+<tr><td>3</td><td>リード→商談化の日数予測</td><td>商談化までの所要日数</td><td>マーケ部長</td><td>インサイドセールスの架電優先順位最適化</td></tr>
+<tr><td>4</td><td>アップセル金額予測</td><td>次回更新時のアップセル額</td><td>CSM / アカウントMgr</td><td>利用状況データの活用促進</td></tr>
+<tr><td>5</td><td>サポートチケット解決時間予測</td><td>チケット解決までの時間(h)</td><td>サポートMgr</td><td>SLA違反リスクの事前特定</td></tr>
+</table></div>
+<h3 id="中企業スタートアップ">中企業・スタートアップ</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>CAC（顧客獲得コスト）予測</td><td>チャネル×セグメント別CAC</td><td>マーケMgr</td><td>限られたマーケ予算の最適配分</td></tr>
+<tr><td>2</td><td>開発工数見積もり予測</td><td>機能開発に要する工数(人日)</td><td>EM / PdM</td><td>スプリント計画の破綻防止</td></tr>
+<tr><td>3</td><td>フリートライアル有料転換スコア</td><td>転換スコア(0-100)</td><td>Growth担当</td><td>オンボーディング設計にフィードバック</td></tr>
+<tr><td>4</td><td>月次問い合わせ件数予測</td><td>翌月のサポート問い合わせ件数</td><td>サポートリーダー</td><td>人員計画の事前最適化</td></tr>
+</table></div>
+<hr>
+<h2 id="13-マーケティング部門職種横断">13. マーケティング部門（職種横断）</h2>
+<h3 id="大企業マーケ部門">大企業マーケ部門</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>TV CM売上リフト予測</td><td>週次/月次の売上増分</td><td>メディアプランニング部</td><td>MMM外注(数百万円)不要のクイック分析</td></tr>
+<tr><td>2</td><td>CRM施策ごとのLTV予測</td><td>顧客の今後12ヶ月累計購買額</td><td>CRM推進部</td><td>セグメント別ROI試算→予算配分根拠</td></tr>
+<tr><td>3</td><td>新商品ローンチ初月売上予測</td><td>新商品の発売初月売上</td><td>ブランドマネージャー</td><td>生産計画ブレの抑制</td></tr>
+<tr><td>4</td><td>デジタル広告CPA予測</td><td>週次CPA(円)</td><td>デジタルマーケ部</td><td>予算策定時の根拠ある見込み提示</td></tr>
+<tr><td>5</td><td>キャンペーン応募数/来場者数予測</td><td>キャンペーン応募数</td><td>販促企画部</td><td>景品発注数・コールセンター人員の最適化</td></tr>
+</table></div>
+<h3 id="中小企業マーケ担当">中小企業マーケ担当</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>ECサイト月次売上予測</td><td>来月の月次売上</td><td>EC担当者</td><td>広告増減時のシミュレーション</td></tr>
+<tr><td>2</td><td>SNS投稿エンゲージメント率予測</td><td>投稿別エンゲージメント率</td><td>SNS運用担当</td><td>投稿パターンの法則化</td></tr>
+<tr><td>3</td><td>Google広告CV数予測</td><td>週次CV数</td><td>広告運用担当</td><td>自社データベースの予測→予算判断</td></tr>
+</table></div>
+<hr>
+<h2 id="14-広告代理店デジタルマーケ会社">14. 広告代理店・デジタルマーケ会社</h2>
+<h3 id="大手代理店">大手代理店</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>メディアプランの売上インパクトシミュレーション</td><td>クライアント売上増分</td><td>ストラテジックプランナー</td><td>非線形効果+SHAP可視化で提案力UP</td></tr>
+<tr><td>2</td><td>クリエイティブ効果の事前スコアリング</td><td>CTR予測値(%)</td><td>クリエイティブ部門</td><td>A/Bテスト前の方向性絞り込み</td></tr>
+<tr><td>3</td><td>クライアント広告予算配分最適化</td><td>チャネル別限界ROAS</td><td>アカウントプランナー</td><td>データ根拠のある年間予算策定支援</td></tr>
+<tr><td>4</td><td>インフルエンサーマーケROI予測</td><td>案件あたり売上貢献額</td><td>インフルエンサー部門</td><td>フォロワー数偏重からの脱却</td></tr>
+</table></div>
+<h3 id="中小代理店">中小代理店</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>リスティング広告月次CV数予測</td><td>クライアント別月次CV数</td><td>運用チームリーダー</td><td>「未来の成果予測」で差別化・リテンション向上</td></tr>
+<tr><td>2</td><td>コンペ受注金額予測</td><td>案件の受注金額(万円)</td><td>営業マネージャー</td><td>パイプライン管理の精度向上</td></tr>
+<tr><td>3</td><td>SEOコンテンツの検索流入数予測</td><td>記事公開後3ヶ月のPV</td><td>SEO担当</td><td>制作リソースの最適配分</td></tr>
+<tr><td>4</td><td>SNS広告のCPE予測</td><td>キャンペーン別CPE(円)</td><td>SNS広告運用担当</td><td>媒体間の最適配分根拠</td></tr>
+</table></div>
+<hr>
+<h2 id="15-コンサルティングファーム">15. コンサルティングファーム</h2>
+<h3 id="戦略コンサル総合コンサル">戦略コンサル・総合コンサル</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>M&amp;A対象企業の企業価値予測</td><td>EV(億円)</td><td>M&amp;A部門</td><td>DCF/マルチプルの「第三の視点」</td></tr>
+<tr><td>2</td><td>新規事業の市場規模予測</td><td>3年後市場規模(億円)</td><td>戦略コンサル部門</td><td>類似市場の成長パターン学習</td></tr>
+<tr><td>3</td><td>間接費の適正水準予測</td><td>部門別適正間接費</td><td>オペレーション改善チーム</td><td>削減施策の優先順位付け</td></tr>
+<tr><td>4</td><td>DXプロジェクトROI予測</td><td>年間コスト削減額/売上増分</td><td>テクノロジーコンサル部門</td><td>定量的な投資効果提示</td></tr>
+</table></div>
+<h3 id="中小コンサル業務改善コンサル">中小コンサル・業務改善コンサル</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>クライアント離職率予測（人事コンサル）</td><td>部門別年間離職率</td><td>人事コンサルタント</td><td>定量的な改善施策の提案根拠</td></tr>
+<tr><td>2</td><td>中小企業の売上予測モデル構築</td><td>クライアント月次売上</td><td>経営コンサルタント</td><td>データドリブン経営支援の付加価値</td></tr>
+<tr><td>3</td><td>業務処理時間予測</td><td>1件あたり所要時間(分)</td><td>BPRコンサルタント</td><td>改善効果のシミュレーション</td></tr>
+<tr><td>4</td><td>補助金採択金額予測</td><td>採択金額(万円)</td><td>補助金支援コンサル</td><td>申請戦略の最適化</td></tr>
+</table></div>
+<hr>
+<h2 id="16-農業">16. 農業</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>農作物の収穫量予測</td><td>圃場あたり収穫量(kg)</td><td>農業法人経営者、JA営農指導員</td><td>出荷計画・販売価格の事前交渉</td></tr>
+<tr><td>2</td><td>農産物の市場出荷価格予測</td><td>卸売市場取引単価(円/kg)</td><td>販売担当</td><td>出荷タイミング最適化で収益最大化</td></tr>
+<tr><td>3</td><td>飼料効率（FCR）予測</td><td>飼料要求率(kg飼料/kg増体)</td><td>畜産農家</td><td>飼料コスト最適化</td></tr>
+</table></div>
+<hr>
+<h2 id="17-エネルギー">17. エネルギー</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>太陽光発電の発電量予測</td><td>日次/月次発電量(kWh)</td><td>再エネ事業者</td><td>FIT→FIP移行で予測精度が収益直結</td></tr>
+<tr><td>2</td><td>電力需要予測（施設向け）</td><td>日次電力消費量(kWh)</td><td>施設管理者</td><td>デマンドレスポンス・電力調達計画</td></tr>
+<tr><td>3</td><td>電力小売のチャーンレート予測</td><td>月次解約確率スコア</td><td>新電力会社</td><td>電力自由化下のリテンション施策</td></tr>
+</table></div>
+<hr>
+<h2 id="18-建設">18. 建設</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ユースケース名</th><th>予測対象</th><th>想定ユーザー</th><th>ポイント</th></tr>
+<tr><td>1</td><td>工事実行予算（工事原価）予測</td><td>案件の最終原価(万円)</td><td>積算部門</td><td>若手への技術移転、赤字工事抑制</td></tr>
+<tr><td>2</td><td>不動産賃料予測</td><td>月額賃料(万円)</td><td>不動産仲介/投資家</td><td>客観的査定根拠</td></tr>
+<tr><td>3</td><td>工期遅延日数予測</td><td>竣工までの遅延日数</td><td>プロジェクトマネージャー</td><td>違約金・コスト増のリスク低減</td></tr>
+</table></div>
+<hr>
+<h2 id="横断分析まとめ">横断分析まとめ</h2>
+<h3 id="アプリの強みが特に刺さるポイント">アプリの強みが特に刺さるポイント</h3>
+<div class="table-wrap"><table>
+<tr><th>アプリの特徴</th><th>ビジネス価値</th></tr>
+<tr><td><strong>ノーコード</strong></td><td>データサイエンティスト不在の組織（中小企業・非テック部門）でも即導入可能</td></tr>
+<tr><td><strong>CSV/Excelアップロード</strong></td><td>既存業務のExcel/CSVをそのまま活用。データ基盤の初期投資が不要</td></tr>
+<tr><td><strong>SHAP解析</strong></td><td>「なぜその予測か」を説明可能。経営層/クライアント/規制当局への説明責任に対応</td></tr>
+<tr><td><strong>回帰予測特化</strong></td><td>売上・コスト・時間・件数・率などビジネスKPIの大半は数値予測であり、親和性が極めて高い</td></tr>
+</table></div>
+<h3 id="企業規模別の訴求ポイント">企業規模別の訴求ポイント</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>主な訴求</th></tr>
+<tr><td><strong>大企業</strong></td><td>PoC高速化、現場部門のセルフサービス分析、既存ベンダーモデルのセカンドオピニオン</td></tr>
+<tr><td><strong>中企業</strong></td><td>専門人材不在でも始められるML導入の第一歩、既存Excel業務の高度化</td></tr>
+<tr><td><strong>小企業</strong></td><td>経験と勘に頼っていた意思決定のデータ化、高額ツール不要の手軽さ、銀行/顧客への説明力向上</td></tr>
+</table></div>
+<h3 id="ユースケース数の集計">ユースケース数の集計</h3>
+<div class="table-wrap"><table>
+<tr><th>業界</th><th>大企業</th><th>中企業</th><th>小企業</th><th>合計</th></tr>
+<tr><td>製造業</td><td>4</td><td>4</td><td>3</td><td>11</td></tr>
+<tr><td>物流業</td><td>4</td><td>4</td><td>3</td><td>11</td></tr>
+<tr><td>小売業</td><td>4</td><td>3</td><td>3</td><td>10</td></tr>
+<tr><td>EC業界</td><td>4</td><td>3</td><td>3</td><td>10</td></tr>
+<tr><td>飲食業</td><td>4</td><td>3</td><td>3</td><td>10</td></tr>
+<tr><td>金融業</td><td>4</td><td>3</td><td>3</td><td>10</td></tr>
+<tr><td>不動産業</td><td>4</td><td>3</td><td>3</td><td>10</td></tr>
+<tr><td>保険業</td><td>4</td><td>3</td><td>3</td><td>10</td></tr>
+<tr><td>HR（全業種横断）</td><td>5</td><td>3</td><td>3</td><td>11</td></tr>
+<tr><td>医療・ヘルスケア</td><td>5</td><td>3</td><td>-</td><td>8</td></tr>
+<tr><td>教育業界</td><td>4</td><td>3</td><td>-</td><td>7</td></tr>
+<tr><td>SaaS・IT</td><td>5</td><td>4</td><td>-</td><td>9</td></tr>
+<tr><td>マーケ部門（職種横断）</td><td>5</td><td>3</td><td>-</td><td>8</td></tr>
+<tr><td>広告代理店</td><td>4</td><td>4</td><td>-</td><td>8</td></tr>
+<tr><td>コンサルティング</td><td>4</td><td>4</td><td>-</td><td>8</td></tr>
+<tr><td>農業</td><td>3</td><td>-</td><td>-</td><td>3</td></tr>
+<tr><td>エネルギー</td><td>3</td><td>-</td><td>-</td><td>3</td></tr>
+<tr><td>建設</td><td>3</td><td>-</td><td>-</td><td>3</td></tr>
+<tr><td><strong>合計</strong></td><td><strong>約140</strong></td></tr>
+</table></div>
+<hr>
+<blockquote>次のステップ: Step 2ではこれらのユースケースに対して、マネタイズ余地を複数の評価軸（市場規模、ペインの深さ、データ入手性、競合状況、課金意欲など）で評価していく。</blockquote>
+</section>
+<section id="step2_monetization_scoring" class="doc-section" style="display:none"><h1 id="step-2-マネタイズ余地の評価ユースケース別スコアリング">Step 2: マネタイズ余地の評価（ユースケース別スコアリング）</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-04</blockquote>
+<hr>
+<h2 id="評価フレームワーク">評価フレームワーク</h2>
+<h3 id="評価軸6軸--各1-5点--合計30点満点">評価軸（6軸 × 各1-5点 = 合計30点満点）</h3>
+<div class="table-wrap"><table>
+<tr><th>評価軸</th><th>略称</th><th>観点</th></tr>
+<tr><td><strong>市場規模</strong></td><td>市場</td><td>対象企業数 × 潜在的な1社あたり売上（5=数万社・数十億円規模、1=極めてニッチ）</td></tr>
+<tr><td><strong>ペインの深さ</strong></td><td>ペイン</td><td>課題の深刻度と業績インパクト（5=年間数千万〜億円、1=課題認識なし）</td></tr>
+<tr><td><strong>データ入手性</strong></td><td>データ</td><td>顧客がCSV/Excelで教師データを準備できるか（5=既に管理済み、1=データなし）</td></tr>
+<tr><td><strong>競合優位性</strong></td><td>競合</td><td>既存ソリューションとの差別化余地（5=代替なし、1=レッドオーシャン）</td></tr>
+<tr><td><strong>課金意欲</strong></td><td>課金</td><td>ターゲットの支払い意思（5=年間数百万円以上支出済み、1=IT投資理解なし）</td></tr>
+<tr><td><strong>アプリ適合度</strong></td><td>適合</td><td>LightGBM回帰/ノーコード/SHAPとの相性（5=完璧フィット、1=対応困難）</td></tr>
+</table></div>
+<h3 id="スコアリング手法">スコアリング手法</h3>
+<ul>
+<li>5つの専門エージェントチーム（製造・物流 / 小売・EC・飲食 / 金融・不動産・保険 / HR・医療・教育・SaaS / マーケ・広告・コンサル・ニッチ）が独立評価</li>
+<li>業界知見＋ビジネス分析の両面からスコアリング</li>
+<li>各チームがTop 5を選出し、全体統合ランキングを作成</li>
+</ul>
+<hr>
+<h2 id="全業界統合ランキング">全業界統合ランキング</h2>
+<h3 id="top-20-ユースケース合計スコア順">Top 20 ユースケース（合計スコア順）</h3>
+<div class="table-wrap"><table>
+<tr><th>順位</th><th>業界</th><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td><strong>1</strong></td><td>製造</td><td>小</td><td>見積もり金額の精緻化</td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>製造</td><td>中</td><td>加工条件最適化（歩留まり予測）</td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>物流</td><td>中</td><td>荷主からの受注物量予測</td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>EC</td><td>大</td><td>商品別販売数量予測</td><td>5</td><td>5</td><td>5</td><td>2</td><td>5</td><td>4</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>EC</td><td>大</td><td>顧客生涯価値（LTV）予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>5</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>不動産</td><td>中</td><td>賃貸物件の空室期間予測</td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>HR</td><td>中</td><td>残業時間予測（労務リスク管理）</td><td>4</td><td>5</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>建設</td><td>-</td><td>工事実行予算（工事原価）予測</td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>1</strong></td><td>建設</td><td>-</td><td>工期遅延日数予測</td><td>4</td><td>5</td><td>3</td><td>5</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>10</strong></td><td>EC</td><td>大</td><td>返品率予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>物流</td><td>大</td><td>倉庫作業員の必要人数予測</td><td>4</td><td>5</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>物流</td><td>小</td><td>顧客別の運賃適正価格予測</td><td>3</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>製造</td><td>大</td><td>製品品質予測（不良率予測）</td><td>5</td><td>5</td><td>4</td><td>2</td><td>5</td><td>4</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>製造</td><td>中</td><td>製品リードタイム予測</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>HR</td><td>大</td><td>年間人件費予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>SaaS</td><td>大</td><td>MRR予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>エネルギー</td><td>-</td><td>太陽光発電の発電量予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>エネルギー</td><td>-</td><td>電力需要予測（施設向け）</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>10</strong></td><td>コンサル</td><td>大手</td><td>間接費の適正水準予測</td><td>3</td><td>4</td><td>4</td><td>4</td><td>5</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td><strong>20</strong></td><td>小売</td><td>大</td><td>商品別の需要予測（発注最適化）</td><td>5</td><td>5</td><td>4</td><td>2</td><td>5</td><td>3</td><td><strong>24</strong></td></tr>
+</table></div>
+<hr>
+<h2 id="業界別-全ユースケーススコアリング">業界別 全ユースケーススコアリング</h2>
+<h3 id="1-製造業22ユースケース中-11件">1. 製造業（22ユースケース中 11件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>小</td><td><strong>見積もり金額の精緻化</strong></td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>中</td><td><strong>加工条件最適化（歩留まり予測）</strong></td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>大</td><td>製品品質予測（不良率予測）</td><td>5</td><td>5</td><td>4</td><td>2</td><td>5</td><td>4</td><td><strong>25</strong></td></tr>
+<tr><td>中</td><td>製品リードタイム予測</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>大</td><td>需要予測・生産計画最適化</td><td>5</td><td>5</td><td>4</td><td>2</td><td>5</td><td>3</td><td><strong>24</strong></td></tr>
+<tr><td>大</td><td>エネルギーコスト予測</td><td>4</td><td>4</td><td>4</td><td>3</td><td>4</td><td>4</td><td><strong>23</strong></td></tr>
+<tr><td>中</td><td>原材料コスト予測</td><td>4</td><td>4</td><td>3</td><td>3</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>大</td><td>設備故障までの残存寿命予測</td><td>4</td><td>5</td><td>3</td><td>2</td><td>5</td><td>2</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>設備消耗品の交換時期予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>月次売上予測</td><td>4</td><td>3</td><td>5</td><td>3</td><td>2</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>従業員の残業時間予測</td><td>3</td><td>3</td><td>3</td><td>3</td><td>2</td><td>4</td><td><strong>18</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 中小製造業向けのユースケースが最高スコア。「見積もり」と「歩留まり」はExcelデータ+回帰予測+SHAPの三拍子が揃う理想的なターゲット。大企業向けはペインは深いが競合（SAP、Siemens等）が強力。</p>
+<hr>
+<h3 id="2-物流業11件">2. 物流業（11件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>中</td><td><strong>荷主からの受注物量予測</strong></td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>大</td><td>倉庫作業員の必要人数予測</td><td>4</td><td>5</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>小</td><td>顧客別の運賃適正価格予測</td><td>3</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>大</td><td>燃料消費量予測</td><td>4</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>中</td><td>配送先ごとの荷降ろし時間予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>5</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>配送所要時間予測</td><td>4</td><td>4</td><td>4</td><td>2</td><td>4</td><td>3</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>トラック稼働率予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>タイヤ・部品の交換時期予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>日次売上・粗利予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>2</td><td>4</td><td><strong>19</strong></td></tr>
+<tr><td>大</td><td>貨物破損リスクスコア予測</td><td>3</td><td>3</td><td>2</td><td>3</td><td>3</td><td>3</td><td><strong>17</strong></td></tr>
+<tr><td>中</td><td>ドライバー離職リスク予測</td><td>3</td><td>4</td><td>2</td><td>3</td><td>3</td><td>2</td><td><strong>17</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 2024年問題以降の配車効率化ニーズが追い風。小規模物流の「運賃適正価格予測」はSHAPで値上げ交渉の根拠を示せる点が経営者に刺さる。</p>
+<hr>
+<h3 id="3-小売業10件">3. 小売業（10件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td>商品別の需要予測（発注最適化）</td><td>5</td><td>5</td><td>4</td><td>2</td><td>5</td><td>3</td><td><strong>24</strong></td></tr>
+<tr><td>大</td><td>店舗売上の中期予測（出退店判断）</td><td>3</td><td>5</td><td>3</td><td>3</td><td>5</td><td>4</td><td><strong>23</strong></td></tr>
+<tr><td>中</td><td>在庫回転日数予測</td><td>4</td><td>4</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>販促キャンペーンのROI予測</td><td>4</td><td>4</td><td>3</td><td>3</td><td>4</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>中</td><td>日別売上予測（シフト最適化）</td><td>4</td><td>4</td><td>4</td><td>3</td><td>3</td><td>3</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>月次売上予測（資金繰り）</td><td>4</td><td>4</td><td>4</td><td>4</td><td>2</td><td>3</td><td><strong>21</strong></td></tr>
+<tr><td>大</td><td>店舗別・日別の来客数予測</td><td>4</td><td>4</td><td>3</td><td>2</td><td>4</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>週次売上予測（仕入れ量決定）</td><td>4</td><td>4</td><td>3</td><td>4</td><td>2</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>中</td><td>顧客単価の予測</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>4</td><td><strong>19</strong></td></tr>
+<tr><td>小</td><td>客単価の変動要因分析と予測</td><td>3</td><td>3</td><td>3</td><td>4</td><td>2</td><td>4</td><td><strong>19</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 時系列要素が強いユースケースが多く、適合度がやや下がる傾向。在庫回転日数予測は回帰に好適合。</p>
+<hr>
+<h3 id="4-ec業界10件">4. EC業界（10件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td><strong>商品別販売数量予測</strong></td><td>5</td><td>5</td><td>5</td><td>2</td><td>5</td><td>4</td><td><strong>26</strong></td></tr>
+<tr><td>大</td><td><strong>顧客生涯価値（LTV）予測</strong></td><td>4</td><td>4</td><td>5</td><td>3</td><td>5</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>大</td><td>返品率予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>大</td><td>広告費用対効果（ROAS）予測</td><td>4</td><td>4</td><td>4</td><td>3</td><td>5</td><td>4</td><td><strong>24</strong></td></tr>
+<tr><td>中</td><td>配送リードタイム予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>月次売上予測（仕入れ/CF管理）</td><td>4</td><td>4</td><td>4</td><td>4</td><td>2</td><td>3</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>メルマガ・LINE経由の売上予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>中</td><td>カゴ落ち金額予測</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td><strong>18</strong></td></tr>
+<tr><td>小</td><td>商品レビュースコア予測</td><td>2</td><td>2</td><td>3</td><td>3</td><td>2</td><td>3</td><td><strong>15</strong></td></tr>
+<tr><td>小</td><td>SNS投稿からのCV数予測</td><td>2</td><td>3</td><td>2</td><td>3</td><td>2</td><td>3</td><td><strong>15</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: データ入手性が全業界最高。大企業ECのLTV・販売数量予測は市場規模+課金意欲が圧倒的だが、Amazon等のプラットフォーム内AI競合に注意。</p>
+<hr>
+<h3 id="5-飲食業10件">5. 飲食業（10件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td>来客数予測（食材発注/シフト）</td><td>5</td><td>5</td><td>4</td><td>2</td><td>4</td><td>3</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>メニュー別売上予測</td><td>4</td><td>4</td><td>4</td><td>3</td><td>4</td><td>4</td><td><strong>23</strong></td></tr>
+<tr><td>中</td><td>日別売上予測（食材ロス削減）</td><td>4</td><td>5</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>原材料費予測</td><td>4</td><td>4</td><td>3</td><td>3</td><td>4</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>デリバリー注文数予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>日別来客数予測（仕込み量決定）</td><td>4</td><td>5</td><td>3</td><td>4</td><td>2</td><td>3</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>客単価予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>月次売上予測（資金繰り）</td><td>4</td><td>4</td><td>3</td><td>4</td><td>2</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>中</td><td>人件費予測</td><td>3</td><td>4</td><td>3</td><td>3</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>テイクアウト販売数予測</td><td>3</td><td>3</td><td>2</td><td>4</td><td>2</td><td>3</td><td><strong>17</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 食材廃棄削減のESG/SDGs文脈が追い風。チェーン本部向けはデータ豊富だが飲食特化AIとの競合あり。個人店はITリテラシーが課題。</p>
+<hr>
+<h3 id="6-金融業10件">6. 金融業（10件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td>住宅ローン貸倒損失額予測</td><td>4</td><td>5</td><td>4</td><td>2</td><td>5</td><td>4</td><td><strong>24</strong></td></tr>
+<tr><td>中</td><td>事業性融資の回収可能額予測</td><td>4</td><td>5</td><td>3</td><td>4</td><td>4</td><td>4</td><td><strong>24</strong></td></tr>
+<tr><td>中</td><td>ATM現金需要量予測</td><td>3</td><td>4</td><td>5</td><td>3</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>小</td><td>融資先の年間売上高予測</td><td>4</td><td>4</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>投資信託の解約額予測</td><td>4</td><td>4</td><td>4</td><td>2</td><td>4</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>法人融資のスプレッド最適化</td><td>3</td><td>4</td><td>3</td><td>2</td><td>5</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>大</td><td>クレジットカード利用額予測</td><td>4</td><td>3</td><td>4</td><td>1</td><td>4</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>中</td><td>個人ローン早期完済額予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>延滞発生までの日数予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>定期預金の満期時継続額予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>2</td><td>4</td><td><strong>19</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 地銀向けの融資回収額予測が最も現実的なターゲット。大手はSAS/Moody&#x27;s等の既存ベンダーが支配的。SHAP解析は金融庁のモデルリスク管理への対応で訴求力あり。</p>
+<hr>
+<h3 id="7-不動産業10件">7. 不動産業（10件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>中</td><td><strong>賃貸物件の空室期間予測</strong></td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>中</td><td>成約価格と売出価格の乖離額予測</td><td>4</td><td>4</td><td>4</td><td>4</td><td>3</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>小</td><td>中古戸建ての査定価格予測</td><td>5</td><td>4</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>大</td><td>分譲マンション販売価格予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>オフィスビル賃料予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>中</td><td>リノベ後の想定賃料予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>5</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>キャップレート予測</td><td>3</td><td>4</td><td>3</td><td>3</td><td>4</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>大</td><td>大規模修繕工事費用予測</td><td>3</td><td>3</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>管理物件の修繕費用予測</td><td>4</td><td>3</td><td>3</td><td>4</td><td>2</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>月間来店客数予測</td><td>4</td><td>3</td><td>3</td><td>3</td><td>2</td><td>3</td><td><strong>18</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 価格・賃料系予測がアプリに最適合（適合度5が6件）。不動産仲介12万社超という巨大裾野市場。SHAPで「価格を動かす要因」を売主/大家に説明できる点が最大の差別化。</p>
+<hr>
+<h3 id="8-保険業10件">8. 保険業（10件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>小</td><td>顧客あたり年間手数料収入予測</td><td>4</td><td>4</td><td>4</td><td>4</td><td>3</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>中</td><td>医療保険の入院日数予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>自動車保険の保険金支払額予測</td><td>3</td><td>5</td><td>4</td><td>1</td><td>5</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>生命保険の給付金請求額予測</td><td>3</td><td>4</td><td>4</td><td>2</td><td>5</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>小</td><td>追加提案による単価アップ額予測</td><td>4</td><td>3</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>共済掛金の適正水準予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>大</td><td>自然災害損害額予測</td><td>3</td><td>5</td><td>3</td><td>1</td><td>5</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>大</td><td>保険料収入予測</td><td>3</td><td>3</td><td>4</td><td>2</td><td>4</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>中</td><td>自動車保険の解約率予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>3</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>小</td><td>月間保険金請求件数予測</td><td>3</td><td>3</td><td>3</td><td>3</td><td>2</td><td>3</td><td><strong>17</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 保険代理店15万店がボリュームゾーン。大手保険はRMS/WTW等の既存ベンダーが支配的。アクチュアリー不在の中小向けにSHAP説明が有効。</p>
+<hr>
+<h3 id="9-hr人事-全業種横断11件">9. HR（人事）— 全業種横断（11件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>中</td><td><strong>残業時間予測（労務リスク管理）</strong></td><td>4</td><td>5</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>大</td><td>年間人件費予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>中</td><td>中途採用の採用単価予測</td><td>3</td><td>4</td><td>4</td><td>4</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>小</td><td>営業担当の月間売上貢献額予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>エンゲージメントスコア予測</td><td>4</td><td>3</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>21</strong></td></tr>
+<tr><td>大</td><td>離職リスクスコア予測</td><td>4</td><td>5</td><td>4</td><td>2</td><td>4</td><td>2</td><td><strong>21</strong></td></tr>
+<tr><td>小</td><td>求人応募数予測</td><td>3</td><td>3</td><td>3</td><td>4</td><td>2</td><td>5</td><td><strong>20</strong></td></tr>
+<tr><td>大</td><td>内定承諾確度スコア予測</td><td>3</td><td>4</td><td>3</td><td>3</td><td>3</td><td>2</td><td><strong>18</strong></td></tr>
+<tr><td>中</td><td>研修効果スコア予測</td><td>2</td><td>2</td><td>3</td><td>4</td><td>2</td><td>4</td><td><strong>17</strong></td></tr>
+<tr><td>大</td><td>昇格試験合格点予測</td><td>2</td><td>2</td><td>3</td><td>4</td><td>2</td><td>4</td><td><strong>17</strong></td></tr>
+<tr><td>小</td><td>新入社員のパフォーマンス予測</td><td>2</td><td>3</td><td>2</td><td>4</td><td>2</td><td>3</td><td><strong>16</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 残業時間予測は法的リスク（36協定違反）＋データ入手性＋回帰適合度のすべてが最高スコア。離職予測はペインは深いが分類問題のため適合度が下がる。</p>
+<hr>
+<h3 id="10-医療ヘルスケア8件">10. 医療・ヘルスケア（8件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td>患者の入院日数予測</td><td>3</td><td>5</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>大</td><td>看護必要度スコア予測</td><td>3</td><td>5</td><td>3</td><td>4</td><td>4</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>大</td><td>患者あたり診療収入予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>中小</td><td>月間レセプト件数予測</td><td>3</td><td>3</td><td>5</td><td>4</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>中小</td><td>処方箋受付枚数予測</td><td>3</td><td>3</td><td>5</td><td>4</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>外来患者数の日次予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>医療機器の故障間隔予測</td><td>2</td><td>4</td><td>3</td><td>3</td><td>4</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>中小</td><td>患者の再来院間隔予測</td><td>2</td><td>3</td><td>3</td><td>4</td><td>2</td><td>4</td><td><strong>18</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: DPC制度下の入院日数管理、看護必要度管理は病院経営の根幹。レセプトデータの電子化率が高くデータ入手性は良好だが、個人情報保護への配慮が必須。</p>
+<hr>
+<h3 id="11-教育業界7件">11. 教育業界（7件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>中小</td><td>次回模試偏差値予測</td><td>3</td><td>4</td><td>5</td><td>3</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>入学辞退率予測（歩留まり管理）</td><td>3</td><td>5</td><td>4</td><td>3</td><td>4</td><td>3</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>中退リスクスコア予測</td><td>3</td><td>5</td><td>4</td><td>3</td><td>4</td><td>3</td><td><strong>22</strong></td></tr>
+<tr><td>中小</td><td>退塾リスクスコア予測</td><td>3</td><td>5</td><td>4</td><td>3</td><td>4</td><td>2</td><td><strong>21</strong></td></tr>
+<tr><td>中小</td><td>合格可能性スコア予測</td><td>3</td><td>4</td><td>5</td><td>3</td><td>3</td><td>3</td><td><strong>21</strong></td></tr>
+<tr><td>大</td><td>学生の最終GPA予測</td><td>2</td><td>3</td><td>4</td><td>4</td><td>2</td><td>5</td><td><strong>20</strong></td></tr>
+<tr><td>大</td><td>就職決定までの所要月数予測</td><td>2</td><td>3</td><td>3</td><td>4</td><td>2</td><td>5</td><td><strong>19</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 学習塾の偏差値予測はデータ整備度+回帰適合度が最高。中退リスクはペインが深いが分類問題が本質。意思決定が遅い教育機関ではフリーミアム戦略が有効。</p>
+<hr>
+<h3 id="12-saasit企業9件">12. SaaS・IT企業（9件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td><strong>MRR予測</strong></td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>大</td><td>アップセル金額予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>中</td><td>CAC（顧客獲得コスト）予測</td><td>3</td><td>4</td><td>4</td><td>4</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>サポートチケット解決時間予測</td><td>3</td><td>3</td><td>5</td><td>3</td><td>3</td><td>5</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>顧客チャーン予測</td><td>4</td><td>5</td><td>4</td><td>2</td><td>5</td><td>2</td><td><strong>22</strong></td></tr>
+<tr><td>中</td><td>開発工数見積もり予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>3</td><td>5</td><td><strong>22</strong></td></tr>
+<tr><td>大</td><td>リード→商談化の日数予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>月次問い合わせ件数予測</td><td>3</td><td>3</td><td>5</td><td>3</td><td>2</td><td>5</td><td><strong>21</strong></td></tr>
+<tr><td>中</td><td>フリートライアル有料転換スコア</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>2</td><td><strong>20</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: MRR・アップセル金額等の「金額系」は回帰に完璧フィット。SaaS企業はデータリテラシーが高くPLG（Product-Led Growth）戦略が最も有効。チャーン予測は分類問題のため適合度低。</p>
+<hr>
+<h3 id="13-マーケティング部門8件">13. マーケティング部門（8件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大</td><td>キャンペーン応募数/来場者数予測</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>中小</td><td>ECサイト月次売上予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>3</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>大</td><td>TV CM売上リフト予測</td><td>4</td><td>5</td><td>3</td><td>3</td><td>5</td><td>3</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>CRM施策ごとのLTV予測</td><td>4</td><td>4</td><td>4</td><td>3</td><td>4</td><td>4</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>新商品ローンチ初月売上予測</td><td>4</td><td>5</td><td>3</td><td>3</td><td>5</td><td>3</td><td><strong>23</strong></td></tr>
+<tr><td>大</td><td>デジタル広告CPA予測</td><td>4</td><td>4</td><td>5</td><td>2</td><td>4</td><td>4</td><td><strong>23</strong></td></tr>
+<tr><td>中小</td><td>Google広告CV数予測</td><td>4</td><td>4</td><td>5</td><td>2</td><td>3</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>中小</td><td>SNS投稿エンゲージメント率予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>2</td><td>4</td><td><strong>19</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 専用ツールがないキャンペーン応募数予測がダークホース。デジタル広告系はデータ入手性が高いがGoogle/Meta自身のAIが強力な無料競合。</p>
+<hr>
+<h3 id="14-広告代理店8件">14. 広告代理店（8件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>中小</td><td>リスティング広告月次CV数予測</td><td>4</td><td>4</td><td>5</td><td>2</td><td>3</td><td>5</td><td><strong>23</strong></td></tr>
+<tr><td>大手</td><td>メディアプランの売上インパクト</td><td>3</td><td>5</td><td>3</td><td>3</td><td>5</td><td>3</td><td><strong>22</strong></td></tr>
+<tr><td>大手</td><td>クライアント広告予算配分最適化</td><td>3</td><td>5</td><td>3</td><td>3</td><td>5</td><td>3</td><td><strong>22</strong></td></tr>
+<tr><td>大手</td><td>インフルエンサーマーケROI予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>4</td><td>4</td><td><strong>22</strong></td></tr>
+<tr><td>中小</td><td>コンペ受注金額予測</td><td>3</td><td>3</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>中小</td><td>SEOコンテンツの検索流入数予測</td><td>3</td><td>3</td><td>4</td><td>3</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>中小</td><td>SNS広告のCPE予測</td><td>3</td><td>3</td><td>5</td><td>2</td><td>2</td><td>4</td><td><strong>19</strong></td></tr>
+<tr><td>大手</td><td>クリエイティブ効果の事前スコアリング</td><td>3</td><td>4</td><td>2</td><td>3</td><td>4</td><td>2</td><td><strong>18</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 中小代理店向けのリスティング広告CV予測が最も現実的。「クライアントへの未来予測レポート」としてSHAP可視化を提案書に組み込める点が差別化。</p>
+<hr>
+<h3 id="15-コンサルティング8件">15. コンサルティング（8件）</h3>
+<div class="table-wrap"><table>
+<tr><th>規模</th><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>大手</td><td>間接費の適正水準予測</td><td>3</td><td>4</td><td>4</td><td>4</td><td>5</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>中小</td><td>クライアント離職率予測</td><td>4</td><td>5</td><td>4</td><td>3</td><td>4</td><td>4</td><td><strong>24</strong></td></tr>
+<tr><td>中小</td><td>中小企業の売上予測モデル構築</td><td>5</td><td>4</td><td>4</td><td>3</td><td>3</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>大手</td><td>M&amp;A対象企業の企業価値予測</td><td>3</td><td>5</td><td>3</td><td>3</td><td>5</td><td>3</td><td><strong>22</strong></td></tr>
+<tr><td>中小</td><td>業務処理時間予測</td><td>3</td><td>3</td><td>3</td><td>4</td><td>3</td><td>5</td><td><strong>21</strong></td></tr>
+<tr><td>大手</td><td>DXプロジェクトROI予測</td><td>3</td><td>4</td><td>2</td><td>4</td><td>4</td><td>3</td><td><strong>20</strong></td></tr>
+<tr><td>中小</td><td>補助金採択金額予測</td><td>3</td><td>3</td><td>3</td><td>4</td><td>3</td><td>4</td><td><strong>20</strong></td></tr>
+<tr><td>大手</td><td>新規事業の市場規模予測</td><td>3</td><td>4</td><td>2</td><td>3</td><td>5</td><td>2</td><td><strong>19</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: コンサルはアプリの「利用者」であり「再販者」にもなれる。ホワイトラベル/OEM提供で拡散効果が大きい。間接費予測はデータが揃いやすく回帰に完璧フィット。</p>
+<hr>
+<h3 id="16-農業3件">16. 農業（3件）</h3>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>農産物の市場出荷価格予測</td><td>3</td><td>5</td><td>4</td><td>4</td><td>3</td><td>5</td><td><strong>24</strong></td></tr>
+<tr><td>飼料効率（FCR）予測</td><td>2</td><td>4</td><td>3</td><td>4</td><td>3</td><td>5</td><td><strong>21</strong></td></tr>
+<tr><td>農作物の収穫量予測</td><td>3</td><td>4</td><td>3</td><td>4</td><td>2</td><td>4</td><td><strong>20</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 出荷価格予測は農家の収入に直結し高スコア。JAや自治体との連携が販路の鍵。</p>
+<hr>
+<h3 id="17-エネルギー3件">17. エネルギー（3件）</h3>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td>太陽光発電の発電量予測</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>電力需要予測（施設向け）</td><td>4</td><td>4</td><td>5</td><td>3</td><td>4</td><td>5</td><td><strong>25</strong></td></tr>
+<tr><td>電力小売のチャーンレート予測</td><td>3</td><td>4</td><td>4</td><td>3</td><td>4</td><td>4</td><td><strong>22</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: IoT/スマートメーターでデータ整備済み。FIT→FIP移行で予測精度が収益に直結し課金意欲が高い。</p>
+<hr>
+<h3 id="18-建設3件">18. 建設（3件）</h3>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>市場</th><th>ペイン</th><th>データ</th><th>競合</th><th>課金</th><th>適合</th><th><strong>合計</strong></th></tr>
+<tr><td><strong>工事実行予算（工事原価）予測</strong></td><td>4</td><td>5</td><td>4</td><td>4</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td><strong>工期遅延日数予測</strong></td><td>4</td><td>5</td><td>3</td><td>5</td><td>4</td><td>5</td><td><strong>26</strong></td></tr>
+<tr><td>不動産賃料予測</td><td>4</td><td>4</td><td>5</td><td>2</td><td>4</td><td>5</td><td><strong>24</strong></td></tr>
+</table></div>
+<p><strong>傾向</strong>: 工期遅延予測は競合優位性5（代替ツール皆無）で独壇場。建設会社47万社という巨大市場。</p>
+<hr>
+<h2 id="横断分析">横断分析</h2>
+<h3 id="評価軸別のヒートマップ業界別平均スコア">評価軸別のヒートマップ（業界別平均スコア）</h3>
+<div class="table-wrap"><table>
+<tr><th>業界</th><th>市場規模</th><th>ペイン</th><th>データ</th><th>競合優位</th><th>課金意欲</th><th>適合度</th><th><strong>平均</strong></th></tr>
+<tr><td>EC</td><td>3.5</td><td>3.7</td><td>4.2</td><td>3.0</td><td>3.9</td><td>4.0</td><td><strong>3.7</strong></td></tr>
+<tr><td>建設</td><td>4.0</td><td>4.7</td><td>4.0</td><td>3.7</td><td>4.0</td><td>5.0</td><td><strong>4.2</strong></td></tr>
+<tr><td>エネルギー</td><td>3.7</td><td>4.0</td><td>4.7</td><td>3.0</td><td>4.0</td><td>4.7</td><td><strong>4.0</strong></td></tr>
+<tr><td>不動産</td><td>3.6</td><td>3.9</td><td>3.5</td><td>3.5</td><td>3.2</td><td>4.6</td><td><strong>3.7</strong></td></tr>
+<tr><td>物流</td><td>3.4</td><td>4.2</td><td>3.5</td><td>3.4</td><td>3.4</td><td>4.2</td><td><strong>3.7</strong></td></tr>
+<tr><td>製造</td><td>4.0</td><td>4.3</td><td>3.7</td><td>3.2</td><td>3.7</td><td>4.2</td><td><strong>3.9</strong></td></tr>
+<tr><td>SaaS</td><td>3.3</td><td>3.8</td><td>4.2</td><td>3.1</td><td>3.4</td><td>4.4</td><td><strong>3.7</strong></td></tr>
+<tr><td>HR</td><td>3.1</td><td>3.6</td><td>3.7</td><td>3.2</td><td>2.9</td><td>4.1</td><td><strong>3.4</strong></td></tr>
+<tr><td>医療</td><td>2.8</td><td>3.9</td><td>3.9</td><td>3.5</td><td>3.3</td><td>4.8</td><td><strong>3.7</strong></td></tr>
+</table></div>
+<h3 id="アプリ適合度が最も高いユースケースの共通パターン">アプリ適合度が最も高いユースケースの共通パターン</h3>
+<p>適合度5（完璧にフィット）のユースケースに共通する3条件：</p>
+<ul>
+<li><strong>予測対象が連続値の金額・数量・日数・率</strong>（見積金額、歩留まり率、空室日数、MRR、発電量等）</li>
+<li><strong>特徴量が表形式でExcel/CSVに既存</strong>（加工条件、物件属性、顧客属性、気象データ等）</li>
+<li><strong>SHAP解析の実務的価値が明確</strong>（コスト増要因、価格決定因子、遅延リスク要因の可視化）</li>
+</ul>
+<h3 id="分類問題との適合度ギャップ">分類問題との適合度ギャップ</h3>
+<p>以下の高ペインユースケースは、分類モデル追加で大幅にアドレス可能市場が拡大：</p>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>現在の適合度</th><th>分類追加後の想定適合度</th></tr>
+<tr><td>離職リスク予測</td><td>2</td><td>5</td></tr>
+<tr><td>チャーン予測</td><td>2</td><td>5</td></tr>
+<tr><td>内定承諾確度予測</td><td>2</td><td>5</td></tr>
+<tr><td>退塾リスク予測</td><td>2</td><td>5</td></tr>
+<tr><td>フリートライアル有料転換</td><td>2</td><td>5</td></tr>
+</table></div>
+<hr>
+<h2 id="業界特有の注意点サマリー">業界特有の注意点サマリー</h2>
+<h3 id="規制コンプライアンス要件">規制・コンプライアンス要件</h3>
+<div class="table-wrap"><table>
+<tr><th>業界</th><th>主な規制・注意点</th></tr>
+<tr><td>金融</td><td>金融庁モデルリスク管理原則、FISC安全対策基準、個人情報保護</td></tr>
+<tr><td>保険</td><td>保険業法アクチュアリー要件、保険料率算出機構との関係</td></tr>
+<tr><td>医療</td><td>要配慮個人情報、院内ネットワーク制限</td></tr>
+<tr><td>不動産</td><td>宅建業法の重要事項説明との整合性、不動産鑑定評価基準</td></tr>
+<tr><td>建設</td><td>データのオンプレミス要件（大手ゼネコン）</td></tr>
+</table></div>
+<h3 id="データセキュリティへの配慮">データセキュリティへの配慮</h3>
+<p>全業界共通で<strong>ローカル実行の訴求</strong>が差別化ポイント。特に金融・医療・建設は顧客データのクラウド送信に強い抵抗がある。Streamlitアプリのローカル実行可能性は規制産業向けの最大の武器。</p>
+<hr>
+<h2 id="価格帯の示唆">価格帯の示唆</h2>
+<div class="table-wrap"><table>
+<tr><th>ターゲット</th><th>推奨月額</th><th>根拠</th></tr>
+<tr><td>小規模事業者（個人店、町工場等）</td><td>5,000-10,000円</td><td>IT投資への抵抗感が強い。フリーミアム必須</td></tr>
+<tr><td>中小企業（製造・物流・不動産等）</td><td>30,000-50,000円</td><td>部門予算で即決可能なレンジ</td></tr>
+<tr><td>大企業・大手コンサル</td><td>100,000-300,000円/月（年間契約）</td><td>PoC→本契約の段階的導入</td></tr>
+<tr><td>ホワイトラベル/OEM（コンサル向け）</td><td>従量課金 or レベニューシェア</td><td>コンサルの再販モデルに適合</td></tr>
+</table></div>
+<hr>
+<h2 id="製品ロードマップへの示唆">製品ロードマップへの示唆</h2>
+<h3 id="短期0-6ヶ月-既存機能で攻めるべきユースケース">短期（0-6ヶ月）: 既存機能で攻めるべきユースケース</h3>
+<ul>
+<li>回帰予測+SHAP解析が完璧にフィットする26点ユースケース群</li>
+</ul>
+<h3 id="中期6-12ヶ月-機能拡張で拡大">中期（6-12ヶ月）: 機能拡張で拡大</h3>
+<ul>
+<li><strong>分類モデルの追加</strong> — 離職/チャーン/退塾等の高ペイン市場がアンロック</li>
+<li><strong>時系列対応の強化</strong> — 来客数/日次売上等のラグ特徴量自動生成</li>
+<li><strong>業界別テンプレート</strong> — 推奨カラム名、サンプルデータ、解釈ガイド</li>
+</ul>
+<h3 id="長期12ヶ月以降">長期（12ヶ月以降）</h3>
+<ul>
+<li>SHAP可視化のPDF/PowerPointレポート出力（コンサル業界キラーフィーチャー）</li>
+<li>APIベースの自動バッチ予測（定期実行ニーズ対応）</li>
+<li>マルチモデル比較機能</li>
+</ul>
+<hr>
+<blockquote>次のステップ: Step 3では、本スコアリング結果をもとに優先順位付けを行い、最も攻めるべき業界・ユースケースの組み合わせを決定する。</blockquote>
+</section>
+<section id="step3_prioritization" class="doc-section" style="display:none"><h1 id="step-3-優先順位付け--最終統合レポート">Step 3: 優先順位付け — 最終統合レポート</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-07</blockquote>
+<hr>
+<h2 id="分析手法">分析手法</h2>
+<p>3つの専門AIエージェントチームが独立して分析し、結果を統合した。</p>
+<div class="table-wrap"><table>
+<tr><th>チーム</th><th>分析内容</th><th>追加評価軸</th></tr>
+<tr><td><strong>GTM戦略チーム</strong></td><td>Go-to-Market速度、顧客獲得容易性、横展開ポテンシャル</td><td>3軸（各1-5点）</td></tr>
+<tr><td><strong>リスク分析チーム</strong></td><td>規制、プライバシー、ベンダーロック、データ品質、期待値管理、サポートコスト、価格感度、景気感応度</td><td>8軸（各1-5点、5=低リスク）</td></tr>
+<tr><td><strong>ポートフォリオ戦略チーム</strong></td><td>集中vs分散戦略、フェーズ別計画、ビジネスモデル、やらない判断</td><td>定性分析</td></tr>
+</table></div>
+<hr>
+<h2 id="最終統合ランキング">最終統合ランキング</h2>
+<h3 id="全軸統合スコアstep-2-30点--gtm-15点--リスク-40点--85点満点">全軸統合スコア（Step 2 30点 + GTM 15点 + リスク 40点 = 85点満点）</h3>
+<div class="table-wrap"><table>
+<tr><th>最終順位</th><th>業界</th><th>規模</th><th>ユースケース</th><th>Step2</th><th>GTM計</th><th>リスク計</th><th><strong>統合</strong></th></tr>
+<tr><td><strong>1</strong></td><td>物流</td><td>中</td><td>荷主からの受注物量予測</td><td>26</td><td>13</td><td>31</td><td><strong>70</strong></td></tr>
+<tr><td><strong>2</strong></td><td>製造</td><td>小</td><td>見積もり金額の精緻化</td><td>26</td><td>12</td><td>30</td><td><strong>68</strong></td></tr>
+<tr><td><strong>3</strong></td><td>EC</td><td>大</td><td>返品率予測</td><td>25</td><td>13</td><td>28</td><td><strong>66</strong></td></tr>
+<tr><td><strong>3</strong></td><td>物流</td><td>小</td><td>顧客別の運賃適正価格予測</td><td>25</td><td>13</td><td>27</td><td><strong>65</strong></td></tr>
+<tr><td><strong>5</strong></td><td>製造</td><td>中</td><td>製品リードタイム予測</td><td>25</td><td>11</td><td>29</td><td><strong>65</strong></td></tr>
+<tr><td><strong>6</strong></td><td>EC</td><td>大</td><td>商品別販売数量予測</td><td>26</td><td>13</td><td>27</td><td><strong>66</strong></td></tr>
+<tr><td><strong>7</strong></td><td>HR</td><td>中</td><td>残業時間予測（労務リスク管理）</td><td>26</td><td>13</td><td>23</td><td><strong>62</strong></td></tr>
+<tr><td><strong>7</strong></td><td>エネルギー</td><td>-</td><td>太陽光発電の発電量予測</td><td>25</td><td>12</td><td>28</td><td><strong>65</strong></td></tr>
+<tr><td><strong>9</strong></td><td>EC</td><td>大</td><td>顧客LTV予測</td><td>26</td><td>13</td><td>23</td><td><strong>62</strong></td></tr>
+<tr><td><strong>9</strong></td><td>SaaS</td><td>大</td><td>MRR予測</td><td>25</td><td>13</td><td>27</td><td><strong>65</strong></td></tr>
+<tr><td><strong>11</strong></td><td>不動産</td><td>中</td><td>賃貸物件の空室期間予測</td><td>26</td><td>12</td><td>24</td><td><strong>62</strong></td></tr>
+<tr><td><strong>12</strong></td><td>製造</td><td>中</td><td>加工条件最適化（歩留まり予測）</td><td>26</td><td>10</td><td>25</td><td><strong>61</strong></td></tr>
+<tr><td><strong>13</strong></td><td>小売</td><td>大</td><td>商品別の需要予測</td><td>25</td><td>13</td><td>24</td><td><strong>62</strong></td></tr>
+<tr><td><strong>14</strong></td><td>建設</td><td>-</td><td>工事実行予算予測</td><td>26</td><td>11</td><td>24</td><td><strong>61</strong></td></tr>
+<tr><td><strong>14</strong></td><td>物流</td><td>大</td><td>倉庫作業員の必要人数予測</td><td>25</td><td>11</td><td>26</td><td><strong>62</strong></td></tr>
+<tr><td><strong>16</strong></td><td>建設</td><td>-</td><td>工期遅延日数予測</td><td>26</td><td>10</td><td>23</td><td><strong>59</strong></td></tr>
+<tr><td><strong>17</strong></td><td>コンサル</td><td>大手</td><td>間接費の適正水準予測</td><td>25</td><td>8</td><td>26</td><td><strong>59</strong></td></tr>
+<tr><td><strong>18</strong></td><td>HR</td><td>大</td><td>年間人件費予測</td><td>25</td><td>10</td><td>22</td><td><strong>57</strong></td></tr>
+<tr><td><strong>19</strong></td><td>エネルギー</td><td>-</td><td>電力需要予測</td><td>25</td><td>9</td><td>23</td><td><strong>57</strong></td></tr>
+<tr><td><strong>20</strong></td><td>製造</td><td>大</td><td>製品品質予測（不良率予測）</td><td>25</td><td>10</td><td>21</td><td><strong>56</strong></td></tr>
+</table></div>
+<hr>
+<h2 id="tier分類">Tier分類</h2>
+<h3 id="tier-1-即座に着手gtm速度4以上--低リスク--統合スコア上位">Tier 1: 即座に着手（GTM速度4以上 × 低リスク × 統合スコア上位）</h3>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>統合点</th><th>GTM速度</th><th>最大の強み</th></tr>
+<tr><td><strong>物流（中）: 受注物量予測</strong></td><td>70</td><td>4</td><td>規制・プライバシーリスク最低。業界組合で横展開</td></tr>
+<tr><td><strong>製造（小）: 見積もり精緻化</strong></td><td>68</td><td>5</td><td>今日から販売可能。Excel見積もりデータで即価値</td></tr>
+<tr><td><strong>EC（大）: 返品率予測</strong></td><td>66</td><td>5</td><td>データ入手性最高。商品軸分析で個人情報回避</td></tr>
+<tr><td><strong>EC（大）: 販売数量予測</strong></td><td>66</td><td>5</td><td>市場規模最大。EC系メディアで事例拡散容易</td></tr>
+<tr><td><strong>物流（小）: 運賃適正価格予測</strong></td><td>65</td><td>5</td><td>2024年問題で業界全体の関心事。トラック協会経由</td></tr>
+<tr><td><strong>製造（中）: リードタイム予測</strong></td><td>65</td><td>4</td><td>データ構造が単純。見積もりの既存顧客にクロスセル</td></tr>
+<tr><td><strong>SaaS（大）: MRR予測</strong></td><td>65</td><td>5</td><td>初期顧客獲得が最も容易。SaaSコミュニティが活発</td></tr>
+</table></div>
+<h3 id="tier-2-3-6ヶ月後に着手gtm速度3-or-中リスク">Tier 2: 3-6ヶ月後に着手（GTM速度3 or 中リスク）</h3>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>統合点</th><th>ボトルネック</th></tr>
+<tr><td>エネルギー: 太陽光発電量予測</td><td>65</td><td>気象データ連携が必要</td></tr>
+<tr><td>不動産（中）: 空室期間予測</td><td>62</td><td>不動産法規への配慮</td></tr>
+<tr><td>HR（中）: 残業時間予測</td><td>62</td><td>従業員データのプライバシー（最大課題）</td></tr>
+<tr><td>小売（大）: 需要予測</td><td>62</td><td>既存POS/ERPベンダーとの競合</td></tr>
+<tr><td>建設: 工事実行予算予測</td><td>61</td><td>データ構造化に支援が必要</td></tr>
+<tr><td>製造（中）: 加工条件最適化</td><td>61</td><td>IoTデータ整備が前提</td></tr>
+</table></div>
+<h3 id="tier-3-機能拡張後に着手">Tier 3: 機能拡張後に着手</h3>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>統合点</th><th>必要な拡張</th></tr>
+<tr><td>建設: 工期遅延日数予測</td><td>59</td><td>信頼区間表示、外的要因対応</td></tr>
+<tr><td>コンサル（大手）: 間接費予測</td><td>59</td><td>レポート自動生成、ホワイトラベル</td></tr>
+<tr><td>HR（大）: 年間人件費予測</td><td>57</td><td>匿名化設計、オンプレ対応</td></tr>
+<tr><td>エネルギー: 電力需要予測</td><td>57</td><td>外部API連携</td></tr>
+<tr><td>製造（大）: 品質予測</td><td>56</td><td>ISO整合性、センサーデータ統合</td></tr>
+</table></div>
+<hr>
+<h2 id="推奨戦略製造業集中--建設へ隣接展開">推奨戦略：「製造業集中 → 建設へ隣接展開」</h2>
+<h3 id="戦略選択の根拠">戦略選択の根拠</h3>
+<p>3チームの分析結果を統合した結果、<strong>「1業界集中 + 隣接展開」のハイブリッド戦略</strong>を推奨。</p>
+<div class="table-wrap"><table>
+<tr><th>評価軸</th><th>製造（中小）</th><th>建設</th><th>EC大手</th><th>不動産</th></tr>
+<tr><td>競合強度</td><td>低〜中</td><td><strong>極低（代替皆無）</strong></td><td><strong>高</strong></td><td>中</td></tr>
+<tr><td>意思決定速度</td><td><strong>速い</strong></td><td>やや遅い</td><td>遅い（稟議）</td><td>速い</td></tr>
+<tr><td>データ準備度</td><td><strong>Excel既存</strong></td><td>やや低い</td><td>高い</td><td>中</td></tr>
+<tr><td>SHAP価値</td><td><strong>極めて高い</strong></td><td>高い</td><td>中</td><td>中</td></tr>
+<tr><td>プライバシーリスク</td><td><strong>低い</strong></td><td><strong>低い</strong></td><td>中</td><td>中</td></tr>
+<tr><td>単価許容度</td><td>月3-10万</td><td>月5-20万</td><td>月20万〜</td><td>月3-10万</td></tr>
+</table></div>
+<p><strong>最も重要な判断：EC大手・小売大手・エネルギーは当面やらない。</strong> 大企業向け・専門領域は競合が強く営業サイクルが長い。製造・建設という「DXが最も遅れている × 代替ツールがない × Excelデータが眠っている」セグメントにリソースを集中。</p>
+<hr>
+<h2 id="フェーズ別実行計画">フェーズ別実行計画</h2>
+<h3 id="フェーズ10-6ヶ月製造業で刺す">フェーズ1（0-6ヶ月）：「製造業で刺す」</h3>
+<h4 id="注力ユースケース">注力ユースケース</h4>
+<div class="table-wrap"><table>
+<tr><th>優先度</th><th>ユースケース</th><th>理由</th></tr>
+<tr><td><strong>1st</strong></td><td>製造（小）: 見積もり金額の精緻化</td><td>最もペイン明確。Excel見積台帳→即価値実感</td></tr>
+<tr><td><strong>2nd</strong></td><td>製造（中）: 加工条件最適化（歩留まり予測）</td><td>SHAPの威力最大。「この温度が歩留まり3%落としている」</td></tr>
+<tr><td><strong>3rd</strong></td><td>製造（中）: リードタイム予測</td><td>上記2つの顧客に追加提案可能。追加開発ほぼ不要</td></tr>
+</table></div>
+<h4 id="ターゲットペルソナ">ターゲットペルソナ</h4>
+<pre><code>企業像 ：従業員30〜300名の金属加工・樹脂成形・組立製造業
+地域   ：首都圏・中京圏（大田区、東大阪、名古屋周辺）
+売上   ：5億〜100億円
+課題   ：熟練者の経験頼みの見積もり、属人化、後継者不足
+担当者 ：工場長、生産管理部長、または社長直轄
+決裁者 ：社長（中小なので社長決裁が多い）
+ITリテラシー：Excelは使える。BIツールは未導入
+</code></pre>
+<h4 id="最初の1社獲得戦略">最初の1社獲得戦略</h4>
+<div class="table-wrap"><table>
+<tr><th>チャネル</th><th>具体的アクション</th></tr>
+<tr><td>商工会議所</td><td>IT支援員と関係構築→紹介→過去見積もりデータ（Excel）で無料デモ</td></tr>
+<tr><td>ものづくり補助金</td><td>補助金申請と絡めた提案。「DX投資に補助金が使える」</td></tr>
+<tr><td>業界メディア</td><td>MONOist/日刊工業新聞に事例記事を寄稿</td></tr>
+</table></div>
+<h4 id="kpi">KPI</h4>
+<div class="table-wrap"><table>
+<tr><th>指標</th><th>目標値</th></tr>
+<tr><td>有料顧客数</td><td><strong>5社</strong></td></tr>
+<tr><td>MRR</td><td><strong>25〜50万円</strong></td></tr>
+<tr><td>NPS</td><td><strong>40以上</strong></td></tr>
+<tr><td>PoC→有料転換率</td><td><strong>50%以上</strong></td></tr>
+<tr><td>月次チャーン率</td><td><strong>5%以下</strong></td></tr>
+</table></div>
+<h4 id="必要な機能追加">必要な機能追加</h4>
+<div class="table-wrap"><table>
+<tr><th>機能</th><th>優先度</th><th>工数</th></tr>
+<tr><td>PDF/CSVレポート出力</td><td>高</td><td>2週間</td></tr>
+<tr><td>カラム名の日本語対応強化</td><td>高</td><td>1週間</td></tr>
+<tr><td>見積もり予測用テンプレート</td><td>中</td><td>2週間</td></tr>
+<tr><td>データバリデーション強化</td><td>中</td><td>1週間</td></tr>
+</table></div>
+<h4 id="マイルストーン">マイルストーン</h4>
+<ul>
+<li>[ ] 有料契約5社達成（うち3社が自発リピート利用）</li>
+<li>[ ] 導入事例2社分を公開可能な状態で取得</li>
+<li>[ ] 見積もり精緻化の「勝ちパターン」（営業資料・PoC手順）確立</li>
+<li>[ ] チャーン率5%以下を3ヶ月連続</li>
+</ul>
+<hr>
+<h3 id="フェーズ26-12ヶ月建設に隣接展開--製造を深掘り">フェーズ2（6-12ヶ月）：「建設に隣接展開 + 製造を深掘り」</h3>
+<h4 id="注力ユースケース">注力ユースケース</h4>
+<div class="table-wrap"><table>
+<tr><th>優先度</th><th>ユースケース</th><th>理由</th></tr>
+<tr><td><strong>1st</strong></td><td>建設: 工事原価予測</td><td>競合皆無。見積もり精緻化と構造が酷似し営業トーク転用可能</td></tr>
+<tr><td><strong>2nd</strong></td><td>建設: 工期遅延日数予測</td><td>同じ顧客にクロスセル。i-Construction推進が追い風</td></tr>
+<tr><td><strong>3rd</strong></td><td>製造（大）: 品質予測</td><td>フェーズ1の中小製造の事例を武器に大手へ上位展開</td></tr>
+</table></div>
+<h4 id="ターゲットペルソナ建設向け">ターゲットペルソナ（建設向け）</h4>
+<pre><code>企業像 ：年間完工高10億〜500億の中堅ゼネコン・サブコン
+担当者 ：工事部長、積算部門の責任者
+課題   ：過去工事実績データ（Excel）はあるが分析していない
+決裁者 ：取締役・事業部長クラス
+</code></pre>
+<h4 id="kpi">KPI</h4>
+<div class="table-wrap"><table>
+<tr><th>指標</th><th>目標値</th></tr>
+<tr><td>有料顧客数</td><td><strong>15社</strong>（製造10社 + 建設5社）</td></tr>
+<tr><td>MRR</td><td><strong>100〜200万円</strong></td></tr>
+<tr><td>建設業PoCパイプライン</td><td>10社以上</td></tr>
+<tr><td>1社あたり平均利用ユースケース数</td><td>1.5以上</td></tr>
+</table></div>
+<h4 id="必要な機能追加">必要な機能追加</h4>
+<div class="table-wrap"><table>
+<tr><th>機能</th><th>優先度</th><th>工数</th></tr>
+<tr><td>建設用テンプレート</td><td>高</td><td>2週間</td></tr>
+<tr><td>定期バッチ予測</td><td>高</td><td>3週間</td></tr>
+<tr><td>複数モデル保存・比較</td><td>中</td><td>3週間</td></tr>
+<tr><td>マルチテナント対応</td><td>高</td><td>4週間</td></tr>
+</table></div>
+<h4 id="マイルストーン">マイルストーン</h4>
+<ul>
+<li>[ ] MRR 150万円達成</li>
+<li>[ ] 建設業での導入事例3社取得</li>
+<li>[ ] シリーズA / エンジェルラウンド資金調達完了</li>
+</ul>
+<hr>
+<h3 id="フェーズ312-24ヶ月プラットフォーム化--高収益ユースケース">フェーズ3（12-24ヶ月）：「プラットフォーム化 + 高収益ユースケース」</h3>
+<h4 id="注力ユースケース">注力ユースケース</h4>
+<div class="table-wrap"><table>
+<tr><th>優先度</th><th>ユースケース</th><th>理由</th></tr>
+<tr><td><strong>1st</strong></td><td>HR（中）: 残業時間予測</td><td>36協定対応で法的ニーズ。製造・建設の既存顧客にクロスセル可能</td></tr>
+<tr><td><strong>2nd</strong></td><td>物流（中）: 受注物量予測</td><td>製造顧客のサプライチェーン上流・下流に紹介展開</td></tr>
+<tr><td><strong>3rd</strong></td><td>コンサル: 間接費予測</td><td>コンサルを再販チャネルとして活用。OEM提供でスケール</td></tr>
+</table></div>
+<h4 id="kpi">KPI</h4>
+<div class="table-wrap"><table>
+<tr><th>指標</th><th>目標値</th></tr>
+<tr><td>有料顧客数</td><td><strong>50社</strong></td></tr>
+<tr><td>MRR</td><td><strong>500〜800万円</strong></td></tr>
+<tr><td>ARR</td><td><strong>6,000万〜1億円</strong></td></tr>
+<tr><td>コンサル再販パートナー</td><td>2〜3社</td></tr>
+</table></div>
+<h4 id="必要な機能追加">必要な機能追加</h4>
+<div class="table-wrap"><table>
+<tr><th>機能</th><th>優先度</th><th>工数</th></tr>
+<tr><td><strong>分類モデル対応</strong></td><td>最高</td><td>6週間</td></tr>
+<tr><td>ホワイトラベル機能</td><td>高</td><td>4週間</td></tr>
+<tr><td>アラート機能</td><td>高</td><td>3週間</td></tr>
+<tr><td>SSO/SAML対応</td><td>中</td><td>3週間</td></tr>
+</table></div>
+<hr>
+<h2 id="戦略的シナジーマップ">戦略的シナジーマップ</h2>
+<h3 id="同一企業内クロスセル最強のシナジー">同一企業内クロスセル（最強のシナジー）</h3>
+<pre><code>製造業の1社に対して：
+  見積もり金額精緻化 → 歩留まり予測 → リードタイム予測 → 残業時間予測
+  ───────────────────────────────────────────────────
+  営業部門          製造部門       生産管理       人事部門
+
+  ※同じCSVデータソース（生産管理システム出力）を使い回せる
+  ※SHAP解析結果が部門横断の改善会議で共有 → 社内口コミ効果
+</code></pre>
+<h3 id="パッケージ化案">パッケージ化案</h3>
+<div class="table-wrap"><table>
+<tr><th>パッケージ</th><th>含まれるユースケース</th><th>月額</th></tr>
+<tr><td><strong>製造業DXパック</strong></td><td>見積もり精緻化 + 歩留まり予測 + リードタイム予測</td><td><strong>10万円</strong>（単体計15万円）</td></tr>
+<tr><td><strong>建設プロジェクト管理パック</strong></td><td>工事原価予測 + 工期遅延予測</td><td><strong>12万円</strong></td></tr>
+<tr><td><strong>全社コスト管理パック</strong></td><td>上記 + 残業時間予測</td><td><strong>+3万円</strong></td></tr>
+</table></div>
+<h3 id="サプライチェーン横断シナジー">サプライチェーン横断シナジー</h3>
+<pre><code>製造業（既存顧客）──紹介──→ 物流会社（新規）
+  リードタイム予測              受注物量予測
+  ※紹介経由のCACはほぼゼロ
+</code></pre>
+<h3 id="ltvモデル">LTVモデル</h3>
+<pre><code>月1-3  ：見積もり精緻化で導入（月5万円）
+月4-6  ：歩留まり予測を追加（→月10万円）
+月7-12 ：リードタイム+残業予測を追加（→月13万円）
+月13-24：API連携・カスタムダッシュボード（→月20万円）
+
+LTV = 20万円 × 24ヶ月 × 0.85（チャーン考慮） ≈ 408万円
+CAC目標 = LTVの1/3 ≈ 136万円以下
+</code></pre>
+<hr>
+<h2 id="リスク緩和策-top-5">リスク緩和策 Top 5</h2>
+<div class="table-wrap"><table>
+<tr><th>順位</th><th>施策</th><th>対象リスク</th><th>インパクト</th></tr>
+<tr><td><strong>1</strong></td><td>「データ持ち出し不要」アーキテクチャ（ローカル実行を全面訴求）</td><td>プライバシー</td><td>HR系2件、EC顧客LTVのリスクスコアが各1-2点改善</td></tr>
+<tr><td><strong>2</strong></td><td>業種別データテンプレート + 最小データ要件ガイド</td><td>データ品質・サポートコスト</td><td>初期サポート工数40-50%削減。製造・建設4件のスコア改善</td></tr>
+<tr><td><strong>3</strong></td><td>予測「レンジ提示」と免責フレームワーク標準化</td><td>期待値管理</td><td>工期遅延・品質予測等の外的要因大ユースケースに有効</td></tr>
+<tr><td><strong>4</strong></td><td>「既存システム補完」ポジショニングの明確化</td><td>ベンダーロックイン</td><td>EC・小売・SaaS等の既存BI環境を持つ顧客への参入可能性向上</td></tr>
+<tr><td><strong>5</strong></td><td>業種特化パートナー制度（コンサル・社労士との提携）</td><td>サポートコスト・ドメイン知識</td><td>建設・HR向けの導入支援をパートナーに委託しスケーラブルに</td></tr>
+</table></div>
+<hr>
+<h2 id="ビジネスモデルの推奨">ビジネスモデルの推奨</h2>
+<h3 id="フェーズ別モデル">フェーズ別モデル</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>フェーズ1</th><th>フェーズ2</th><th>フェーズ3</th></tr>
+<tr><td><strong>モデル</strong></td><td>PoC無料 + コンサル型月額</td><td>フリーミアム + SaaS月額</td><td>SaaS月額 + 再販ライセンス</td></tr>
+<tr><td><strong>価格帯</strong></td><td>月額3〜8万円</td><td>月額5〜15万円</td><td>月額5〜20万円</td></tr>
+<tr><td><strong>無料枠</strong></td><td>2週間PoC</td><td>月5回予測まで</td><td>月5回予測まで</td></tr>
+</table></div>
+<h3 id="推奨プラン体系フェーズ2以降">推奨プラン体系（フェーズ2以降）</h3>
+<div class="table-wrap"><table>
+<tr><th>プラン</th><th>月額</th><th>内容</th></tr>
+<tr><td><strong>Free</strong></td><td>0円</td><td>月5回予測、1,000行まで、SHAP無し</td></tr>
+<tr><td><strong>Starter</strong></td><td>5万円</td><td>月50回、10,000行、SHAP有り、PDFレポート</td></tr>
+<tr><td><strong>Pro</strong></td><td>12万円</td><td>無制限、100,000行、複数モデル、定期バッチ</td></tr>
+<tr><td><strong>Enterprise</strong></td><td>20万円〜</td><td>全機能、API、SSO、専任サポート</td></tr>
+</table></div>
+<h3 id="価格根拠">価格根拠</h3>
+<ul>
+<li><strong>月5万円</strong>：中小製造業のIT予算月3-10万円。Excel作業月20h × 人件費3,000円 = 6万円の削減効果</li>
+<li><strong>月12万円</strong>：Tableau(月1万円 × 10ユーザー)との比較で予測機能の付加価値を上乗せ</li>
+</ul>
+<hr>
+<h2 id="やらない判断リスト">「やらない」判断リスト</h2>
+<div class="table-wrap"><table>
+<tr><th>ユースケース</th><th>見送り理由</th><th>再検討タイミング</th></tr>
+<tr><td>EC（大）: 販売数量予測</td><td>Amazon Forecast等の競合が強力。大企業の稟議が6ヶ月超</td><td>ARR 1億円超で大企業営業チーム構築後</td></tr>
+<tr><td>EC（大）: 顧客LTV予測</td><td>CDPベンダー（Treasure Data等）が統合機能として提供</td><td>同上</td></tr>
+<tr><td>EC（大）: 返品率予測</td><td>同上</td><td>同上</td></tr>
+<tr><td>SaaS（大）: MRR予測</td><td>SaaS企業は自社でPython内製する傾向。ノーコードの価値薄い</td><td>PLG戦略でFree層に取り込めた場合</td></tr>
+<tr><td>小売（大）: 需要予測</td><td>日立・NEC等の大手SIerが占有。参入障壁極めて高い</td><td>中小小売にピボットする場合</td></tr>
+<tr><td>エネルギー（2件）</td><td>気象データ連携必須。ドメイン知識の獲得コスト高い</td><td>業界パートナーが見つかった場合</td></tr>
+<tr><td>物流（大）: 倉庫人員予測</td><td>WMS連携が前提。API開発必要</td><td>API機能実装後</td></tr>
+</table></div>
+<p><strong>Top 20のうち8件を見送り、12件に集中</strong> → 開発リソースの70%を製造・建設に投下。</p>
+<hr>
+<h2 id="成功撤退基準">成功/撤退基準</h2>
+<h3 id="フェーズ10-6ヶ月">フェーズ1（0-6ヶ月）</h3>
+<div class="table-wrap"><table>
+<tr><th>判定</th><th>基準</th></tr>
+<tr><td><strong>成功</strong></td><td>有料5社以上 &amp; MRR 25万円以上 &amp; NPS 40以上</td></tr>
+<tr><td><strong>継続（要改善）</strong></td><td>有料3-4社 or MRR 15-25万円</td></tr>
+<tr><td><strong>ピボット検討</strong></td><td>有料2社以下 or MRR 15万円未満 or NPS 20未満</td></tr>
+<tr><td><strong>撤退</strong></td><td>PoC 10社実施して有料転換0社</td></tr>
+</table></div>
+<h4 id="ピボットシグナル">ピボットシグナル</h4>
+<div class="table-wrap"><table>
+<tr><th>シグナル</th><th>ピボット先</th></tr>
+<tr><td>「データが無い」問題が頻発</td><td>データ整備済みのSaaS/EC向けへ</td></tr>
+<tr><td>「Excelで十分」と言われる</td><td>SHAP可視化・レポート機能を強化</td></tr>
+<tr><td>見積もりユースケースが刺さらない</td><td>歩留まり予測（製造現場寄り）にシフト</td></tr>
+<tr><td>IT予算が想定より小さい</td><td>中堅〜大手製造業にターゲット上方シフト</td></tr>
+</table></div>
+<h3 id="フェーズ26-12ヶ月">フェーズ2（6-12ヶ月）</h3>
+<div class="table-wrap"><table>
+<tr><th>判定</th><th>基準</th></tr>
+<tr><td><strong>成功</strong></td><td>15社以上 &amp; MRR 150万円以上 &amp; 建設3社導入</td></tr>
+<tr><td><strong>ピボット検討</strong></td><td>建設PoC 5社→有料転換0社</td></tr>
+<tr><td><strong>撤退基準</strong></td><td>MRR成長率が3ヶ月連続マイナス</td></tr>
+</table></div>
+<h3 id="フェーズ312-24ヶ月">フェーズ3（12-24ヶ月）</h3>
+<div class="table-wrap"><table>
+<tr><th>判定</th><th>基準</th></tr>
+<tr><td><strong>成功</strong></td><td>ARR 8,000万円以上 &amp; 50社 &amp; 再販パートナー2社</td></tr>
+<tr><td><strong>事業モデル再考</strong></td><td>ARR 4,000万円未満 &amp; 成長率鈍化</td></tr>
+</table></div>
+<hr>
+<h2 id="全体戦略のサマリー図">全体戦略のサマリー図</h2>
+<pre><code>時間軸         業界             戦略                    収益
+──────────────────────────────────────────────────────────
+0-6ヶ月    製造（中小）    1業界集中・ハイタッチ     MRR 25-50万
+           ↓ 事例蓄積
+6-12ヶ月   製造＋建設      隣接展開・パッケージ化    MRR 100-200万
+           ↓ 営業標準化
+12-24ヶ月  製造＋建設＋HR  プラットフォーム化        MRR 500-800万
+           ＋コンサル再販  チャネル多角化           ARR 6,000万-1億
+</code></pre>
+<hr>
+<blockquote>次のステップ: Step 4では、フェーズ1の注力ユースケース（製造業 見積もり精緻化・歩留まり予測・リードタイム予測）に対して、マーケティングフレームワークを用いた具体的なアプローチ戦略を策定する。</blockquote>
+</section>
+<section id="step4_marketing_strategy" class="doc-section" style="display:none"><h1 id="step-4-マーケティング戦略フレームワーク--フェーズ106ヶ月">Step 4: マーケティング戦略フレームワーク — フェーズ1（0〜6ヶ月）</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-08</blockquote>
+<blockquote>最優先ユースケース: <strong>製造業（中小）× 見積もり金額の精緻化</strong></blockquote>
+<hr>
+<h2 id="目次">目次</h2>
+<ul>
+<li><a href="#1-stp分析">STP分析</a></li>
+<li><a href="#2-ペルソナ設計">ペルソナ設計</a></li>
+<li><a href="#3-4p4c分析">4P/4C分析</a></li>
+<li><a href="#4-カスタマージャーニー">カスタマージャーニー</a></li>
+<li><a href="#5-コンテンツ戦略">コンテンツ戦略</a></li>
+<li><a href="#6-チャネル戦略">チャネル戦略</a></li>
+<li><a href="#7-kpiダッシュボード">KPIダッシュボード</a></li>
+<li><a href="#8-abテスト計画">ABテスト計画</a></li>
+<li><a href="#9-予算配分">予算配分</a></li>
+</ul>
+<hr>
+<h2 id="1-stp分析">1. STP分析</h2>
+<h3 id="1-1-segmentation市場細分化">1-1. Segmentation（市場細分化）</h3>
+<h4 id="セグメンテーション変数">セグメンテーション変数</h4>
+<div class="table-wrap"><table>
+<tr><th>変数</th><th>分類基準</th><th>セグメント</th></tr>
+<tr><td><strong>業種</strong></td><td>製造業の中分類</td><td>金属加工 / 樹脂成形 / 組立製造 / 精密部品</td></tr>
+<tr><td><strong>企業規模</strong></td><td>従業員数</td><td>小規模（10〜49名） / 中規模（50〜299名）</td></tr>
+<tr><td><strong>IT成熟度</strong></td><td>DX推進状況</td><td>レベル1: Excel中心 / レベル2: 基幹システム導入済 / レベル3: データ活用検討中</td></tr>
+<tr><td><strong>見積もり業務の課題度</strong></td><td>属人化の深刻さ</td><td>高: ベテラン1-2名に依存 / 中: 部門内で共有 / 低: システム化済み</td></tr>
+<tr><td><strong>地域</strong></td><td>製造業集積地</td><td>大田区・東大阪・名古屋・北九州 等</td></tr>
+</table></div>
+<h4 id="有望セグメント特定マトリクス">有望セグメント特定マトリクス</h4>
+<div class="table-wrap"><table>
+<tr><th>セグメント</th><th>市場規模</th><th>課題深刻度</th><th>アクセス容易性</th><th>競合強度</th><th><strong>優先度</strong></th></tr>
+<tr><td>金属加工×小規模×IT レベル1-2</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>樹脂成形×中規模×IT レベル2</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><strong>A</strong></td></tr>
+<tr><td>組立製造×中規模×IT レベル2-3</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span></td><td><strong>B</strong></td></tr>
+<tr><td>精密部品×小規模×IT レベル1</td><td><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span></td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td><strong>B</strong></td></tr>
+</table></div>
+<h3 id="1-2-targetingターゲット選定">1-2. Targeting（ターゲット選定）</h3>
+<p><strong>プライマリターゲット</strong>: 従業員20〜150名の金属加工・樹脂成形メーカー（見積もりがベテラン依存）</p>
+<div class="table-wrap"><table>
+<tr><th>属性</th><th>詳細</th></tr>
+<tr><td>業種</td><td>金属加工（板金・切削・プレス）、樹脂成形（射出成形）</td></tr>
+<tr><td>従業員数</td><td>20〜150名</td></tr>
+<tr><td>売上規模</td><td>3億〜30億円</td></tr>
+<tr><td>見積もり件数</td><td>月50〜300件</td></tr>
+<tr><td>主な課題</td><td>ベテラン依存の見積もり、精度のバラつき、後継者不在</td></tr>
+<tr><td>IT環境</td><td>Excel＋基幹システム。データはあるが活用できていない</td></tr>
+<tr><td>推定ターゲット企業数</td><td>全国約15,000〜20,000社</td></tr>
+</table></div>
+<p><strong>セカンダリターゲット</strong>: 同規模帯の製造業で歩留まり改善・リードタイム短縮に課題を持つ企業</p>
+<h3 id="1-3-positioningポジショニング">1-3. Positioning（ポジショニング）</h3>
+<p><strong>ポジショニングステートメント</strong>:</p>
+<blockquote>見積もりのベテラン依存に悩む中小製造業にとって、本アプリは「いつものExcel/CSVデータをアップロードするだけで、AIが見積もり金額を予測し、その根拠まで可視化する」唯一のノーコードツールです。</blockquote>
+<h4 id="ポジショニングマップ">ポジショニングマップ</h4>
+<pre><code>            高機能・カスタマイズ性
+                    ↑
+                    │
+    DataRobot ●     │     ● 大手SIerの
+    (高価格)        │       カスタム開発
+                    │
+    ────────────────┼────────────────→ 製造業特化
+    汎用BI           │     ★ 本アプリ
+    (Tableau等)     │     (ノーコード×
+                    │      SHAP解釈)
+                    │
+                    │
+            シンプル・即時利用
+</code></pre>
+<p><strong>差別化の3本柱</strong>:</p>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>差別化要素</th><th>競合との違い</th></tr>
+<tr><td>1</td><td><strong>ノーコード・即時利用</strong></td><td>DataRobot等は高額・複雑。本アプリはCSVアップロード→5分で予測</td></tr>
+<tr><td>2</td><td><strong>SHAP解釈可視化</strong></td><td>「なぜその金額か」を可視化。ブラックボックスではない</td></tr>
+<tr><td>3</td><td><strong>製造業特化の価格帯</strong></td><td>月額3〜8万円。中小製造業のIT予算に合致</td></tr>
+</table></div>
+<hr>
+<h2 id="2-ペルソナ設計">2. ペルソナ設計</h2>
+<h3 id="ペルソナ1-意思決定者--田中工場長55歳">ペルソナ1: 意思決定者 — 田中工場長（55歳）</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>詳細</th></tr>
+<tr><td><strong>名前</strong></td><td>田中 誠（仮名）</td></tr>
+<tr><td><strong>役職</strong></td><td>取締役 兼 工場長</td></tr>
+<tr><td><strong>企業</strong></td><td>従業員45名の金属加工メーカー（大田区）</td></tr>
+<tr><td><strong>年齢</strong></td><td>55歳</td></tr>
+<tr><td><strong>ITスキル</strong></td><td>Excel は使える。マクロは分からない</td></tr>
+<tr><td><strong>日常業務</strong></td><td>生産管理、見積もり承認、顧客対応、設備投資判断</td></tr>
+<tr><td><strong>最大の悩み</strong></td><td>見積もりのベテラン（62歳の佐藤さん）があと3年で定年。ノウハウ継承ができていない</td></tr>
+<tr><td><strong>情報収集</strong></td><td>日刊工業新聞、商工会議所の勉強会、同業他社との情報交換</td></tr>
+<tr><td><strong>購買行動</strong></td><td>補助金が使えるなら検討する。同業の導入事例があると安心</td></tr>
+<tr><td><strong>意思決定基準</strong></td><td>① ROIが明確 ② 操作が簡単 ③ 同業の実績 ④ 補助金適用可</td></tr>
+<tr><td><strong>拒否反応ポイント</strong></td><td>「AIは難しそう」「うちにはデータがない」「高そう」</td></tr>
+</table></div>
+<h3 id="ペルソナ2-実務担当者--鈴木主任35歳">ペルソナ2: 実務担当者 — 鈴木主任（35歳）</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>詳細</th></tr>
+<tr><td><strong>名前</strong></td><td>鈴木 健太（仮名）</td></tr>
+<tr><td><strong>役職</strong></td><td>見積もり担当 主任</td></tr>
+<tr><td><strong>企業</strong></td><td>従業員80名の樹脂成形メーカー（東大阪）</td></tr>
+<tr><td><strong>年齢</strong></td><td>35歳</td></tr>
+<tr><td><strong>ITスキル</strong></td><td>Excel中級。VLOOKUPは使える。Pythonは触ったことがない</td></tr>
+<tr><td><strong>日常業務</strong></td><td>見積もり作成（月100件以上）、原価計算、顧客折衝</td></tr>
+<tr><td><strong>最大の悩み</strong></td><td>見積もり精度がバラつく。複雑な案件は上司に聞くしかない。残業が多い</td></tr>
+<tr><td><strong>情報収集</strong></td><td>X（Twitter）、note、YouTube、Google検索</td></tr>
+<tr><td><strong>購買行動</strong></td><td>自分で試してから上司に提案したい。無料トライアルがあると嬉しい</td></tr>
+<tr><td><strong>意思決定基準</strong></td><td>① 自分で使える ② すぐ効果が出る ③ 既存データが使える</td></tr>
+<tr><td><strong>拒否反応ポイント</strong></td><td>「プログラミングが必要」「データ整備に時間がかかる」</td></tr>
+</table></div>
+<h3 id="ペルソナ3-外部推薦者--中小企業診断士山本48歳">ペルソナ3: 外部推薦者 — 中小企業診断士・山本（48歳）</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>詳細</th></tr>
+<tr><td><strong>名前</strong></td><td>山本 浩一（仮名）</td></tr>
+<tr><td><strong>役職</strong></td><td>独立中小企業診断士</td></tr>
+<tr><td><strong>専門</strong></td><td>製造業の経営改善・DX支援</td></tr>
+<tr><td><strong>顧問先</strong></td><td>製造業10社（月1-2回訪問）</td></tr>
+<tr><td><strong>最大の関心</strong></td><td>顧問先に具体的なDXツールを提案したい。紹介料も歓迎</td></tr>
+<tr><td><strong>情報収集</strong></td><td>診断協会の研修、J-Net21、LinkedIn</td></tr>
+<tr><td><strong>推薦行動</strong></td><td>補助金申請と組み合わせて顧問先に提案</td></tr>
+</table></div>
+<hr>
+<h2 id="3-4p4c分析">3. 4P/4C分析</h2>
+<h3 id="3-1-4p企業視点">3-1. 4P（企業視点）</h3>
+<h4 id="product製品">Product（製品）</h4>
+<div class="table-wrap"><table>
+<tr><th>要素</th><th>内容</th></tr>
+<tr><td><strong>コア価値</strong></td><td>CSV/Excelデータで即座に回帰予測＋SHAP解釈</td></tr>
+<tr><td><strong>基本機能</strong></td><td>データアップロード、変数選択、LightGBM学習、予測実行、SHAP可視化、CSV出力</td></tr>
+<tr><td><strong>付加機能（フェーズ1）</strong></td><td>見積もりテンプレート、操作チュートリアル</td></tr>
+<tr><td><strong>付加機能（フェーズ2以降）</strong></td><td>API連携、バッチ予測、モデル管理、チーム機能</td></tr>
+<tr><td><strong>品質基準</strong></td><td>予測精度R²&gt;0.8を目安、応答時間3秒以内</td></tr>
+</table></div>
+<h4 id="price価格">Price（価格）</h4>
+<div class="table-wrap"><table>
+<tr><th>プラン</th><th>月額</th><th>年額</th><th>対象</th><th>含まれる機能</th></tr>
+<tr><td><strong>ライト</strong></td><td>30,000円</td><td>324,000円（10%割引）</td><td>個人事業・小規模</td><td>月50回予測、データ100MB</td></tr>
+<tr><td><strong>スタンダード</strong></td><td>50,000円</td><td>540,000円（10%割引）</td><td>中小企業（推奨）</td><td>月200回予測、データ1GB、SHAP解析</td></tr>
+<tr><td><strong>プロ</strong></td><td>80,000円</td><td>864,000円（10%割引）</td><td>中堅企業</td><td>無制限予測、データ5GB、優先サポート</td></tr>
+<tr><td><strong>無料トライアル</strong></td><td>0円</td><td>—</td><td>全対象</td><td>14日間、全機能利用可</td></tr>
+</table></div>
+<p><strong>価格設定根拠</strong>:</p>
+<ul>
+<li>見積もり1件あたり30分→10分に短縮 = 月20件で月10時間削減</li>
+<li>時給換算3,000円 × 10時間 = 月30,000円の人件費削減（ライトプランでペイ）</li>
+<li>精度向上による受注率改善効果（年間数百万円のインパクト）</li>
+</ul>
+<h4 id="place流通">Place（流通）</h4>
+<div class="table-wrap"><table>
+<tr><th>チャネル</th><th>役割</th><th>優先度</th></tr>
+<tr><td>自社Webサイト（SaaS直販）</td><td>メインの販売チャネル</td><td>A</td></tr>
+<tr><td>パートナー紹介（診断士・信金）</td><td>信頼を活用した紹介</td><td>A</td></tr>
+<tr><td>商工会議所セミナー</td><td>認知獲得・リード</td><td>B</td></tr>
+<tr><td>展示会</td><td>認知獲得・名刺交換</td><td>B</td></tr>
+<tr><td>リスティング広告</td><td>リード獲得</td><td>A</td></tr>
+</table></div>
+<h4 id="promotionプロモーション">Promotion（プロモーション）</h4>
+<div class="table-wrap"><table>
+<tr><th>手法</th><th>内容</th><th>月間予算</th></tr>
+<tr><td>コンテンツマーケティング</td><td>ブログ、WP、事例記事</td><td>工数ベース（内製）</td></tr>
+<tr><td>リスティング広告</td><td>Google検索広告</td><td>12〜18万円</td></tr>
+<tr><td>SNS広告</td><td>Facebook/Instagram</td><td>3〜5万円</td></tr>
+<tr><td>セミナー/ウェビナー</td><td>月1回</td><td>0〜3万円</td></tr>
+<tr><td>メールナーチャリング</td><td>自動シーケンス</td><td>ツール費2万円</td></tr>
+</table></div>
+<h3 id="3-2-4c顧客視点">3-2. 4C（顧客視点）</h3>
+<div class="table-wrap"><table>
+<tr><th>4P</th><th>4C</th><th>顧客の声（ペルソナ視点）</th></tr>
+<tr><td>Product →</td><td><strong>Customer Value</strong></td><td>「ベテランがいなくても精度の高い見積もりが出せる」「AIの判断根拠が見えるので信頼できる」</td></tr>
+<tr><td>Price →</td><td><strong>Cost</strong></td><td>「月5万円なら見積もり担当の残業代より安い」「補助金で半額なら稟議が通る」</td></tr>
+<tr><td>Place →</td><td><strong>Convenience</strong></td><td>「Webブラウザだけで使える」「インストール不要」「CSVアップロードだけ」</td></tr>
+<tr><td>Promotion →</td><td><strong>Communication</strong></td><td>「同業の導入事例を見て安心した」「ウェビナーで実際の操作を見て理解できた」</td></tr>
+</table></div>
+<hr>
+<h2 id="4-カスタマージャーニー">4. カスタマージャーニー</h2>
+<h3 id="4-1-ジャーニーマップペルソナ1-田中工場長">4-1. ジャーニーマップ（ペルソナ1: 田中工場長）</h3>
+<pre><code>認知          興味・情報収集      比較・検討         試用・評価        購入・導入
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[きっかけ]     [行動]            [行動]             [行動]           [行動]
+商工会議所の   Google検索        無料デモ申込       14日間トライアル  年契約
+セミナーで     「製造業 見積     事例記事を         自社の見積もり    補助金申請
+AI活用を知る   もり AI」         じっくり読む       データで検証      と同時に導入
+
+[感情]        [感情]            [感情]             [感情]           [感情]
+「うちにも     「意外と簡単      「同業が使って     「本当に精度が    「佐藤さんの
+使えるの？」   そうだな」        成果出てるなら」    出るのか？」     ノウハウを
+                                                  →「おっ、使える」 残せる！」
+
+[タッチポイント]
+セミナー      ブログ記事         事例記事           無料トライアル    営業担当
+             ↓                ホワイトペーパー    操作サポート      補助金申請支援
+             LP               ウェビナー動画      ヘルプドキュメント 導入サポート
+
+[KPI]
+セミナー     LP訪問数          WP DL数             トライアル       新規契約数
+参加者数     ブログPV          デモ申込数          開始数           MRR
+</code></pre>
+<h3 id="4-2-フェーズ別マーケティング施策">4-2. フェーズ別マーケティング施策</h3>
+<div class="table-wrap"><table>
+<tr><th>フェーズ</th><th>目的</th><th>主要施策</th><th>KPI</th></tr>
+<tr><td><strong>認知</strong></td><td>課題の顕在化</td><td>SEOブログ、SNS発信、セミナー登壇、リスティング広告</td><td>サイトセッション数、インプレッション</td></tr>
+<tr><td><strong>興味</strong></td><td>解決策の理解</td><td>ピラーページ、操作デモ動画、製品LP</td><td>LP訪問数、滞在時間、ページ/セッション</td></tr>
+<tr><td><strong>比較検討</strong></td><td>信頼獲得・不安解消</td><td>事例記事、WP、ウェビナー、ROI試算ツール</td><td>WP DL数、ウェビナー参加数、デモ申込数</td></tr>
+<tr><td><strong>試用</strong></td><td>価値の実感</td><td>無料トライアル、操作ガイド、サポート</td><td>トライアル開始数、トライアル→契約転換率</td></tr>
+<tr><td><strong>購入</strong></td><td>契約・定着</td><td>補助金申請支援、導入サポート、定期レビュー</td><td>新規契約数、MRR、チャーン率</td></tr>
+<tr><td><strong>推奨</strong></td><td>紹介・事例化</td><td>事例取材依頼、紹介プログラム</td><td>紹介リード数、NPS</td></tr>
+</table></div>
+<hr>
+<h2 id="5-コンテンツ戦略">5. コンテンツ戦略</h2>
+<h3 id="5-1-コンテンツピラー柱">5-1. コンテンツピラー（柱）</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>ピラー名</th><th>定義</th><th>対象ペルソナ</th><th>ファネル位置</th></tr>
+<tr><td>1</td><td><strong>見積もり業務のDX</strong></td><td>見積もり精度向上・属人化解消・原価管理の改善</td><td>工場長・見積もり担当者</td><td>TOFU〜MOFU</td></tr>
+<tr><td>2</td><td><strong>製造業×AI活用の実践知</strong></td><td>中小製造業がAI/機械学習を現場で使う具体的手法・事例</td><td>生産技術・品質管理担当</td><td>TOFU</td></tr>
+<tr><td>3</td><td><strong>歩留まり改善・品質予測</strong></td><td>加工条件最適化、不良率低減のデータ活用手法</td><td>生産技術・製造部門長</td><td>MOFU</td></tr>
+<tr><td>4</td><td><strong>ノーコードML実践ガイド</strong></td><td>プログラミング不要でML予測モデルを構築する操作手順</td><td>現場担当者・情報システム兼務者</td><td>MOFU〜BOFU</td></tr>
+<tr><td>5</td><td><strong>補助金・ROI・導入判断</strong></td><td>IT導入補助金活用法、投資対効果、導入稟議の通し方</td><td>経営者・管理部門</td><td>BOFU</td></tr>
+</table></div>
+<h3 id="5-2-seoキーワード戦略">5-2. SEOキーワード戦略</h3>
+<h4 id="優先度amonth-12で対策">優先度A（Month 1〜2で対策）</h4>
+<div class="table-wrap"><table>
+<tr><th>キーワード</th><th>検索Vol</th><th>難易度</th><th>対応ピラー</th></tr>
+<tr><td>製造業 見積もり 効率化</td><td>390</td><td>中</td><td>1</td></tr>
+<tr><td>製造業 AI 活用</td><td>1,300</td><td>高</td><td>2</td></tr>
+<tr><td>IT導入補助金 製造業 2026</td><td>590</td><td>中</td><td>5</td></tr>
+<tr><td>歩留まり 改善 方法</td><td>480</td><td>中</td><td>3</td></tr>
+<tr><td>ノーコード 機械学習</td><td>320</td><td>中</td><td>4</td></tr>
+</table></div>
+<h4 id="優先度bmonth-34で対策">優先度B（Month 3〜4で対策）</h4>
+<div class="table-wrap"><table>
+<tr><th>キーワード</th><th>検索Vol</th><th>難易度</th><th>対応ピラー</th></tr>
+<tr><td>見積もり 精度 向上</td><td>260</td><td>低</td><td>1</td></tr>
+<tr><td>中小企業 機械学習</td><td>210</td><td>低</td><td>2</td></tr>
+<tr><td>品質予測 AI</td><td>170</td><td>低</td><td>3</td></tr>
+<tr><td>ものづくり補助金 AI</td><td>260</td><td>中</td><td>5</td></tr>
+<tr><td>製造業 DX 事例</td><td>880</td><td>高</td><td>2</td></tr>
+</table></div>
+<h3 id="5-3-コンテンツカレンダー6ヶ月分">5-3. コンテンツカレンダー（6ヶ月分）</h3>
+<h4 id="month-1立ち上げ期">Month 1（立ち上げ期）</h4>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>タイトル案</th><th>形式</th><th>ピラー</th></tr>
+<tr><td>W1</td><td>「製造業の見積もり、なぜベテラン頼みが危険なのか？」</td><td>ブログ</td><td>1</td></tr>
+<tr><td>W2</td><td>「【2026年版】中小製造業のAI活用 完全ガイド」</td><td>ブログ（ピラーページ）</td><td>2</td></tr>
+<tr><td>W3</td><td>サービスLP v1 公開</td><td>LP</td><td>-</td></tr>
+<tr><td>W4</td><td>「見積もり精度を±5%に改善するデータ活用術」</td><td>ホワイトペーパー</td><td>1</td></tr>
+</table></div>
+<h4 id="month-2コンテンツ基盤構築">Month 2（コンテンツ基盤構築）</h4>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>タイトル案</th><th>形式</th><th>ピラー</th></tr>
+<tr><td>W1</td><td>「金属加工業A社：見積もり作成時間を70%削減した方法」</td><td>事例記事</td><td>1</td></tr>
+<tr><td>W2</td><td>「歩留まり予測にAIを使う：樹脂成形の加工条件最適化入門」</td><td>ブログ</td><td>3</td></tr>
+<tr><td>W3</td><td>「CSVを入れるだけ：ノーコードで予測モデルを作る5ステップ」</td><td>ブログ</td><td>4</td></tr>
+<tr><td>W4</td><td>メールナーチャリングシーケンス構築（5通）</td><td>メール基盤</td><td>-</td></tr>
+</table></div>
+<h4 id="month-3リード獲得加速">Month 3（リード獲得加速）</h4>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>タイトル案</th><th>形式</th><th>ピラー</th></tr>
+<tr><td>W1</td><td>「【IT導入補助金2026】製造業のAIツール導入で最大450万円」</td><td>ブログ</td><td>5</td></tr>
+<tr><td>W2</td><td>「30分でわかる製造業のAI見積もり〜デモ付きウェビナー〜」</td><td>ウェビナー</td><td>1,4</td></tr>
+<tr><td>W3</td><td>「リードタイム予測：納期遅延を30%削減するデータ分析手法」</td><td>ブログ</td><td>3</td></tr>
+<tr><td>W4</td><td>ウェビナー録画→短尺動画3本化</td><td>動画</td><td>1,4</td></tr>
+</table></div>
+<h4 id="month-4事例信頼蓄積">Month 4（事例・信頼蓄積）</h4>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>タイトル案</th><th>形式</th><th>ピラー</th></tr>
+<tr><td>W1</td><td>「組立製造業B社：原価見積もりの精度が2倍に改善」</td><td>事例記事</td><td>1</td></tr>
+<tr><td>W2</td><td>「SHAP値とは？製造現場に伝わるAI予測の&quot;なぜ&quot;の説明方法」</td><td>ブログ</td><td>4</td></tr>
+<tr><td>W3</td><td>「中小製造業のAI導入ROI計算シート（Excel配布）」</td><td>WP（Excel付）</td><td>5</td></tr>
+<tr><td>W4</td><td>「製造業AI導入の稟議書テンプレート公開」</td><td>ブログ</td><td>5</td></tr>
+</table></div>
+<h4 id="month-5チャネル拡大">Month 5（チャネル拡大）</h4>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>タイトル案</th><th>形式</th><th>ピラー</th></tr>
+<tr><td>W1</td><td>「加工条件と品質の関係をデータで可視化する〜実践ウェビナー第2弾〜」</td><td>ウェビナー</td><td>3,4</td></tr>
+<tr><td>W2</td><td>「ものづくり補助金でAI予測ツールを実質無料導入するステップ」</td><td>ブログ</td><td>5</td></tr>
+<tr><td>W3</td><td>パートナー向け紹介資料v1 作成</td><td>営業資料</td><td>-</td></tr>
+<tr><td>W4</td><td>「データ分析で見える化：製造リードタイム短縮の3つの着眼点」</td><td>ブログ</td><td>3</td></tr>
+</table></div>
+<h4 id="month-6成果刈り取り改善">Month 6（成果刈り取り・改善）</h4>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>タイトル案</th><th>形式</th><th>ピラー</th></tr>
+<tr><td>W1</td><td>「導入企業3社のBefore/After比較：見積もりAI活用のリアル」</td><td>事例集WP</td><td>1</td></tr>
+<tr><td>W2</td><td>上位パフォーマンス記事のリライト・CTA最適化</td><td>改修</td><td>-</td></tr>
+<tr><td>W3</td><td>「6ヶ月で見えた：中小製造業AI導入の成功・失敗パターン」</td><td>ブログ</td><td>2</td></tr>
+<tr><td>W4</td><td>フェーズ1振り返り＆フェーズ2計画策定</td><td>社内文書</td><td>-</td></tr>
+</table></div>
+<h4 id="6ヶ月コンテンツ配分サマリー">6ヶ月コンテンツ配分サマリー</h4>
+<div class="table-wrap"><table>
+<tr><th>形式</th><th>本数</th><th>累計工数</th></tr>
+<tr><td>ブログ記事</td><td>14本</td><td>約70h</td></tr>
+<tr><td>ホワイトペーパー/事例集</td><td>3本</td><td>約45h</td></tr>
+<tr><td>事例記事</td><td>2本</td><td>約14h</td></tr>
+<tr><td>ウェビナー</td><td>2回</td><td>約40h</td></tr>
+<tr><td>LP</td><td>1本</td><td>約15h</td></tr>
+<tr><td>その他（メール基盤・資料等）</td><td>3件</td><td>約28h</td></tr>
+<tr><td><strong>合計</strong></td><td><strong>25本</strong></td><td><strong>約212h（月平均35h）</strong></td></tr>
+</table></div>
+<hr>
+<h2 id="6-チャネル戦略">6. チャネル戦略</h2>
+<h3 id="6-1-オンラインチャネル">6-1. オンラインチャネル</h3>
+<h4 id="サイト構成">サイト構成</h4>
+<pre><code>トップページ (/)
+├── 製品紹介 (/product/)
+├── ユースケース (/usecase/)
+│   ├── 見積もり精緻化 (/usecase/estimate/)
+│   ├── 歩留まり予測 (/usecase/yield/)
+│   └── リードタイム予測 (/usecase/leadtime/)
+├── 事例 (/case-study/)
+├── ブログ (/blog/)
+├── ホワイトペーパー (/whitepaper/)
+├── ウェビナー (/webinar/)
+├── 料金 (/pricing/)
+├── よくある質問 (/faq/)
+└── お問い合わせ (/contact/)
+</code></pre>
+<h4 id="メインlp-ワイヤーフレーム">メインLP ワイヤーフレーム</h4>
+<pre><code>┌─────────────────────────────────────────────┐
+│ ■ ファーストビュー                           │
+│ キャッチコピー: 「見積もりの属人化、          │
+│ CSVだけで解決」                              │
+│ [無料デモを試す] [資料ダウンロード]           │
+├─────────────────────────────────────────────┤
+│ ■ 課題提起（3カラム）                        │
+│ 見積もりがベテラン頼み / 歩留まりが不安定 /   │
+│ 納期が読めない                               │
+├─────────────────────────────────────────────┤
+│ ■ 解決策（3ステップ図解）                    │
+│ ① CSVアップロード → ② ワンクリック学習      │
+│ → ③ 予測結果＆要因可視化                    │
+├─────────────────────────────────────────────┤
+│ ■ SHAP可視化の説明                           │
+│ 「AIがブラックボックスではない理由」          │
+├─────────────────────────────────────────────┤
+│ ■ 導入効果                                   │
+│ 見積もり工数70%削減 | 精度±5% | 導入1週間    │
+├─────────────────────────────────────────────┤
+│ ■ 導入事例（カード2〜3枚）                   │
+├─────────────────────────────────────────────┤
+│ ■ 料金（3プラン表 + 補助金案内）             │
+├─────────────────────────────────────────────┤
+│ ■ よくある質問（アコーディオン）              │
+├─────────────────────────────────────────────┤
+│ ■ CTA                                       │
+│ [無料デモ申込] [資料DL] [電話相談]           │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h4 id="リスティング広告配分">リスティング広告配分</h4>
+<div class="table-wrap"><table>
+<tr><th>キャンペーン</th><th>キーワード例</th><th>想定CPC</th><th>月間予算</th></tr>
+<tr><td>見積もり系</td><td>製造業 見積もり 効率化 / AI</td><td>150〜300円</td><td>5万円</td></tr>
+<tr><td>製造業AI系</td><td>製造業 AI ツール / ノーコード</td><td>200〜400円</td><td>4万円</td></tr>
+<tr><td>補助金系</td><td>IT導入補助金 製造業</td><td>100〜200円</td><td>3万円</td></tr>
+</table></div>
+<h4 id="sns戦略">SNS戦略</h4>
+<div class="table-wrap"><table>
+<tr><th>チャネル</th><th>投稿頻度</th><th>工数/月</th></tr>
+<tr><td>X（Twitter）</td><td>週5回（平日毎日）</td><td>5h</td></tr>
+<tr><td>note</td><td>月2回</td><td>3h</td></tr>
+<tr><td>LinkedIn</td><td>週2回</td><td>2h</td></tr>
+<tr><td>YouTube</td><td>月1〜2本</td><td>3h</td></tr>
+</table></div>
+<h4 id="メールナーチャリングシーケンス">メールナーチャリングシーケンス</h4>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>タイミング</th><th>件名</th><th>CTA</th></tr>
+<tr><td>1</td><td>即時</td><td>【御礼】資料ダウンロードありがとうございます</td><td>信頼構築</td></tr>
+<tr><td>2</td><td>3日後</td><td>見積もり精度改善の最初の一歩は「既存データの棚卸し」</td><td>無料データ診断</td></tr>
+<tr><td>3</td><td>7日後</td><td>【事例】金属加工A社が見積もり工数を70%削減した方法</td><td>個別相談予約</td></tr>
+<tr><td>4</td><td>14日後</td><td>IT導入補助金で実質1/2〜2/3に</td><td>補助金相談予約</td></tr>
+<tr><td>5</td><td>21日後</td><td>【限定】30分の無料デモ：自社データでお試し</td><td>無料デモ予約</td></tr>
+<tr><td>6</td><td>35日後</td><td>製造業AI活用の最新トレンド＆ウェビナー案内</td><td>ウェビナー申込</td></tr>
+<tr><td>7</td><td>以降月1回</td><td>ニュースレター</td><td>各コンテンツ誘導</td></tr>
+</table></div>
+<h3 id="6-2-オフラインチャネル">6-2. オフラインチャネル</h3>
+<h4 id="展示会フェーズ1">展示会（フェーズ1）</h4>
+<div class="table-wrap"><table>
+<tr><th>展示会名</th><th>時期</th><th>参加形態</th><th>優先度</th></tr>
+<tr><td>日本ものづくりワールド（東京）</td><td>2026年6月</td><td>来場＋名刺交換</td><td>A</td></tr>
+<tr><td>スマート工場EXPO（名古屋）</td><td>2026年10月</td><td>来場＋ミニブース検討</td><td>A</td></tr>
+<tr><td>中小企業テクノフェア</td><td>2026年10-11月</td><td>小規模出展</td><td>B</td></tr>
+</table></div>
+<h4 id="セミナー勉強会">セミナー・勉強会</h4>
+<div class="table-wrap"><table>
+<tr><th>企画名</th><th>形式</th><th>頻度</th><th>集客目標</th></tr>
+<tr><td>「製造業のためのデータ活用入門」</td><td>対面セミナー</td><td>2ヶ月に1回</td><td>10〜15名</td></tr>
+<tr><td>「ノーコードAI体験会」</td><td>ハンズオン</td><td>3ヶ月に1回</td><td>5〜10名</td></tr>
+<tr><td>「IT導入補助金 申請相談会」</td><td>個別相談会</td><td>補助金公募時期</td><td>5〜8名</td></tr>
+</table></div>
+<h3 id="6-3-パートナーチャネル">6-3. パートナーチャネル</h3>
+<div class="table-wrap"><table>
+<tr><th>パートナー種別</th><th>目標数</th><th>紹介料（成約時）</th><th>アプローチ方法</th></tr>
+<tr><td>中小企業診断士</td><td>3〜5名</td><td>月額1ヶ月分＋継続10%</td><td>診断士向け説明会→個別面談→契約</td></tr>
+<tr><td>地域金融機関（信金）</td><td>2〜3行</td><td>なし（コンプラ上）</td><td>法人担当者向け勉強会の講師提案</td></tr>
+<tr><td>会計事務所</td><td>2〜3所</td><td>月額1ヶ月分＋継続10%</td><td>「原価管理精度向上」の会計視点で訴求</td></tr>
+</table></div>
+<hr>
+<h2 id="7-kpiダッシュボード">7. KPIダッシュボード</h2>
+<h3 id="7-1-ファネル別kpi">7-1. ファネル別KPI</h3>
+<h4 id="tofu認知">TOFU（認知）</h4>
+<div class="table-wrap"><table>
+<tr><th>KPI</th><th>Month 1</th><th>Month 3</th><th>Month 6</th></tr>
+<tr><td>オーガニック検索セッション</td><td>300</td><td>1,500</td><td>5,000</td></tr>
+<tr><td>ブログPV</td><td>500</td><td>3,000</td><td>10,000</td></tr>
+<tr><td>X フォロワー数</td><td>100</td><td>300</td><td>800</td></tr>
+<tr><td>検索順位（主要KW 5つ）</td><td>圏外〜50位</td><td>20〜30位</td><td>10〜20位</td></tr>
+</table></div>
+<h4 id="mofu検討">MOFU（検討）</h4>
+<div class="table-wrap"><table>
+<tr><th>KPI</th><th>Month 1</th><th>Month 3</th><th>Month 6</th></tr>
+<tr><td>ホワイトペーパーDL数</td><td>10</td><td>40</td><td>80</td></tr>
+<tr><td>ウェビナー申込数</td><td>-</td><td>20</td><td>25</td></tr>
+<tr><td>メールリスト登録数</td><td>30</td><td>100</td><td>250</td></tr>
+<tr><td>LP→フォーム送信率</td><td>3%</td><td>4%</td><td>5%</td></tr>
+</table></div>
+<h4 id="bofu契約">BOFU（契約）</h4>
+<div class="table-wrap"><table>
+<tr><th>KPI</th><th>Month 1</th><th>Month 3</th><th>Month 6</th></tr>
+<tr><td>無料デモ申込数</td><td>2</td><td>8</td><td>15</td></tr>
+<tr><td>デモ→商談化率</td><td>50%</td><td>50%</td><td>60%</td></tr>
+<tr><td>商談→成約率</td><td>20%</td><td>25%</td><td>30%</td></tr>
+<tr><td>新規契約数（月）</td><td>0</td><td>2</td><td>4</td></tr>
+<tr><td>MRR</td><td>0円</td><td>10万円</td><td>40万円</td></tr>
+<tr><td>CAC</td><td>-</td><td>20万円</td><td>10万円</td></tr>
+</table></div>
+<h4 id="post-sales">Post-Sales</h4>
+<div class="table-wrap"><table>
+<tr><th>KPI</th><th>Month 3</th><th>Month 6</th></tr>
+<tr><td>月間アクティブ利用率</td><td>80%</td><td>80%</td></tr>
+<tr><td>チャーン率</td><td>5%以下</td><td>3%以下</td></tr>
+<tr><td>NPS</td><td>-</td><td>+30以上</td></tr>
+</table></div>
+<h3 id="7-2-ダッシュボードレイアウト">7-2. ダッシュボードレイアウト</h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│ 月次マーケティングダッシュボード                      │
+├─────────────────────────────────────────────────────┤
+│ ■ サマリーカード（4列）                              │
+│ [MRR ¥XX万] [新規契約 X件] [リード XX件] [セッション] │
+├─────────────────────────────────────────────────────┤
+│ ■ ファネル可視化                                     │
+│ サイト訪問 → リード → デモ → 商談 → 成約            │
+├───────────────────────┬─────────────────────────────┤
+│ トラフィック推移       │ リードソース別円グラフ       │
+│ （折れ線グラフ6ヶ月分）│ オーガニック/広告/セミナー等 │
+├───────────────────────┴─────────────────────────────┤
+│ ■ コンテンツパフォーマンス / 広告パフォーマンス       │
+│ （テーブル形式）                                     │
+└─────────────────────────────────────────────────────┘
+</code></pre>
+<p>使用ツール: Googleスプレッドシート + Looker Studio（無料）</p>
+<hr>
+<h2 id="8-abテスト計画">8. ABテスト計画</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>テスト対象</th><th>パターンA</th><th>パターンB</th><th>実施月</th><th>指標</th></tr>
+<tr><td>1</td><td>LP キャッチコピー</td><td>「見積もりの属人化、もう終わりに」（課題訴求）</td><td>「CSV1つで見積もり精度が2倍に」（効果訴求）</td><td>M1-2</td><td>CTR, 滞在時間</td></tr>
+<tr><td>2</td><td>CTAボタン</td><td>緑「無料デモを申し込む」</td><td>オレンジ「自社データで精度を確認する（無料）」</td><td>M2</td><td>クリック率</td></tr>
+<tr><td>3</td><td>フォーム項目数</td><td>3項目（会社名・氏名・メール）</td><td>5項目（+電話・従業員数）</td><td>M2-3</td><td>送信率, リード品質</td></tr>
+<tr><td>4</td><td>広告見出し</td><td>課題訴求</td><td>効果訴求</td><td>M1〜</td><td>CTR</td></tr>
+<tr><td>5</td><td>広告CTA</td><td>「無料デモ」</td><td>「資料DL」</td><td>M2-3</td><td>CVR</td></tr>
+</table></div>
+<p><strong>統計的有意性の判断基準</strong>: 信頼水準95%、検出力80%以上、最低2週間、各パターン200セッション以上</p>
+<hr>
+<h2 id="9-予算配分">9. 予算配分</h2>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>M1</th><th>M2</th><th>M3</th><th>M4</th><th>M5</th><th>M6</th></tr>
+<tr><td>リスティング広告</td><td>10万</td><td>12万</td><td>15万</td><td>15万</td><td>18万</td><td>18万</td></tr>
+<tr><td>SNS広告</td><td>3万</td><td>3万</td><td>4万</td><td>4万</td><td>5万</td><td>5万</td></tr>
+<tr><td>ツール費</td><td>2万</td><td>2万</td><td>2万</td><td>2万</td><td>2万</td><td>2万</td></tr>
+<tr><td>セミナー・展示会</td><td>0</td><td>0</td><td>3万</td><td>2万</td><td>5万</td><td>3万</td></tr>
+<tr><td>コンテンツ外注</td><td>5万</td><td>3万</td><td>3万</td><td>5万</td><td>3万</td><td>5万</td></tr>
+<tr><td>予備費</td><td>5万</td><td>5万</td><td>3万</td><td>2万</td><td>2万</td><td>2万</td></tr>
+<tr><td><strong>月計</strong></td><td><strong>25万</strong></td><td><strong>25万</strong></td><td><strong>30万</strong></td><td><strong>30万</strong></td><td><strong>35万</strong></td><td><strong>35万</strong></td></tr>
+</table></div>
+<p><strong>6ヶ月総額: 180万円</strong>（月平均30万円）</p>
+<hr>
+<h2 id="次のステップ">次のステップ</h2>
+<ul>
+<li><strong>フェーズ1実行</strong>: 本ドキュメントに基づき、Month 1のアクションを開始</li>
+<li><strong>Month 3レビュー</strong>: KPI達成状況を確認し、戦略を微調整</li>
+<li><strong>Month 6評価</strong>: MRR 40万円達成の可否を判断し、フェーズ2計画を策定</li>
+<li><strong>フェーズ2移行基準</strong>: MRR 40万円以上 → マーケティング専任化 + チャネル拡大投資</li>
+</ul>
+</section>
+<section id="step5_strategy_review" class="doc-section" style="display:none"><h1 id="step-5-多角的戦略レビュー--5つの思考パターンによる改善提案統合">Step 5: 多角的戦略レビュー — 5つの思考パターンによる改善提案統合</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-08</blockquote>
+<blockquote>レビュー対象: Step 1〜4 全ドキュメント</blockquote>
+<hr>
+<h2 id="レビュー手法">レビュー手法</h2>
+<p>5つの独立した専門エージェントが、異なる思考パターンでStep 1〜4の全ドキュメントをレビューし、改善提案を行った。</p>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>思考パターン</th><th>分析の焦点</th></tr>
+<tr><td>1</td><td><strong>批判的思考</strong></td><td>論理矛盾・前提の弱さ・楽観バイアス・リスク見落とし</td></tr>
+<tr><td>2</td><td><strong>グロース思考</strong></td><td>PLG設計・ファネル最適化・リテンション・スケーラビリティ</td></tr>
+<tr><td>3</td><td><strong>水平思考</strong></td><td>逆転発想・異業種応用・組み合わせ・非常識なアイデア</td></tr>
+<tr><td>4</td><td><strong>論理的思考</strong></td><td>MECE検証・仮説ピラミッド・数値整合性・戦略オプション</td></tr>
+<tr><td>5</td><td><strong>デザイン思考</strong></td><td>ユーザー共感・JTBD・体験マップ・アクセシビリティ</td></tr>
+</table></div>
+<hr>
+<h2 id="目次">目次</h2>
+<ul>
+<li><a href="#1-重大な問題点全エージェント共通指摘">重大な問題点（全エージェント共通指摘）</a></li>
+<li><a href="#2-批判的思考からの指摘">批判的思考からの指摘</a></li>
+<li><a href="#3-グロース思考からの提案">グロース思考からの提案</a></li>
+<li><a href="#4-水平思考からのアイデア">水平思考からのアイデア</a></li>
+<li><a href="#5-論理的思考からの検証結果">論理的思考からの検証結果</a></li>
+<li><a href="#6-デザイン思考からの提案">デザイン思考からの提案</a></li>
+<li><a href="#7-統合アクションプラン">統合アクションプラン</a></li>
+</ul>
+<hr>
+<h2 id="1-重大な問題点全エージェント共通指摘">1. 重大な問題点（全エージェント共通指摘）</h2>
+<p>5つの思考パターンから<strong>共通して</strong>指摘された問題点は、戦略全体の信頼性に関わる重大な課題である。</p>
+<h3 id="1-1-顧客検証の完全な欠如55エージェントが指摘">1-1. 顧客検証の完全な欠如（5/5エージェントが指摘）</h3>
+<p>全4ステップを通じて、実際の顧客への一次調査（インタビュー、アンケート、PoC）が一度も行われていない。全てがAIエージェントの推定に基づく机上の分析であり、「顧客が本当にこの課題にお金を払うか」という最重要仮説が未検証。</p>
+<blockquote><strong>デザイン思考</strong>: 製造業の現場を最低3社訪問し、見積もり業務を半日間シャドウイングすべき</blockquote>
+<blockquote><strong>批判的思考</strong>: 180万円のマーケ投資は顧客検証後でも遅くない</blockquote>
+<blockquote><strong>グロース思考</strong>: PLGの全ての研究が示すように「Time to First Value」の短縮こそが最もROIの高い投資</blockquote>
+<h3 id="1-2-ファネルkpiと最終kpiの数値矛盾45エージェントが指摘">1-2. ファネルKPIと最終KPIの数値矛盾（4/5エージェントが指摘）</h3>
+<p>MRR 40万円の達成に必要な契約数と、ファネル各段階のKPIが整合していない。</p>
+<pre><code>MRR 40万円 = 累積8社（ARPU 5万円）
+→ M6に新規4社/月が必要
+→ 商談→成約率30%で必要商談数 = 13.3件/月
+→ デモ→商談化率60%で必要デモ数 = 22件/月
+→ しかしM6のデモ申込目標は15件/月
+
+★ デモ15件 × 商談化50% × 成約30% = 2.25社/月（4社に未達）
+</code></pre>
+<h3 id="1-3-step間の数値不整合35エージェントが指摘">1-3. Step間の数値不整合（3/5エージェントが指摘）</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>Step 3</th><th>Step 4</th><th>乖離</th></tr>
+<tr><td>MRR目標(M6)</td><td>25〜50万円（レンジ）</td><td>40万円（点推定）</td><td>レンジ上限寄りで楽観的</td></tr>
+<tr><td>有料顧客数(M6)</td><td>5社</td><td>8社（逆算値）</td><td>1.6倍の乖離</td></tr>
+<tr><td>PoC転換率</td><td>50%以上</td><td>デモ→商談50%×成約30%=実質15%</td><td><strong>3倍以上の乖離</strong></td></tr>
+<tr><td>NPS目標</td><td>40以上</td><td>+30以上</td><td>不一致</td></tr>
+<tr><td>CAC目標</td><td>136万円以下</td><td>M6で10万円</td><td>大幅乖離</td></tr>
+</table></div>
+<h3 id="1-4-プロダクト未完成のままマーケ戦略を策定35エージェントが指摘">1-4. プロダクト未完成のままマーケ戦略を策定（3/5エージェントが指摘）</h3>
+<p>CLAUDE.mdのIssue一覧によれば、データ入力機能（Issue #2）すら未完成。Month 2で事例記事（「金属加工A社：見積もり作成時間を70%削減」）を計画しているが、その時点で導入実績は存在しない。プロダクト開発とマーケティングのタイムライン整合が取れていない。</p>
+<hr>
+<h2 id="2-批判的思考からの指摘">2. 批判的思考からの指摘</h2>
+<h3 id="2-1-論理的整合性の問題">2-1. 論理的整合性の問題</h3>
+<ul>
+<li><strong>Step 2→3のスコア逆転</strong>: Step 2のTop 9（26点）のうち5件がStep 3の「やらない」リストに入る。スコアリングが戦略選択に活きていない</li>
+<li><strong>統合スコアの重み付け</strong>: リスク評価（40点）が全体の47%を占め、「リスクが低いもの」が構造的に上位に来るバイアスがかかっている</li>
+<li><strong>順位と統合スコアの矛盾</strong>: 同点なのに順位が異なる、高スコアなのに低順位の箇所が複数存在</li>
+</ul>
+<h3 id="2-2-前提の妥当性への疑問">2-2. 前提の妥当性への疑問</h3>
+<ul>
+<li><strong>ターゲット企業数15,000〜20,000社</strong>: 出典・算出根拠が不明。全てが「見積もりのベテラン依存」の課題を持つわけではない</li>
+<li><strong>検索ボリューム</strong>: SEOキーワードの検索ボリュームの出典が不明（Google キーワードプランナーの実データか、AIの推定値か）</li>
+<li><strong>コンテンツ工数</strong>: 月平均35hで25本（ブログ14本 + WP3本 + 事例2本 + ウェビナー2回等）は非現実的。SNS運用（月13h）は212hに含まれていない</li>
+<li><strong>LTVモデル</strong>: 顧客単価が24ヶ月で4倍（月5万→20万）のアップセル想定は楽観的。年間チャーン率15%もPMF前のB2B SaaSとしては甘い（一般的には30-50%）</li>
+</ul>
+<h3 id="2-3-見落とされているリスク">2-3. 見落とされているリスク</h3>
+<div class="table-wrap"><table>
+<tr><th>リスク</th><th>内容</th></tr>
+<tr><td><strong>LLMベースの代替</strong></td><td>ChatGPT Code Interpreter等で「CSVアップロード→予測」が無料で可能になりつつある</td></tr>
+<tr><td><strong>補助金依存</strong></td><td>制度変更・審査不通過時のフォールバック戦略がない</td></tr>
+<tr><td><strong>景気感応度</strong></td><td>中小製造業は景気変動の影響を最も受けやすく、不況時にIT投資が真っ先に削られる</td></tr>
+<tr><td><strong>LP表記リスク</strong></td><td>「見積もり工数70%削減」「精度±5%」は未実証であり、景品表示法（優良誤認）のリスク</td></tr>
+<tr><td><strong>ABテスト不可能</strong></td><td>M1-2のトラフィックでは各パターン200セッションを確保できない</td></tr>
+</table></div>
+<h3 id="2-4-批判的思考の総合提言">2-4. 批判的思考の総合提言</h3>
+<blockquote>次にやるべきことは、Step 4のマーケ施策の実行ではなく:</blockquote>
+<blockquote>1. <strong>顧客開発インタビュー</strong>: 5〜10社に話を聞き、課題・WTP仮説を検証</blockquote>
+<blockquote>2. <strong>プロダクトMVPの完成</strong>: Issue #1〜#4を完成させ、ベータユーザーに使ってもらう</blockquote>
+<blockquote>3. <strong>1社目の有料契約</strong>: ハイタッチで最初の1社を獲得し、PMFの手応えを確認</blockquote>
+<hr>
+<h2 id="3-グロース思考からの提案">3. グロース思考からの提案</h2>
+<h3 id="3-1-product-led-growth-plg-設計">3-1. Product-Led Growth (PLG) 設計</h3>
+<p>現行戦略はセールスドリブン（PoC→商談→成約）に偏っている。製造業でもPLGは機能する。</p>
+<div class="table-wrap"><table>
+<tr><th>提案</th><th>内容</th><th>インパクト</th><th>工数</th><th>優先度</th></tr>
+<tr><td><strong>Free枠を「回数制限」→「行数制限」に変更</strong></td><td>500行まで無料・無制限回数。小さなデータで何度も試行錯誤可能に</td><td>高</td><td>低</td><td>S</td></tr>
+<tr><td><strong>SHAPをFree枠で開放（上位3変数のみ）</strong></td><td>SHAPこそが「おっ、面白い」の瞬間を作る最大の武器</td><td>高</td><td>低</td><td>S</td></tr>
+<tr><td><strong>サンプルデータ3種のプリインストール</strong></td><td>「見積もり」「歩留まり」「リードタイム」をワンクリックでロード</td><td>高</td><td>低</td><td>S</td></tr>
+<tr><td><strong>インタラクティブ製品デモ（サンドボックス）</strong></td><td>サインアップ不要でサンプルデータで一連の体験ができるデモ環境</td><td>高</td><td>中</td><td>S</td></tr>
+<tr><td><strong>「この予測結果を共有」ボタン</strong></td><td>SHAPプロットのスクリーンショット+短縮URLを生成</td><td>高</td><td>低</td><td>S</td></tr>
+</table></div>
+<h3 id="3-2-ファネル最適化ドロップオフ対策">3-2. ファネル最適化（ドロップオフ対策）</h3>
+<div class="table-wrap"><table>
+<tr><th>ドロップオフ</th><th>推定離脱率</th><th>対策</th></tr>
+<tr><td>LP訪問→フォーム送信</td><td>97%離脱</td><td>チャットボット設置。製造業の意思決定者はフォームに抵抗感が強い</td></tr>
+<tr><td>トライアル→初回予測実行</td><td>40-50%未実行</td><td>サインアップ直後にサンプルデータで自動的に予測完了状態を見せる</td></tr>
+<tr><td>初回予測→2回目</td><td>60%離脱</td><td>「次のステップ：別のデータで精度比較」のCTAを表示</td></tr>
+<tr><td>トライアル→有料転換</td><td>目標50%</td><td>精度が出た企業に30日延長。事例取材協力を条件に（Win-Win）</td></tr>
+</table></div>
+<h3 id="3-3-リテンション戦略">3-3. リテンション戦略</h3>
+<ul>
+<li><strong>Aha Moment定義</strong>: 「自社データでR²&gt;0.7の予測モデルが完成し、SHAPで予想外の変数が上位に来た瞬間」</li>
+<li><strong>North Star Metric</strong>: 「トライアル14日以内のAha Moment到達率」</li>
+<li><strong>行動ベースのトリガーメール</strong>: Day 0/1/3/7/14で未実行者に操作ガイドを送信</li>
+<li><strong>解約前出口インタビュー必須化</strong>: チャーン理由のデータ蓄積→プロダクト改善シグナル</li>
+</ul>
+<h3 id="3-4-成長のレバレッジポイント-top-3">3-4. 成長のレバレッジポイント Top 3</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>施策</th><th>投資</th><th>期待効果</th></tr>
+<tr><td>1</td><td><strong>サンプルデータ同梱+インスタント体験</strong></td><td>開発2-3日、マーケ費用ゼロ</td><td>Aha moment到達率を30%→60%に倍増</td></tr>
+<tr><td>2</td><td><strong>140ユースケースのプログラマティックLP量産</strong></td><td>テンプレート設計+自動化で約1ヶ月</td><td>ロングテールSEOで月5,000-10,000セッション獲得</td></tr>
+<tr><td>3</td><td><strong>診断士ネットワークの組織化</strong></td><td>月1回説明会開催</td><td>5名から年間10-15社リード、CACほぼゼロ</td></tr>
+</table></div>
+<h3 id="3-5-価格最適化">3-5. 価格最適化</h3>
+<ul>
+<li><strong>Starterプランを月額19,800円に</strong>: 「2万円以下」の心理的壁を突破</li>
+<li><strong>差別化軸を「予測回数」→「データ行数×モデル保存数」に変更</strong>: 予測回数制限は顧客体験を劣化させる</li>
+<li><strong>年契約割引を10%→17%（2ヶ月無料）に引き上げ</strong>: 製造業は年度予算で動くためロックイン効果大</li>
+</ul>
+<hr>
+<h2 id="4-水平思考からのアイデア">4. 水平思考からのアイデア</h2>
+<h3 id="4-1-逆転法">4-1. 逆転法</h3>
+<div class="table-wrap"><table>
+<tr><th>アイデア</th><th>概要</th></tr>
+<tr><td><strong>「あえてラフ見積もり」モード</strong></td><td>特徴量3つだけで10秒で概算。展示会や電話の場で即座に使える「スピード重視」のポジション</td></tr>
+<tr><td><strong>「外れ値レポート」機能</strong></td><td>予測を外した案件こそ宝の山。乖離の大きい案件を自動検出し「なぜ外れたか」をSHAP分析</td></tr>
+<tr><td><strong>What-if分析</strong></td><td>「原材料費2倍なら？」「納期半分なら？」のシミュレーション。リスクマネジメントツールへ昇格</td></tr>
+</table></div>
+<h3 id="4-2-異業種応用ランダム入力法">4-2. 異業種応用（ランダム入力法）</h3>
+<div class="table-wrap"><table>
+<tr><th>応用元</th><th>アイデア</th></tr>
+<tr><td><strong>ゲーム業界</strong></td><td>アチーブメントバッジ（「初モデル学習」「R²&gt;0.9達成」）。「見習い予測師→匠の予測師→AI工場長」の称号。製造業の「匠」文化と親和性大</td></tr>
+<tr><td><strong>Spotify</strong></td><td>週次レコメンド「あなたのデータに似たパターンの他業種ユースケースを発見」</td></tr>
+<tr><td><strong>料理業界</strong></td><td>「予測レシピ」形式でユースケースを公開（目的・材料・手順・コツ）。ユーザー投稿も可能に</td></tr>
+</table></div>
+<h3 id="4-3-挑発法から生まれた破壊的アイデア">4-3. 挑発法から生まれた破壊的アイデア</h3>
+<div class="table-wrap"><table>
+<tr><th>PO（挑発）</th><th>生まれたアイデア</th></tr>
+<tr><td>「完全無料だったら？」</td><td><strong>成果報酬型</strong>: ツール無料、精度向上による受注増加額の1-3%をレベニューシェア。初期コストゼロで導入障壁消滅</td></tr>
+<tr><td>「競合データも見られたら？」</td><td><strong>匿名化ベンチマーク</strong>: 「あなたの見積もり精度は業界中央値の上位30%」。参加企業が増えるほどモデルが賢くなるネットワーク効果</td></tr>
+<tr><td>「人間が予測していたら？」</td><td><strong>AI vs 匠 対決機能</strong>: AIとベテランの予測精度を毎週競い合う。ベテランの補正パターン自体がデータとして蓄積→退職後もカンがモデルに残る</td></tr>
+</table></div>
+<h3 id="4-4-アナロジー思考成功saasの応用">4-4. アナロジー思考（成功SaaSの応用）</h3>
+<div class="table-wrap"><table>
+<tr><th>応用元</th><th>適用案</th></tr>
+<tr><td><strong>Canva</strong></td><td>業種×ユースケース別「予測テンプレート」100種類以上。白紙から始めなくてよい</td></tr>
+<tr><td><strong>Notion</strong></td><td>ボトムアップ導入設計。無料=個人利用限定、チーム共有=有料のトリガー</td></tr>
+<tr><td><strong>Figma</strong></td><td>コラボモード。営業・生産管理・購買がSHAP画面を同時に見ながら「予測レビュー会議」</td></tr>
+</table></div>
+<h3 id="4-5-最もインパクトの大きい非常識なアイデア-top-5">4-5. 最もインパクトの大きい非常識なアイデア Top 5</h3>
+<div class="table-wrap"><table>
+<tr><th>順位</th><th>アイデア</th><th>インパクトの根拠</th></tr>
+<tr><td><strong>1</strong></td><td><strong>公開データによるゼロショット業界ベンチマークモデル</strong></td><td>「データがない」という最大の導入障壁を破壊。ネットワーク効果で好循環</td></tr>
+<tr><td><strong>2</strong></td><td><strong>成果報酬型の完全無料プラン</strong></td><td>固定費ゼロで導入件数10倍の可能性</td></tr>
+<tr><td><strong>3</strong></td><td><strong>AI vs 匠 対決機能 + ベテランの暗黙知キャプチャ</strong></td><td>「ベテランの代替」→「ベテランの永久保存」。月20万円でも安い価値提案</td></tr>
+<tr><td><strong>4</strong></td><td><strong>予測テンプレート・マーケットプレイス（Canva型）</strong></td><td>ユーザー自身がユースケースを開拓。140業界への展開がコミュニティの力で実現</td></tr>
+<tr><td><strong>5</strong></td><td><strong>サプライチェーン横断データハブ</strong></td><td>このアプリが業界のデータインフラに。競合が参入しにくい圧倒的な堀</td></tr>
+</table></div>
+<hr>
+<h2 id="5-論理的思考からの検証結果">5. 論理的思考からの検証結果</h2>
+<h3 id="5-1-mece検証結果">5-1. MECE検証結果</h3>
+<div class="table-wrap"><table>
+<tr><th>対象</th><th>評価</th><th>主な漏れ・ダブり</th></tr>
+<tr><td>Step 1: 業界網羅性</td><td>B+</td><td>運輸（航空・海運・鉄道）、官公庁・自治体、メディア・出版が欠落</td></tr>
+<tr><td>Step 1: 分類軸</td><td>C+</td><td>「予測対象の性質」（金額/数量/時間/率）の横串分類が欠落</td></tr>
+<tr><td>Step 2: 評価軸</td><td>B</td><td>「スイッチングコスト」（Excel→本アプリの移行コスト）が欠落</td></tr>
+<tr><td>Step 3: Tier分類</td><td>C</td><td>境界基準が不明確。Tier 1に含めたものを事後的に「やらない」リストで除外</td></tr>
+<tr><td>Step 4: チャネル</td><td>B</td><td>アーンドメディア（PR、メディア掲載、口コミ）戦略が薄い</td></tr>
+</table></div>
+<h3 id="5-2-仮説ピラミッド検証">5-2. 仮説ピラミッド検証</h3>
+<pre><code>MRR 40万円達成
+├── Q1: 十分なリード数を獲得できるか？
+│   └── 【懸念】製造業×AIのKWは検索Vol小。M6に5,000セッションは楽観的
+├── Q2: リードを契約に転換できるか？
+│   └── 【矛盾】デモ15件×商談化50%×成約30%=2.25社/月（目標4社に未達）
+├── Q3: チャーンを抑制できるか？
+│   └── 【未検証】中小製造業のSaaS継続率ベンチマークなし
+└── Q4: 予算180万円で達成可能か？
+    └── 【矛盾】M6単月CAC 10万円は人件費を含めると21万円以上
+</code></pre>
+<h3 id="5-3-適用すべきだったフレームワーク">5-3. 適用すべきだったフレームワーク</h3>
+<div class="table-wrap"><table>
+<tr><th>フレームワーク</th><th>不在の影響</th></tr>
+<tr><td><strong>TAM/SAM/SOM</strong></td><td>市場規模を定量化しないまま優先順位を議論している</td></tr>
+<tr><td><strong>AARRR（パイレーツメトリクス）</strong></td><td>ファネルの定量モデルが不在</td></tr>
+<tr><td><strong>ユニットエコノミクス</strong></td><td>LTV/CACの計算がStep 3-4間で接続されていない</td></tr>
+<tr><td><strong>5Forces</strong></td><td>競合分析が1軸評価に留まっている</td></tr>
+<tr><td><strong>PMFピラミッド</strong></td><td>PMF前にマーケ投資180万円は時期尚早のリスク</td></tr>
+</table></div>
+<h3 id="5-4-検討されていない戦略オプション">5-4. 検討されていない戦略オプション</h3>
+<div class="table-wrap"><table>
+<tr><th>オプション</th><th>概要</th><th>検討すべき理由</th></tr>
+<tr><td><strong>B案: PLG先行</strong></td><td>無料版を全面公開しセルフサーブ獲得</td><td>SaaS/EC企業のデータリテラシーが高いと分析しながら、ハイタッチ営業を選択した根拠不足</td></tr>
+<tr><td><strong>C案: コンサル再販先行</strong></td><td>診断士を最初の顧客にし間接展開</td><td>フェーズ3（12ヶ月後）まで待つ理由がない</td></tr>
+<tr><td><strong>D案: 不動産バーティカル</strong></td><td>賃料予測SaaSとして展開</td><td>適合度5が6件と最多。裾野12万社超</td></tr>
+</table></div>
+<h3 id="5-5-論理的思考の総合評価">5-5. 論理的思考の総合評価</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>評価</th></tr>
+<tr><td>全体構造の論理性</td><td>B（Step間の数値整合性に重大な問題）</td></tr>
+<tr><td>分析の深度</td><td>A-（18業界140ユースケースの網羅性は高品質）</td></tr>
+<tr><td>実行可能性</td><td>B-（PMF未確認段階でのマーケ投資はリスキー）</td></tr>
+<tr><td>数値の信頼性</td><td>C+（PoC転換率50% vs 15%の矛盾が致命的）</td></tr>
+<tr><td>戦略の独自性</td><td>B+（製造集中→建設隣接展開は差別化された判断）</td></tr>
+</table></div>
+<hr>
+<h2 id="6-デザイン思考からの提案">6. デザイン思考からの提案</h2>
+<h3 id="6-1-ペルソナの深化">6-1. ペルソナの深化</h3>
+<p>現在のペルソナは「行動」は書かれているが「感情・文脈・暗黙知」が薄い。</p>
+<h4 id="見落とされている第4のペルソナベテランの佐藤さん62歳">見落とされている第4のペルソナ:「ベテランの佐藤さん（62歳）」</h4>
+<p>現在のドキュメントでは「課題の原因」として描かれているが、実は<strong>最も重要なステークホルダー</strong>。</p>
+<blockquote>「40年やってきた自分の経験がAIに置き換えられるのか」という恐れと誇り。</blockquote>
+<blockquote>このツールへの態度は: <strong>最大の抵抗勢力であり、最大の協力者になりうる</strong></blockquote>
+<p>佐藤さんを「置き換えられる人」ではなく「40年分の知恵がデータとして残る人」として位置づけなければ、現場導入は頓挫する。</p>
+<h3 id="6-2-問題定義の再定義jtbd">6-2. 問題定義の再定義（JTBD）</h3>
+<div class="table-wrap"><table>
+<tr><th>レベル</th><th>現在の定義</th><th>再定義</th></tr>
+<tr><td>表層</td><td>見積もり精度を上げたい</td><td>そのまま</td></tr>
+<tr><td>中層</td><td>属人化を解消したい</td><td>特定個人に依存せず、組織として再現可能な意思決定をしたい</td></tr>
+<tr><td><strong>深層</strong></td><td>―</td><td><strong>不確実な状況下で、自信を持って値付けの判断をしたい</strong></td></tr>
+<tr><td><strong>根本</strong></td><td>―</td><td><strong>中小製造業における暗黙知の組織資産化</strong></td></tr>
+</table></div>
+<blockquote><strong>メッセージのリフレーミング提案</strong>:</blockquote>
+<blockquote>- Before: 「見積もりの属人化を解消」（問題の指摘）</blockquote>
+<blockquote>- After: 「<strong>佐藤さんの40年分の勘を、会社の財産に。</strong>」（価値の創造）</blockquote>
+<h3 id="6-3-mvp検証ロードマップ">6-3. MVP検証ロードマップ</h3>
+<div class="table-wrap"><table>
+<tr><th>MVP</th><th>期間</th><th>コスト</th><th>検証仮説</th></tr>
+<tr><td>1. 見積もりデータ分析レポート</td><td>1週間</td><td>0円</td><td>経営者は自社データ分析に価値を感じるか</td></tr>
+<tr><td>2. Googleフォーム課題調査</td><td>3日</td><td>0円</td><td>属人化は本当に「金を払う課題」か</td></tr>
+<tr><td>3. 15分デモ動画テスト</td><td>2日</td><td>0円</td><td>ITリテラシー低い層でも操作を理解できるか</td></tr>
+<tr><td>4. 有料PoC（5万円/月）</td><td>1ヶ月</td><td>営業工数のみ</td><td>月5万円を払う価値があるか</td></tr>
+</table></div>
+<h3 id="6-4-uiアクセシビリティ55歳工場長が使えるか">6-4. UIアクセシビリティ（55歳工場長が使えるか）</h3>
+<div class="table-wrap"><table>
+<tr><th>課題</th><th>対策</th></tr>
+<tr><td>専門用語</td><td>「LightGBM」「SHAP」「R²」をユーザー画面で一切使わない。「予測精度: <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>☆（とても良い）」</td></tr>
+<tr><td>操作フロー</td><td>サイドバー+メインエリア → <strong>ウィザード形式</strong>（ステップ1/4: データを選んでください）</td></tr>
+<tr><td>フォントサイズ</td><td>最低16px。SHAP凡例は14px以上</td></tr>
+<tr><td>結果の解釈</td><td>SHAPグラフの横に「&quot;材質&quot;が見積もり金額に最も影響しています」とテキスト自動生成</td></tr>
+<tr><td>信頼感</td><td>「データは外部に送信されません」をデータアップロード画面直下に常時表示</td></tr>
+<tr><td>サポート</td><td>チャットより<strong>電話番号を大きく表示</strong>（製造業の55歳は電話を好む）</td></tr>
+</table></div>
+<h3 id="6-5-感情曲線付きカスタマージャーニー">6-5. 感情曲線付きカスタマージャーニー</h3>
+<pre><code>感情
+ 高 |                                          ★デライト3
+    |                              ★デライト2  /  「10分で見積もり完了」
+    |          ★デライト1         /           /
+ 中 |─────────/─────────────────/───────────/──────────
+    |        /    ▼ペイン2     /  ▼ペイン3
+    |       /   「事例がない」 /  「精度出るか？」
+ 低 | ▼ペイン1               /
+    | 「AIは難しそう」
+    |_____________________________________________________
+      認知    興味    比較検討    試用     購入    活用
+
+デライトモーメント:
+  ★1「CSVアップロードだけでいいの？ これなら私でもできる」
+  ★2「SHAPで見たら、佐藤さんが言ってたことと同じ結果が出た！」
+  ★3「新しい案件の見積もりが10分で出せた。しかも根拠付き」
+</code></pre>
+<hr>
+<h2 id="7-統合アクションプラン">7. 統合アクションプラン</h2>
+<p>5つの思考パターンからの提案を統合し、優先度を付けた実行計画を策定する。</p>
+<h3 id="フェーズ0-pmf検証今すぐ6週間-マーケ投資前にやるべきこと">フェーズ0: PMF検証（今すぐ〜6週間）— マーケ投資前にやるべきこと</h3>
+<p>全エージェントが共通して「顧客検証なしにマーケ投資すべきでない」と指摘。フェーズ1の前にフェーズ0を挿入する。</p>
+<div class="table-wrap"><table>
+<tr><th>週</th><th>アクション</th><th>検証仮説</th><th>成功基準</th><th>出典</th></tr>
+<tr><td>W1</td><td>製造業3社訪問・シャドウイング</td><td>見積もり属人化は本当のペインか</td><td>「お金を払って解決したい」の反応</td><td>デザイン思考</td></tr>
+<tr><td>W1</td><td>プロダクトMVP完成（Issue #1-#4）</td><td>CSVアップロード→予測→SHAPが動くか</td><td>一連のフローが完動</td><td>批判的思考</td></tr>
+<tr><td>W2</td><td>5社への見積もりデータ分析レポート提供</td><td>分析結果に価値を感じるか</td><td>3社以上が「面白い」と反応</td><td>デザイン思考</td></tr>
+<tr><td>W3</td><td>デモ動画を5名のターゲット層にテスト</td><td>UIは理解されるか</td><td>4/5名が「自分でもできそう」</td><td>デザイン思考</td></tr>
+<tr><td>W4</td><td>有料PoC提案（5万円/月、3社に）</td><td>月5万円の課金意欲があるか</td><td>1社以上が契約</td><td>批判的思考</td></tr>
+<tr><td>W5-6</td><td>ユーザーインタビュー5名</td><td>WTP、根本課題の検証</td><td>仮説の修正 or 確認</td><td>デザイン思考</td></tr>
+</table></div>
+<p><strong>Go/No-Go判断基準</strong>: フェーズ0で有料PoC 1社以上を獲得できなければ、ユースケースのピボットを検討する。</p>
+<h3 id="フェーズ1修正-数値整合性の修正">フェーズ1修正: 数値整合性の修正</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>修正前</th><th>修正後</th><th>修正根拠</th></tr>
+<tr><td>MRR目標(M6)</td><td>40万円</td><td><strong>25万円（5社×5万円）</strong></td><td>Step 3のレンジ下限。保守的に設定</td></tr>
+<tr><td>デモ申込目標(M6)</td><td>15件/月</td><td><strong>20件/月</strong></td><td>逆算: 20×50%×30%=3社/月で累積目標を達成</td></tr>
+<tr><td>PoC→有料転換率</td><td>Step 3で50%、Step 4で15%</td><td><strong>25%に統一</strong></td><td>デモ→商談50%×商談→成約50%（ハイタッチ前提）</td></tr>
+<tr><td>CAC目標(M6)</td><td>10万円</td><td><strong>25万円（Fully Loaded）</strong></td><td>営業人件費込み</td></tr>
+<tr><td>NPS目標</td><td>Step 3で40、Step 4で30</td><td><strong>+30に統一</strong></td><td>フェーズ1の現実的な水準</td></tr>
+</table></div>
+<h3 id="プロダクト改善優先度s">プロダクト改善（優先度S）</h3>
+<div class="table-wrap"><table>
+<tr><th>改善</th><th>効果</th><th>出典</th></tr>
+<tr><td>サンプルデータ3種プリインストール</td><td>Time to First Value短縮</td><td>グロース</td></tr>
+<tr><td>ウィザード形式UI</td><td>55歳工場長の操作成功率向上</td><td>デザイン</td></tr>
+<tr><td>専門用語の排除（R²→<span class="star">★</span>表示）</td><td>認知的アクセシビリティ向上</td><td>デザイン</td></tr>
+<tr><td>SHAPグラフ横にテキスト解説自動生成</td><td>「なぜ」の理解促進</td><td>デザイン</td></tr>
+<tr><td>「データは外部に送信されません」常時表示</td><td>信頼感向上</td><td>デザイン</td></tr>
+</table></div>
+<h3 id="マーケティングメッセージの改善">マーケティングメッセージの改善</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>修正前</th><th>修正後</th><th>出典</th></tr>
+<tr><td>キャッチコピー</td><td>「見積もりの属人化、CSVだけで解決」</td><td><strong>「佐藤さんの40年分の勘を、会社の財産に。」</strong></td><td>デザイン</td></tr>
+<tr><td>ポジショニング</td><td>「ノーコード×SHAP」</td><td><strong>「ベテランの知恵を、次世代に残すツール」</strong></td><td>デザイン+水平</td></tr>
+<tr><td>ターゲットの言語</td><td>「AI」「機械学習」</td><td><strong>「データ活用」「Excel分析の延長」</strong></td><td>デザイン</td></tr>
+</table></div>
+<h3 id="中長期で検討すべき非常識なアイデア">中長期で検討すべき非常識なアイデア</h3>
+<div class="table-wrap"><table>
+<tr><th>アイデア</th><th>検討時期</th><th>出典</th></tr>
+<tr><td>AI vs 匠 対決機能（ベテランの暗黙知キャプチャ）</td><td>フェーズ1後半</td><td>水平</td></tr>
+<tr><td>成果報酬型無料プラン</td><td>フェーズ2</td><td>水平</td></tr>
+<tr><td>140ユースケースのプログラマティックLP量産</td><td>フェーズ1</td><td>グロース</td></tr>
+<tr><td>予測テンプレート・マーケットプレイス</td><td>フェーズ3</td><td>水平+グロース</td></tr>
+<tr><td>匿名化業界ベンチマークモデル</td><td>フェーズ2</td><td>水平+グロース</td></tr>
+</table></div>
+<hr>
+<h2 id="付録-5エージェントの評価クロスリファレンス">付録: 5エージェントの評価クロスリファレンス</h2>
+<p>各エージェントの指摘・提案が他のエージェントの分析とどう関連するかのマッピング。</p>
+<div class="table-wrap"><table>
+<tr><th>テーマ</th><th>批判的</th><th>グロース</th><th>水平</th><th>論理的</th><th>デザイン</th></tr>
+<tr><td>顧客検証の欠如</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>ファネルKPIの矛盾</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>Step間の数値不整合</td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>PMF前のマーケ投資リスク</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>PLG/セルフサーブの不足</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>ペルソナの深み不足</td><td><span class="star">★</span></td></tr>
+<tr><td>メッセージのリフレーミング</td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>サンプルデータ同梱</td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>UIアクセシビリティ</td><td><span class="star">★</span></td></tr>
+<tr><td>競合（LLM）リスク</td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>ネットワーク効果の構築</td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+<tr><td>価格最適化</td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td><td><span class="star">★</span></td></tr>
+</table></div>
+<p><span class="star">★</span> = 当該エージェントが指摘/提案した項目</p>
+</section>
+<section id="step6_revised_strategy" class="doc-section" style="display:none"><h1 id="step-6-修正戦略--step-5レビューを反映した実行計画-v2">Step 6: 修正戦略 — Step 5レビューを反映した実行計画 v2</h1>
+<blockquote>ML予測アプリ（LightGBM回帰予測 / ノーコード / SHAP解析付き）のマネタイズ検討用</blockquote>
+<blockquote>調査日: 2026-03-08</blockquote>
+<blockquote>前提: Step 5の5つの思考パターンによるレビュー結果を全面反映</blockquote>
+<hr>
+<h2 id="エグゼクティブサマリー">エグゼクティブサマリー</h2>
+<p>Step 5の多角的レビューにより、Step 1〜4の戦略に<strong>4つの重大な問題</strong>が特定された。</p>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>問題</th><th>影響度</th><th>本ドキュメントでの対応</th></tr>
+<tr><td>1</td><td>顧客検証の完全な欠如</td><td>致命的</td><td>→ フェーズ0（PMF検証）を新設</td></tr>
+<tr><td>2</td><td>ファネルKPIの数値矛盾</td><td>重大</td><td>→ 財務モデルを全面改訂</td></tr>
+<tr><td>3</td><td>Step間の数値不整合</td><td>重大</td><td>→ 統一KPIフレームワーク策定</td></tr>
+<tr><td>4</td><td>プロダクト未完成でのマーケ計画</td><td>重大</td><td>→ プロダクト/マーケ統合タイムライン作成</td></tr>
+</table></div>
+<p><strong>最大の変更点</strong>: 従来のフェーズ1（0〜6ヶ月のマーケ施策実行）の前に、<strong>フェーズ0（6週間のPMF検証）</strong> を挿入する。マーケ投資180万円は、フェーズ0のGo判定後に実行する。</p>
+<hr>
+<h2 id="目次">目次</h2>
+<ul>
+<li><a href="#1-修正前後の比較">修正前後の比較</a></li>
+<li><a href="#2-フェーズ0-pmf検証計画6週間">フェーズ0: PMF検証計画</a></li>
+<li><a href="#3-修正版-財務モデル">修正版: 財務モデル</a></li>
+<li><a href="#4-修正版-ファネルkpi">修正版: ファネルKPI</a></li>
+<li><a href="#5-修正版-プロダクトロードマップ">修正版: プロダクトロードマップ</a></li>
+<li><a href="#6-修正版-マーケティング戦略">修正版: マーケティング戦略</a></li>
+<li><a href="#7-修正版-価格戦略">修正版: 価格戦略</a></li>
+<li><a href="#8-リスク管理計画">リスク管理計画</a></li>
+<li><a href="#9-gono-go判定基準">Go/No-Go判定基準</a></li>
+<li><a href="#10-ピボット候補の事前設計">ピボット候補の事前設計</a></li>
+</ul>
+<hr>
+<h2 id="1-修正前後の比較">1. 修正前後の比較</h2>
+<h3 id="1-1-戦略フレームワークの変更">1-1. 戦略フレームワークの変更</h3>
+<pre><code>【修正前】Step 4の計画
+Month 1 ──────────────────────────── Month 6
+│  マーケ施策実行（180万円投下）        │
+│  LP制作 → SEO → 広告 → セミナー      │
+│  → MRR 40万円（8社）達成             │
+
+【修正後】本ドキュメントの計画
+Week 1-6        Month 3-8              Month 9-12
+│ フェーズ0    │  フェーズ1(修正版)    │ フェーズ2
+│ PMF検証     │  初期成長            │ スケール
+│ 投資: 最小  │  投資: 段階的        │ 投資: 本格化
+│ Go/No-Go→  │  MRR 25万円目標      │ MRR 100万円目標
+</code></pre>
+<h3 id="1-2-主要kpiの修正一覧">1-2. 主要KPIの修正一覧</h3>
+<div class="table-wrap"><table>
+<tr><th>KPI</th><th>Step 4（修正前）</th><th>Step 6（修正後）</th><th>修正理由</th></tr>
+<tr><td><strong>MRR目標(M6)</strong></td><td>40万円</td><td><strong>25万円</strong></td><td>Step 3のレンジ下限を採用。楽観バイアス排除</td></tr>
+<tr><td><strong>有料顧客数(M6)</strong></td><td>8社</td><td><strong>5社</strong></td><td>ARPU 5万円×5社=25万円</td></tr>
+<tr><td><strong>デモ申込(M6月次)</strong></td><td>15件</td><td><strong>20件</strong></td><td>ファネル逆算で整合性確保</td></tr>
+<tr><td><strong>PoC→有料転換率</strong></td><td>50%（Step 3）/15%（Step 4）</td><td><strong>25%統一</strong></td><td>商談化50%×成約50%（ハイタッチ前提）</td></tr>
+<tr><td><strong>CAC目標(M6)</strong></td><td>10万円</td><td><strong>25万円（Fully Loaded）</strong></td><td>営業人件費込み</td></tr>
+<tr><td><strong>NPS目標</strong></td><td>40（Step 3）/30（Step 4）</td><td><strong>+30統一</strong></td><td>PMF初期の現実的水準</td></tr>
+<tr><td><strong>マーケ投資(6ヶ月)</strong></td><td>180万円</td><td><strong>フェーズ0: 15万円 + フェーズ1: 120万円</strong></td><td>段階的投資に変更</td></tr>
+<tr><td><strong>チャーン率(年間)</strong></td><td>15%</td><td><strong>30%</strong></td><td>PMF前のB2B SaaS業界平均を適用</td></tr>
+</table></div>
+<hr>
+<h2 id="2-フェーズ0-pmf検証計画6週間">2. フェーズ0: PMF検証計画（6週間）</h2>
+<h3 id="2-1-目的">2-1. 目的</h3>
+<p><strong>180万円のマーケ投資を実行する前に、以下の3つの仮説を検証する。</strong></p>
+<div class="table-wrap"><table>
+<tr><th>仮説</th><th>検証方法</th><th>成功基準</th></tr>
+<tr><td>H1: 見積もりの属人化は「お金を払って解決したい」課題である</td><td>深層インタビュー5社</td><td>5社中3社以上が「月5万円以下なら検討する」と回答</td></tr>
+<tr><td>H2: CSV→予測→SHAPの操作フローは非IT層でも使える</td><td>ユーザビリティテスト5名</td><td>4/5名が初回15分以内に予測完了</td></tr>
+<tr><td>H3: 月額5万円の課金意欲がある</td><td>有料PoCの提案</td><td>3社提案→1社以上が契約</td></tr>
+</table></div>
+<h3 id="2-2-週次実行計画">2-2. 週次実行計画</h3>
+<h4 id="week-1-プロダクトmvp完成--初回訪問">Week 1: プロダクトMVP完成 + 初回訪問</h4>
+<div class="table-wrap"><table>
+<tr><th>タスク</th><th>詳細</th><th>担当</th><th>完了基準</th></tr>
+<tr><td>MVP完成</td><td>CLAUDE.md Issue #1〜#4を完成</td><td>開発</td><td>CSVアップロード→予測→SHAP表示が一連で動作</td></tr>
+<tr><td>サンプルデータ作成</td><td>製造業見積もりのダミーデータ3種（金属加工/樹脂成形/板金）</td><td>開発</td><td>各100行以上、現実的な特徴量構成</td></tr>
+<tr><td>初回訪問</td><td>製造業3社に訪問し見積もり業務を観察</td><td>営業/創業者</td><td>シャドウイング実施、写真・メモ記録</td></tr>
+</table></div>
+<p><strong>初回訪問のアプローチ先</strong>:</p>
+<ul>
+<li>商工会議所の製造業部会（大田区/東大阪が最優先）</li>
+<li>中小企業診断士の製造業担当者（無料で紹介を依頼）</li>
+<li>既存の知人・ネットワーク（最も早い）</li>
+</ul>
+<h4 id="week-2-見積もりデータ分析レポート提供">Week 2: 見積もりデータ分析レポート提供</h4>
+<div class="table-wrap"><table>
+<tr><th>タスク</th><th>詳細</th></tr>
+<tr><td>データ借用</td><td>Week 1訪問先または知人の製造業から見積もりExcelを借用（NDA締結）</td></tr>
+<tr><td>分析実行</td><td>本アプリで予測モデル構築＋SHAP分析</td></tr>
+<tr><td>レポート作成</td><td>PowerPoint 5枚にまとめて訪問・プレゼン</td></tr>
+<tr><td>記録</td><td>顧客の反応（発言原文、表情、質問内容）を詳細に記録</td></tr>
+</table></div>
+<p><strong>レポートの構成（5枚）</strong>:</p>
+<ul>
+<li>御社の見積もりデータ概要（件数・金額分布）</li>
+<li>予測モデルの精度（「100件の実績から、新規見積もりの金額を±○%で予測」）</li>
+<li>見積もり金額に最も影響する要素TOP 5（SHAPベース）</li>
+<li>「ベテランの勘」の可視化（「材質と加工難易度の組み合わせが金額を決めていた」）</li>
+<li>次のステップ（14日間無料トライアルの案内）</li>
+</ul>
+<h4 id="week-3-デモ動画テスト">Week 3: デモ動画テスト</h4>
+<div class="table-wrap"><table>
+<tr><th>タスク</th><th>詳細</th></tr>
+<tr><td>デモ動画撮影</td><td>サンプルデータで一連の操作を15分以内で実演。操作ミスもカットしない</td></tr>
+<tr><td>テスト</td><td>55歳以上の非IT職5名に動画を見せ、直後に操作してもらう</td></tr>
+<tr><td>計測</td><td>初回予測完了までの時間、つまずきポイント、質問内容を記録</td></tr>
+</table></div>
+<h4 id="week-4-有料poc提案">Week 4: 有料PoC提案</h4>
+<div class="table-wrap"><table>
+<tr><th>タスク</th><th>詳細</th></tr>
+<tr><td>PoC設計</td><td>「1ヶ月間、週1回の分析レポート + ツール利用権」を5万円/月で提案</td></tr>
+<tr><td>アプローチ</td><td>Week 2のレポート提供先3社に提案</td></tr>
+<tr><td>交渉</td><td>事例取材協力を条件に初月3万円の割引も検討</td></tr>
+</table></div>
+<h4 id="week-5-6-深層インタビュー--gono-go判定">Week 5-6: 深層インタビュー + Go/No-Go判定</h4>
+<div class="table-wrap"><table>
+<tr><th>タスク</th><th>詳細</th></tr>
+<tr><td>インタビュー</td><td>5社×45分。Step 5のインタビューガイドに準拠</td></tr>
+<tr><td>分析</td><td>発言をポストイットに書き起こし→アフィニティダイアグラム作成</td></tr>
+<tr><td>Go/No-Go判定</td><td>セクション9の判定基準に基づき、フェーズ1進行 or ピボットを決定</td></tr>
+</table></div>
+<h3 id="2-3-フェーズ0の予算">2-3. フェーズ0の予算</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>金額</th><th>備考</th></tr>
+<tr><td>交通費（訪問5回想定）</td><td>3万円</td><td>首都圏内</td></tr>
+<tr><td>NDA/契約書作成</td><td>0円</td><td>テンプレート利用</td></tr>
+<tr><td>デモ動画制作</td><td>0円</td><td>自社撮影</td></tr>
+<tr><td>サンプルデータ作成</td><td>0円</td><td>内製</td></tr>
+<tr><td>軽微なUI改修</td><td>0円</td><td>内製</td></tr>
+<tr><td>予備費</td><td>2万円</td><td>-</td></tr>
+<tr><td><strong>合計</strong></td><td><strong>5万円</strong></td><td><strong>Step 4の180万円の3%以下</strong></td></tr>
+</table></div>
+<h3 id="2-4-フェーズ0で検証しないことスコープ外">2-4. フェーズ0で検証しないこと（スコープ外）</h3>
+<ul>
+<li>SEOの効果検証（トラフィックが足りない）</li>
+<li>ABテスト（統計的有意差に達しない）</li>
+<li>価格の最適化（まずは「払うか/払わないか」の二値で十分）</li>
+<li>スケーラビリティ（5社で十分）</li>
+</ul>
+<hr>
+<h2 id="3-修正版-財務モデル">3. 修正版: 財務モデル</h2>
+<h3 id="3-1-ユニットエコノミクス修正版">3-1. ユニットエコノミクス（修正版）</h3>
+<pre><code>【修正前のモデル】
+ARPU: 5万円/月 → 24ヶ月後に20万円（4倍アップセル）
+チャーン: 年15%（月1.35%）
+LTV: 370万円
+CAC: 136万円以下
+LTV/CAC: 2.7以上
+
+【修正後のモデル — 保守的】
+ARPU: 5万円/月 → 12ヶ月後に8万円（1.6倍アップセル）
+チャーン: 年30%（月2.96%）
+顧客寿命: 1/0.0296 = 33.8ヶ月 ≈ 34ヶ月
+LTV: 平均ARPU 6.5万円 × 34ヶ月 = 221万円
+目標CAC: 221万円 / 3 = 73.7万円以下（LTV/CAC ≥ 3）
+
+【修正後のモデル — 楽観的】
+ARPU: 5万円/月 → 18ヶ月後に12万円（2.4倍アップセル）
+チャーン: 年20%（月1.85%）
+顧客寿命: 54ヶ月
+LTV: 平均ARPU 8.5万円 × 54ヶ月 = 459万円
+目標CAC: 153万円以下
+</code></pre>
+<h3 id="3-2-月次収益予測修正版">3-2. 月次収益予測（修正版）</h3>
+<div class="table-wrap"><table>
+<tr><th>月</th><th>新規獲得</th><th>累計顧客</th><th>チャーン</th><th>純増</th><th>MRR</th><th>累計投資</th></tr>
+<tr><td><strong>Phase 0</strong></td></tr>
+<tr><td>W1-6</td><td>1（PoC）</td><td>1</td><td>0</td><td>1</td><td>5万</td><td>5万</td></tr>
+<tr><td><strong>Phase 1</strong></td></tr>
+<tr><td>M3</td><td>1</td><td>2</td><td>0</td><td>1</td><td>10万</td><td>25万</td></tr>
+<tr><td>M4</td><td>1</td><td>3</td><td>0</td><td>1</td><td>15万</td><td>45万</td></tr>
+<tr><td>M5</td><td>1</td><td>4</td><td>0</td><td>1</td><td>20万</td><td>65万</td></tr>
+<tr><td>M6</td><td>1</td><td>5</td><td>0</td><td>1</td><td>25万</td><td>85万</td></tr>
+<tr><td>M7</td><td>2</td><td>6.5</td><td>0.5</td><td>1.5</td><td>32.5万</td><td>110万</td></tr>
+<tr><td>M8</td><td>2</td><td>8</td><td>0.5</td><td>1.5</td><td>40万</td><td>135万</td></tr>
+<tr><td><strong>Phase 2</strong></td></tr>
+<tr><td>M9</td><td>3</td><td>10</td><td>1</td><td>2</td><td>50万</td><td>155万</td></tr>
+<tr><td>M12</td><td>4</td><td>16</td><td>2</td><td>2</td><td>80万</td><td>230万</td></tr>
+</table></div>
+<p><strong>BEP（損益分岐点）</strong>: 累計投資135万円 / MRR 40万円 → M8で月次黒字化</p>
+<h3 id="3-3-tamsamsomstep-5で不在と指摘されたフレームワーク">3-3. TAM/SAM/SOM（Step 5で不在と指摘されたフレームワーク）</h3>
+<pre><code>TAM（Total Addressable Market）
+  中小製造業の見積もり業務改善市場
+  = 推定15,000社 × 年間60万円（月5万円） = 90億円/年
+
+SAM（Serviceable Addressable Market）
+  金属加工・樹脂成形 × 従業員20-150名 × Excel見積もり運用
+  = 推定5,000社 × 年間60万円 = 30億円/年
+
+SOM（Serviceable Obtainable Market）— 初年度
+  フェーズ1-2で獲得可能な現実的顧客数
+  = 15-20社 × 年間60万円 = 900万〜1,200万円/年
+
+※ ターゲット企業数15,000-20,000社の根拠が未検証（Step 5指摘）
+  → フェーズ0のインタビューで実態を確認する
+</code></pre>
+<hr>
+<h2 id="4-修正版-ファネルkpi">4. 修正版: ファネルKPI</h2>
+<h3 id="4-1-aarrrパイレーツメトリクスの導入">4-1. AARRR（パイレーツメトリクス）の導入</h3>
+<p>Step 5で「ファネルの定量モデルが不在」と指摘。AARRRフレームワークを導入する。</p>
+<div class="table-wrap"><table>
+<tr><th>段階</th><th>定義</th><th>M6目標</th><th>M12目標</th><th>計測方法</th></tr>
+<tr><td><strong>Acquisition</strong></td><td>LP訪問</td><td>3,000セッション/月</td><td>8,000</td><td>GA4</td></tr>
+<tr><td><strong>Activation</strong></td><td>初回予測完了（Aha Moment到達）</td><td>Aha率 50%</td><td>65%</td><td>アプリ内イベント</td></tr>
+<tr><td><strong>Revenue</strong></td><td>有料契約</td><td>MRR 25万円</td><td>80万円</td><td>Stripe</td></tr>
+<tr><td><strong>Retention</strong></td><td>翌月継続率</td><td>90%（月次）</td><td>93%</td><td>Stripe</td></tr>
+<tr><td><strong>Referral</strong></td><td>紹介経由リード</td><td>1件/月</td><td>5件/月</td><td>CRM</td></tr>
+</table></div>
+<h3 id="4-2-ファネル逆算モデル修正版">4-2. ファネル逆算モデル（修正版）</h3>
+<pre><code>M6目標: MRR 25万円（累計5社、月次純増1社）
+
+月次純増1社に必要な各段階の件数:
+  成約:      1社/月
+  ÷ 成約率50% (ハイタッチ)
+  商談:      2件/月
+  ÷ 商談化率50%
+  デモ申込:  4件/月
+  ÷ デモ化率5%
+  MQL:       80件/月
+  ÷ CV率3%
+  LP訪問:    2,667セッション/月 ≈ 3,000
+
+M8目標: MRR 40万円（累計8社、月次純増2社）
+  成約:      2社/月
+  商談:      4件/月
+  デモ申込:  8件/月
+  MQL:       160件/月
+  LP訪問:    5,333セッション/月 ≈ 5,500
+</code></pre>
+<p><strong>修正前との比較</strong>: Step 4ではデモ15件→成約2.25社の矛盾があったが、修正版ではデモ4件→成約1社と整合性がとれている。少数のハイタッチ営業で確実に成約する戦略に転換。</p>
+<h3 id="4-3-north-star-metric">4-3. North Star Metric</h3>
+<div class="table-wrap"><table>
+<tr><th>候補</th><th>定義</th><th>採用</th></tr>
+<tr><td>MRR</td><td>月次経常収益</td><td>△（遅行指標）</td></tr>
+<tr><td>トライアル14日以内のAha Moment到達率</td><td>自社データでR²&gt;0.7のモデル構築 + SHAP確認</td><td><strong><span class="star">★</span>採用</strong></td></tr>
+<tr><td>週次アクティブ予測回数</td><td>ログイン→予測実行した回数/週</td><td>○（補助指標）</td></tr>
+</table></div>
+<hr>
+<h2 id="5-修正版-プロダクトロードマップ">5. 修正版: プロダクトロードマップ</h2>
+<h3 id="5-1-プロダクトマーケ統合タイムライン">5-1. プロダクト/マーケ統合タイムライン</h3>
+<p>Step 5で「プロダクト未完成のままマーケ計画を策定」と指摘された問題を解消する。</p>
+<pre><code>            W1-2    W3-4    W5-6    M3      M4      M5      M6      M7-8
+開発       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           Issue    Issue   Issue   Issue   UI改善   SHAP     API     テンプレ
+           #1-#4   #5-#6   #7-#8   (bug)   ウィザ   テキスト  連携    ート
+           MVP完成  評価+   予測+            ード化   解説
+                   SHAP    出力
+
+マーケ     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           訪問    デモ    インタ   LP公開  SEO     事例     リスティ セミナー
+           観察    動画    ビュー          記事    記事      ング     開始
+                   テスト  Go/NoGo        開始    (実績     広告
+                                                 ベース)
+
+顧客       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           0社     0社     1社PoC  2社     3社     4社      5社      8社
+</code></pre>
+<h3 id="5-2-プロダクト改善の優先順位step-5統合">5-2. プロダクト改善の優先順位（Step 5統合）</h3>
+<h4 id="優先度sフェーズ0中に実装">優先度S（フェーズ0中に実装）</h4>
+<div class="table-wrap"><table>
+<tr><th>改善</th><th>出典</th><th>理由</th><th>工数</th></tr>
+<tr><td>サンプルデータ3種プリインストール</td><td>グロース</td><td>Time to First Valueの劇的短縮</td><td>1日</td></tr>
+<tr><td>「データは外部に送信されません」常時表示</td><td>デザイン</td><td>信頼感。セキュリティ懸念で離脱を防止</td><td>0.5日</td></tr>
+<tr><td>エラーメッセージの日本語化・具体化</td><td>デザイン</td><td>「次に何をすべきか」を明示</td><td>1日</td></tr>
+</table></div>
+<h4 id="優先度aフェーズ1前半で実装">優先度A（フェーズ1前半で実装）</h4>
+<div class="table-wrap"><table>
+<tr><th>改善</th><th>出典</th><th>理由</th><th>工数</th></tr>
+<tr><td>ウィザード形式UI（ステップ1/4形式）</td><td>デザイン</td><td>55歳工場長のタスク完了率向上</td><td>3日</td></tr>
+<tr><td>専門用語の排除（R²→<span class="star">★</span>表示）</td><td>デザイン</td><td>認知的アクセシビリティ</td><td>1日</td></tr>
+<tr><td>SHAPグラフ横にテキスト解説自動生成</td><td>デザイン</td><td>「なぜこの予測か」の理解促進</td><td>2日</td></tr>
+<tr><td>Free枠の制限変更（回数→行数500行）</td><td>グロース</td><td>試行錯誤の自由度向上</td><td>0.5日</td></tr>
+</table></div>
+<h4 id="優先度bフェーズ1後半で実装">優先度B（フェーズ1後半で実装）</h4>
+<div class="table-wrap"><table>
+<tr><th>改善</th><th>出典</th><th>理由</th><th>工数</th></tr>
+<tr><td>「ラフ見積もり」モード（特徴量3つで即概算）</td><td>水平</td><td>展示会・電話の場での活用拡大</td><td>3日</td></tr>
+<tr><td>「外れ値レポート」機能</td><td>水平</td><td>予測を外した案件の深掘り</td><td>3日</td></tr>
+<tr><td>What-if分析</td><td>水平</td><td>リスクマネジメントツールへの昇格</td><td>5日</td></tr>
+<tr><td>予測結果共有ボタン</td><td>グロース</td><td>バイラル係数の向上</td><td>1日</td></tr>
+</table></div>
+<h4 id="優先度cフェーズ2以降で検討">優先度C（フェーズ2以降で検討）</h4>
+<div class="table-wrap"><table>
+<tr><th>改善</th><th>出典</th><th>備考</th></tr>
+<tr><td>AI vs 匠 対決機能</td><td>水平</td><td>ベテランの暗黙知キャプチャ</td></tr>
+<tr><td>予測テンプレート・マーケットプレイス</td><td>水平+グロース</td><td>コミュニティ形成が前提</td></tr>
+<tr><td>匿名化業界ベンチマーク</td><td>水平+グロース</td><td>参加企業数がクリティカルマス</td></tr>
+<tr><td>コラボモード</td><td>水平（Figma型）</td><td>チーム利用の有料化トリガー</td></tr>
+</table></div>
+<hr>
+<h2 id="6-修正版-マーケティング戦略">6. 修正版: マーケティング戦略</h2>
+<h3 id="6-1-メッセージのリフレーミング">6-1. メッセージのリフレーミング</h3>
+<p>Step 5のデザイン思考・水平思考から、メッセージの根本的な転換を行う。</p>
+<div class="table-wrap"><table>
+<tr><th>要素</th><th>修正前（Step 4）</th><th>修正後</th><th>変更理由</th></tr>
+<tr><td><strong>キャッチコピー</strong></td><td>「見積もりの属人化、CSVだけで解決」</td><td><strong>「ベテランの経験を、会社の財産に。」</strong></td><td>問題指摘→価値創造。ベテランを敵にしない</td></tr>
+<tr><td><strong>サブコピー</strong></td><td>「ノーコードAI予測ツール」</td><td><strong>「いつものExcelデータで、見積もりの&quot;なぜ&quot;が見える」</strong></td><td>AI/MLを前面に出さない</td></tr>
+<tr><td><strong>ポジショニング</strong></td><td>「ノーコード×SHAP」</td><td><strong>「ベテランの知恵を、次世代に残すツール」</strong></td><td>技術語→顧客便益</td></tr>
+<tr><td><strong>ターゲットの呼び方</strong></td><td>「ユーザー」</td><td><strong>「匠の知恵を引き継ぐ方」</strong></td><td>製造業の「匠」文化との親和性</td></tr>
+<tr><td><strong>使用禁止用語</strong></td><td>―</td><td>AI、機械学習、LightGBM、SHAP、R²、回帰</td><td>ターゲット（55歳工場長）に届かない</td></tr>
+<tr><td><strong>使用推奨用語</strong></td><td>―</td><td>データ活用、Excel分析の延長、見積もりの根拠を見える化</td><td>日常語で表現</td></tr>
+</table></div>
+<h3 id="6-2-チャネル戦略の修正">6-2. チャネル戦略の修正</h3>
+<h4 id="フェーズ0w1-6-ダイレクトチャネルのみ">フェーズ0（W1-6）: ダイレクトチャネルのみ</h4>
+<div class="table-wrap"><table>
+<tr><th>チャネル</th><th>アクション</th><th>目標</th></tr>
+<tr><td><strong>対面訪問</strong></td><td>製造業3-5社を直接訪問</td><td>見積もり業務の実態把握</td></tr>
+<tr><td><strong>中小企業診断士</strong></td><td>2-3名に無料で分析レポート提供</td><td>診断士経由のリード獲得</td></tr>
+<tr><td><strong>商工会議所</strong></td><td>製造業部会での5分プレゼン</td><td>PoC候補の発掘</td></tr>
+</table></div>
+<h4 id="フェーズ1m3-8-段階的チャネル拡大">フェーズ1（M3-8）: 段階的チャネル拡大</h4>
+<div class="table-wrap"><table>
+<tr><th>月</th><th>追加チャネル</th><th>投資</th><th>目標</th></tr>
+<tr><td>M3</td><td>LP公開 + SEO記事（月4本）開始</td><td>15万/月</td><td>月間1,000セッション</td></tr>
+<tr><td>M4</td><td>実績ベース事例記事（PoC企業の許可を得て）</td><td>5万/月</td><td>信頼性の獲得</td></tr>
+<tr><td>M5</td><td>リスティング広告（絞り込みKW）</td><td>10万/月</td><td>デモ申込4件/月</td></tr>
+<tr><td>M6</td><td>日刊工業新聞への記事掲載打診</td><td>0円</td><td>アーンドメディア</td></tr>
+<tr><td>M7</td><td>オンラインセミナー開始（月1回）</td><td>5万/月</td><td>参加者20名/回</td></tr>
+<tr><td>M8</td><td>診断士ネットワーク組織化</td><td>3万/月</td><td>紹介リード3件/月</td></tr>
+</table></div>
+<p><strong>修正前との差分</strong>:</p>
+<ul>
+<li>M1-2の広告投資を削除（トラフィック不足でABテスト不可能 — Step 5批判的思考の指摘）</li>
+<li>「事例記事」の掲載時期をPoC実績後に後ろ倒し（未実証の「70%削減」は景品表示法リスク — Step 5指摘）</li>
+<li>アーンドメディア戦略を追加（Step 5論理的思考で「チャネルにPRが不在」と指摘）</li>
+</ul>
+<h3 id="6-3-コンテンツ戦略の修正">6-3. コンテンツ戦略の修正</h3>
+<h4 id="使用する事例数値の基準">使用する事例・数値の基準</h4>
+<div class="table-wrap"><table>
+<tr><th>区分</th><th>使用可否</th><th>例</th></tr>
+<tr><td><strong>PoC実績に基づく数値</strong></td><td>OK</td><td>「A社の見積もりデータ200件で検証したところ、予測精度R²=0.87を達成」</td></tr>
+<tr><td><strong>推定値（未実証）</strong></td><td>NG</td><td><del>「見積もり工数70%削減」「精度±5%」</del></td></tr>
+<tr><td><strong>デモデータによる例</strong></td><td>条件付きOK</td><td>「サンプルデータでの検証例」と明記した上で使用</td></tr>
+</table></div>
+<h4 id="コンテンツカレンダー修正版">コンテンツカレンダー（修正版）</h4>
+<div class="table-wrap"><table>
+<tr><th>月</th><th>コンテンツ</th><th>本数</th><th>備考</th></tr>
+<tr><td>M3</td><td>製造業の見積もり課題に関する解説記事</td><td>4本</td><td>課題提起のみ。製品訴求なし</td></tr>
+<tr><td>M4</td><td>「データで見積もりを分析してみた」シリーズ</td><td>4本</td><td>サンプルデータで実演</td></tr>
+<tr><td>M5</td><td>PoC企業の事例記事（許可取得済み）</td><td>1-2本</td><td>実績ベースの数値のみ使用</td></tr>
+<tr><td>M6</td><td>「ベテランの勘をデータで検証」連載</td><td>4本</td><td>デザイン思考のメッセージ反映</td></tr>
+<tr><td>M7-8</td><td>ウェビナー「見積もりデータ活用入門」</td><td>月1回</td><td>製品デモではなく教育コンテンツ</td></tr>
+</table></div>
+<h3 id="6-4-オフラインチャネルの追加デザイン思考から">6-4. オフラインチャネルの追加（デザイン思考から）</h3>
+<p>Step 5で「デジタルリテラシーの低い層にWebコンテンツは届かない」と指摘。</p>
+<div class="table-wrap"><table>
+<tr><th>施策</th><th>詳細</th><th>投資</th></tr>
+<tr><td><strong>A4チラシ</strong></td><td>商工会議所・信金の窓口に設置。電話番号を大きく記載</td><td>3万円（印刷500部）</td></tr>
+<tr><td><strong>商工会議所セミナー</strong></td><td>「製造業のデータ活用入門」として30分登壇</td><td>0円</td></tr>
+<tr><td><strong>信金経由の紹介</strong></td><td>取引先信金の法人担当者に製品を説明</td><td>0円</td></tr>
+<tr><td><strong>業界紙記事</strong></td><td>日刊工業新聞・MONOistへの記事掲載打診</td><td>0円（PR）</td></tr>
+</table></div>
+<hr>
+<h2 id="7-修正版-価格戦略">7. 修正版: 価格戦略</h2>
+<h3 id="7-1-価格テーブル修正版">7-1. 価格テーブル（修正版）</h3>
+<p>Step 5のグロース思考・水平思考を反映し、価格体系を再設計。</p>
+<div class="table-wrap"><table>
+<tr><th>プラン</th><th>月額</th><th>制限</th><th>ターゲット</th></tr>
+<tr><td><strong>Free</strong></td><td>0円</td><td>データ500行まで、SHAP上位3変数のみ表示、モデル保存1個</td><td>個人利用・試用</td></tr>
+<tr><td><strong>Starter</strong></td><td><strong>19,800円</strong></td><td>データ5,000行、SHAP全変数、モデル保存5個</td><td>小規模製造業</td></tr>
+<tr><td><strong>Professional</strong></td><td><strong>49,800円</strong></td><td>データ50,000行、モデル保存無制限、API連携、優先サポート</td><td>中規模製造業</td></tr>
+<tr><td><strong>Enterprise</strong></td><td>個別見積</td><td>オンプレ対応、SSO、SLA</td><td>大企業・コンサル</td></tr>
+</table></div>
+<p><strong>修正ポイント</strong>:</p>
+<ul>
+<li>Starterを29,800円→<strong>19,800円</strong>に引き下げ（「2万円以下」の心理的壁突破）</li>
+<li>Free枠の制限を「回数」→「行数」に変更（試行錯誤の自由度向上）</li>
+<li>SHAPをFree枠で部分開放（Aha Momentの早期到達）</li>
+<li>差別化軸を「行数×モデル保存数」に変更（予測回数制限は体験を劣化させる）</li>
+<li>年契約割引を10%→17%（2ヶ月無料）に引き上げ</li>
+</ul>
+<h3 id="7-2-フェーズ0の特別価格">7-2. フェーズ0の特別価格</h3>
+<div class="table-wrap"><table>
+<tr><th>条件</th><th>価格</th><th>理由</th></tr>
+<tr><td>PoC参加（事例取材協力あり）</td><td><strong>月額30,000円</strong>（初月のみ）</td><td>事例記事という対価との交換</td></tr>
+<tr><td>PoC参加（取材なし）</td><td>月額49,800円</td><td>正規Professionalプラン</td></tr>
+<tr><td>フェーズ0参加企業の年契約</td><td><strong>月額39,800円</strong>（20%割引）</td><td>早期採用者への感謝</td></tr>
+</table></div>
+<hr>
+<h2 id="8-リスク管理計画">8. リスク管理計画</h2>
+<h3 id="8-1-新規リスクへの対応step-5で特定されたもの">8-1. 新規リスクへの対応（Step 5で特定されたもの）</h3>
+<div class="table-wrap"><table>
+<tr><th>リスク</th><th>発生確率</th><th>影響度</th><th>対策</th><th>トリガー</th></tr>
+<tr><td><strong>LLMベースの代替</strong>（ChatGPT等）</td><td>高</td><td>高</td><td>SHAP解析の深さ＋製造業特化のテンプレートで差別化。「汎用LLMでは再現できない業界知見」の蓄積</td><td>競合LLMが製造業向け分析を無料提供開始時</td></tr>
+<tr><td><strong>補助金制度の変更</strong></td><td>中</td><td>中</td><td>補助金をCACの補助として使うが、依存しない設計。補助金なしでもROI&gt;1のプラン設計</td><td>IT導入補助金の要件変更・廃止時</td></tr>
+<tr><td><strong>景気後退</strong></td><td>中</td><td>高</td><td>月額2万円以下のStarterプランで「削れない投資」に位置づけ。ROI訴求を強化</td><td>製造業景況感DI（日銀短観）が-10以下</td></tr>
+<tr><td><strong>LP表記の景品表示法リスク</strong></td><td>低</td><td>高</td><td>全ての数値を実績ベースに限定。「※サンプルデータでの検証値」と注記</td><td>LP公開前にリーガルチェック実施</td></tr>
+<tr><td><strong>PoC企業でデータ品質が低い</strong></td><td>高</td><td>中</td><td>データクレンジングの支援メニュー追加。「まず100行から始めましょう」の設計</td><td>PoC開始時にデータ確認</td></tr>
+</table></div>
+<h3 id="8-2-pmfリスクの管理">8-2. PMFリスクの管理</h3>
+<div class="table-wrap"><table>
+<tr><th>シグナル</th><th>閾値</th><th>アクション</th></tr>
+<tr><td>PoC→有料転換率</td><td>&lt; 15%</td><td>価格 or 機能 or ターゲットの見直し</td></tr>
+<tr><td>トライアル14日以内のAha率</td><td>&lt; 30%</td><td>UX改善を最優先。オンボーディング強化</td></tr>
+<tr><td>NPS</td><td>&lt; +10</td><td>顧客インタビューで根本原因を特定</td></tr>
+<tr><td>月次チャーン</td><td>&gt; 5%</td><td>リテンション施策を最優先</td></tr>
+</table></div>
+<hr>
+<h2 id="9-gono-go判定基準">9. Go/No-Go判定基準</h2>
+<h3 id="9-1-フェーズ0--フェーズ1のgo条件">9-1. フェーズ0 → フェーズ1のGo条件</h3>
+<p><strong>全3条件を満たした場合、フェーズ1に進行する。</strong></p>
+<div class="table-wrap"><table>
+<tr><th>条件</th><th>基準</th><th>計測方法</th></tr>
+<tr><td><strong>課題の実在</strong></td><td>5社中3社以上が「見積もりの属人化は深刻な課題」と認識</td><td>インタビュー</td></tr>
+<tr><td><strong>課金意欲</strong></td><td>有料PoC 1社以上が契約</td><td>実契約</td></tr>
+<tr><td><strong>操作可能性</strong></td><td>ターゲット層5名中4名が15分以内に予測完了</td><td>ユーザビリティテスト</td></tr>
+</table></div>
+<h3 id="9-2-go判定の場合">9-2. Go判定の場合</h3>
+<ul>
+<li>フェーズ1のマーケ投資（月15-35万円、段階的）を開始</li>
+<li>LP制作 + SEO記事執筆を開始</li>
+<li>PoC企業の事例記事作成に着手</li>
+</ul>
+<h3 id="9-3-conditional-go条件付き進行の場合">9-3. Conditional Go（条件付き進行）の場合</h3>
+<div class="table-wrap"><table>
+<tr><th>状況</th><th>アクション</th></tr>
+<tr><td>課題は実在するが課金意欲が低い</td><td>価格を月額9,800円に引き下げて再テスト</td></tr>
+<tr><td>操作が難しいとの評価</td><td>UI改修（ウィザード化）を優先実施後に再テスト</td></tr>
+<tr><td>製造業で反応が薄い</td><td>セクション10のピボット候補を検討</td></tr>
+</table></div>
+<h3 id="9-4-no-go判定の場合">9-4. No-Go判定の場合</h3>
+<div class="table-wrap"><table>
+<tr><th>状況</th><th>アクション</th></tr>
+<tr><td>5社中4社以上が「課題ではない」</td><td>ターゲット業界のピボット（→セクション10）</td></tr>
+<tr><td>全社が課金を拒否</td><td>ビジネスモデルの再設計（成果報酬型 or フリーミアム完全無料）</td></tr>
+<tr><td>データ品質が構造的に低い</td><td>データクレンジング機能の強化 or ターゲット変更</td></tr>
+</table></div>
+<hr>
+<h2 id="10-ピボット候補の事前設計">10. ピボット候補の事前設計</h2>
+<p>フェーズ0でNo-Go判定となった場合に備え、ピボット候補を事前に設計しておく。</p>
+<h3 id="10-1-ピボット候補step-3-tier-1より">10-1. ピボット候補（Step 3 Tier 1より）</h3>
+<div class="table-wrap"><table>
+<tr><th>候補</th><th>ユースケース</th><th>統合スコア</th><th>ピボットの容易さ</th><th>理由</th></tr>
+<tr><td><strong>A: 物流（中）</strong></td><td>受注物量予測</td><td>70（1位）</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td>データ構造が製造業と類似。CSVで完結</td></tr>
+<tr><td><strong>B: EC（大）</strong></td><td>返品率予測</td><td>66</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td>データ入手性最高。PLGと相性が良い</td></tr>
+<tr><td><strong>C: 物流（小）</strong></td><td>運賃適正価格予測</td><td>65</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td>2024年問題で業界の関心が高い</td></tr>
+<tr><td><strong>D: SaaS（大）</strong></td><td>MRR予測</td><td>65</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td>初期顧客獲得が最も容易。データリテラシー高</td></tr>
+<tr><td><strong>E: 不動産（中）</strong></td><td>空室期間予測</td><td>62</td><td><span class="star">★</span><span class="star">★</span><span class="star">★</span></td><td>適合度5が6件で最多。市場12万社超</td></tr>
+</table></div>
+<h3 id="10-2-ピボット判断のタイミング">10-2. ピボット判断のタイミング</h3>
+<pre><code>W6  フェーズ0 Go/No-Go判定
+    ├── Go → フェーズ1実行
+    ├── Conditional Go → 修正して再テスト（+2週間）
+    └── No-Go → ピボット候補A-Eから選択
+                ├── 2週間でピボット先のPMF検証を設計
+                └── W10-14でピボット先のフェーズ0を実行
+</code></pre>
+<h3 id="10-3-ピボットしない部分プラットフォームとしての不変要素">10-3. ピボットしない部分（プラットフォームとしての不変要素）</h3>
+<p>ピボットしても変わらない、本プロダクトの根幹:</p>
+<ul>
+<li><strong>CSVアップロード → LightGBM予測 → SHAP解析</strong> の一連のフロー</li>
+<li><strong>ノーコード操作</strong>（プログラミング不要）</li>
+<li><strong>Streamlitベースの軽量UI</strong></li>
+</ul>
+<p>変わるのは:</p>
+<ul>
+<li>ターゲット業界</li>
+<li>サンプルデータの内容</li>
+<li>マーケティングメッセージ</li>
+<li>用語・UI上の表現</li>
+</ul>
+<hr>
+<h2 id="付録a-step-14--step-6-修正トレーサビリティ">付録A: Step 1〜4 → Step 6 修正トレーサビリティ</h2>
+<p>Step 5の各指摘が、本ドキュメントのどこで対応されたかのマッピング。</p>
+<div class="table-wrap"><table>
+<tr><th>Step 5の指摘</th><th>出典</th><th>Step 6での対応箇所</th></tr>
+<tr><td>顧客検証の欠如</td><td>全エージェント</td><td>→ セクション2（フェーズ0）</td></tr>
+<tr><td>ファネルKPIの矛盾</td><td>批判的/論理的</td><td>→ セクション4（ファネル逆算の修正）</td></tr>
+<tr><td>Step間の数値不整合</td><td>批判的/論理的</td><td>→ セクション1-2（KPI修正一覧）</td></tr>
+<tr><td>プロダクト未完成でのマーケ計画</td><td>批判的/論理的</td><td>→ セクション5（統合タイムライン）</td></tr>
+<tr><td>PLG/セルフサーブの不足</td><td>グロース/論理的</td><td>→ セクション7（Free枠の再設計）</td></tr>
+<tr><td>ペルソナの深み不足</td><td>デザイン</td><td>→ セクション6-1（メッセージ転換）</td></tr>
+<tr><td>メッセージのリフレーミング</td><td>デザイン/水平</td><td>→ セクション6-1（使用禁止用語含む）</td></tr>
+<tr><td>UIアクセシビリティ</td><td>デザイン</td><td>→ セクション5-2（プロダクト改善優先順位）</td></tr>
+<tr><td>LLM競合リスク</td><td>批判的/水平</td><td>→ セクション8（リスク管理計画）</td></tr>
+<tr><td>TAM/SAM/SOM不在</td><td>論理的</td><td>→ セクション3-3</td></tr>
+<tr><td>AARRRフレームワーク不在</td><td>論理的</td><td>→ セクション4-1</td></tr>
+<tr><td>LP表記の法的リスク</td><td>批判的</td><td>→ セクション6-3（事例数値の基準）</td></tr>
+<tr><td>ABテスト不可能</td><td>批判的</td><td>→ セクション6-2（M1-2の広告投資削除）</td></tr>
+<tr><td>価格最適化</td><td>グロース/水平</td><td>→ セクション7（価格テーブル改訂）</td></tr>
+<tr><td>ピボット候補の不在</td><td>論理的</td><td>→ セクション10（ピボット候補の事前設計）</td></tr>
+</table></div>
+<h2 id="付録b-次のステップ">付録B: 次のステップ</h2>
+<div class="table-wrap"><table>
+<tr><th>順序</th><th>アクション</th><th>期限</th><th>担当</th></tr>
+<tr><td>1</td><td>CLAUDE.md Issue #1〜#4の開発完了</td><td>W1</td><td>開発</td></tr>
+<tr><td>2</td><td>サンプルデータ3種作成</td><td>W1</td><td>開発</td></tr>
+<tr><td>3</td><td>製造業3社への訪問アポ取り</td><td>W1</td><td>営業/創業者</td></tr>
+<tr><td>4</td><td>NDAテンプレート準備</td><td>W1</td><td>法務</td></tr>
+<tr><td>5</td><td>見積もりデータ分析レポートテンプレート作成</td><td>W2</td><td>開発+営業</td></tr>
+<tr><td>6</td><td>デモ動画撮影</td><td>W3</td><td>開発</td></tr>
+<tr><td>7</td><td>ユーザビリティテスト実施</td><td>W3</td><td>営業</td></tr>
+<tr><td>8</td><td>有料PoC提案</td><td>W4</td><td>営業/創業者</td></tr>
+<tr><td>9</td><td>深層インタビュー5社</td><td>W5-6</td><td>営業/創業者</td></tr>
+<tr><td>10</td><td>Go/No-Go判定会議</td><td>W6末</td><td>全員</td></tr>
+</table></div>
+</section>
+</main>
+
+<script>
+function showSection(id) {
+  // 全セクションを非表示
+  document.querySelectorAll('.doc-section').forEach(s => s.style.display = 'none');
+  // 指定セクションを表示
+  const target = document.getElementById(id);
+  if (target) {
+    target.style.display = 'block';
+    document.querySelector('.main').scrollTop = 0;
+  }
+  // ナビゲーションのアクティブ状態更新
+  document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
+  const navLink = document.querySelector(`a[onclick="showSection('${id}')"]`);
+  if (navLink) navLink.classList.add('active');
+}
+// 初期状態: 最初のナビをアクティブに
+document.querySelector('.nav-item')?.classList.add('active');
+</script>
+
+</body>
+</html>
