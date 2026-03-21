@@ -25,6 +25,7 @@
 | 11A | **構造転換版（保守的イノベーション）** | テンプレートSaaS化・AI First運営・4シナリオ分析 | [開く](./11a_structural_shift.md) |
 | 11B | **飛躍版（時給5万円チャレンジ）** | コンソーシアム・API化・Expert Network・M&A設計 | [開く](./11b_breakthrough.md) |
 | 11C | **マルチアプリ・ポートフォリオ版** | 25アプリ構築・データ活用PF・一人DSチーム戦略 | [開く](./11c_multi_app_portfolio.md) |
+| 12A | **セグメント分析#1：食品製造業** | ペイン・市場価格・ソリューション・競合・ロードマップ | [開く](./12a_segment_food_manufacturing.md) |
 
 ---
 
