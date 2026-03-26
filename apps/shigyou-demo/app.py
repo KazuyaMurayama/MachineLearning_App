@@ -8,6 +8,9 @@ MVP #1: LightGBM + SHAP + 逆SHAP による離反予測・改善提案
   - 顧問先の離反リスクスコアリング
   - SHAP要因分析（なぜ離反リスクが高いか）
   - 逆SHAP改善提案（何を変えれば離反を防げるか）
+
+Usage:
+    streamlit run app.py
 """
 
 import streamlit as st
@@ -21,25 +24,284 @@ warnings.filterwarnings("ignore")
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-# モジュールパスを追加（親ディレクトリのcommon + 既存modules）
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-
-from modules.data_loader import load_file, display_data_info
-from modules.model import preprocess_data, split_data, train_model, predict
-from modules.evaluation import calculate_metrics, display_metrics
-from modules.shap_analysis import (
-    calculate_shap_values, create_summary_plot, create_bar_plot,
-    setup_japanese_font, check_japanese_font_available,
-    get_feature_importance
-)
-from common.reverse_shap import (
-    generate_action_suggestions, compute_feature_stats
-)
+import lightgbm as lgb
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import shap
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from typing import Dict, List, Optional, Tuple
 
-# --- ページ設定 ---
+# =====================================================================
+# 共通ユーティリティ（自己完結型 — 外部modules不要）
+# =====================================================================
+
+# --- 日本語フォント ---
+def setup_japanese_font():
+    japanese_fonts = [
+        "Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic",
+        "MS Gothic", "Meiryo", "DejaVu Sans",
+    ]
+    available = [f.name for f in fm.fontManager.ttflist]
+    for font in japanese_fonts:
+        if font in available:
+            plt.rcParams["font.family"] = font
+            plt.rcParams["font.sans-serif"] = [font]
+            plt.rcParams["axes.unicode_minus"] = False
+            return font
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams["axes.unicode_minus"] = False
+    return None
+
+_font = setup_japanese_font()
+
+
+def check_japanese_font_available() -> bool:
+    available = [f.name for f in fm.fontManager.ttflist]
+    return any(f in available for f in ["Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic", "MS Gothic", "Meiryo"])
+
+
+# --- データ読み込み ---
+def load_file(uploaded_file) -> Optional[pd.DataFrame]:
+    if uploaded_file is None:
+        return None
+    try:
+        if uploaded_file.name.endswith(".csv"):
+            return pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith((".xlsx", ".xls")):
+            return pd.read_excel(uploaded_file)
+        st.error("CSVまたはExcelをアップロードしてください。")
+        return None
+    except Exception as e:
+        st.error(f"読み込みエラー: {e}")
+        return None
+
+
+def display_data_info(df: pd.DataFrame, name: str = "データ"):
+    c1, c2, c3 = st.columns(3)
+    c1.metric("行数", f"{len(df):,}")
+    c2.metric("列数", f"{len(df.columns):,}")
+    c3.metric("欠損値", f"{df.isnull().sum().sum():,}")
+
+
+# --- モデル ---
+def preprocess_data(df, target_col=None, label_encoders=None, is_training=True):
+    df_p = df.copy()
+    if label_encoders is None:
+        label_encoders = {}
+    for col in df_p.columns:
+        if target_col and col == target_col:
+            continue
+        if df_p[col].dtype == "object" or df_p[col].dtype.name == "category":
+            if is_training:
+                if col not in label_encoders:
+                    label_encoders[col] = LabelEncoder()
+                    vals = df_p[col].astype(str).fillna("__NA__")
+                    df_p[col] = pd.Series(label_encoders[col].fit_transform(vals), index=df_p.index, dtype="int64")
+            else:
+                if col in label_encoders:
+                    df_p[col] = df_p[col].astype(str).fillna("__NA__")
+                    known = set(label_encoders[col].classes_)
+                    df_p[col] = df_p[col].apply(lambda x: label_encoders[col].transform([x])[0] if x in known else -1)
+    return df_p, label_encoders
+
+
+def split_data(df, target_col, test_size=0.2, random_state=42):
+    X = df.drop(columns=[target_col]).reset_index(drop=True)
+    y = df[target_col].reset_index(drop=True)
+    Xv, yv = X.values.copy(), y.values.copy()
+    X_tr, X_te, y_tr, y_te = train_test_split(Xv, yv, test_size=test_size, random_state=random_state)
+    return (pd.DataFrame(X_tr, columns=X.columns), pd.DataFrame(X_te, columns=X.columns),
+            pd.Series(y_tr, name=y.name), pd.Series(y_te, name=y.name))
+
+
+def train_model(X_train, y_train):
+    model = lgb.LGBMRegressor(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42, verbose=-1, force_col_wise=True)
+    model.fit(X_train, y_train)
+    return model
+
+
+# --- 評価 ---
+def calculate_metrics(y_true, y_pred):
+    return {"MAE": mean_absolute_error(y_true, y_pred),
+            "RMSE": np.sqrt(mean_squared_error(y_true, y_pred)),
+            "R2": r2_score(y_true, y_pred)}
+
+
+def display_metrics(metrics):
+    c1, c2, c3 = st.columns(3)
+    c1.metric("MAE（平均絶対誤差）", f"{metrics['MAE']:.2f} ヶ月", help="小さいほど良い")
+    c2.metric("RMSE", f"{metrics['RMSE']:.2f} ヶ月", help="外れ値に敏感。小さいほど良い")
+    c3.metric("R²（決定係数）", f"{metrics['R2']:.3f}", help="1に近いほど良い。0.7以上で実用水準")
+
+
+# --- SHAP ---
+def calculate_shap_values(model, X, max_samples=500):
+    X_s = X.sample(n=min(max_samples, len(X)), random_state=42) if len(X) > max_samples else X.copy()
+    explainer = shap.TreeExplainer(model)
+    return explainer.shap_values(X_s), X_s
+
+
+def get_feature_importance(shap_values, feature_names):
+    imp = np.abs(shap_values).mean(axis=0)
+    return pd.DataFrame({"特徴量": feature_names, "重要度": imp}).sort_values("重要度", ascending=False).reset_index(drop=True)
+
+
+# --- 逆SHAP ---
+
+# 特徴量ごとの「すぐ実行できるアクション」テンプレート
+# key=特徴量名, value=(改善方向が"上げる"時のアクション, "下げる"時のアクション, 1段階の改善幅)
+ACTION_TEMPLATES = {
+    "直近3ヶ月連絡頻度": (
+        "担当者からの情報提供メールを月1回追加する",
+        None, 1,
+    ),
+    "直近6ヶ月面談回数": (
+        "電話での簡易フォローを半年に1回追加する（対面不要）",
+        None, 1,
+    ),
+    "質問数トレンド": (
+        "こちらから「最近お困りのことはありますか？」と声がけする機会を作る",
+        None, 0.5,
+    ),
+    "入金遅延回数": (
+        None,
+        "請求書発行を5日早め、リマインドメールを自動化する",
+        1,
+    ),
+    "担当変更回数": (
+        None,
+        "担当変更時の引継ぎ面談（15分）を必須化する",
+        1,
+    ),
+    "価格交渉フラグ": (
+        None,
+        "年1回の「サービス振り返りレポート」を送付し、提供価値を可視化する",
+        1,
+    ),
+    "オプションサービス利用率": (
+        "次回面談で未利用のオプションサービスを1つ紹介する",
+        None, 0.1,
+    ),
+    "契約年数": (
+        None,  # 契約年数は操作不可
+        None, 0,
+    ),
+    "月額顧問料": (
+        None,  # 顧問料は直接操作しにくい
+        None, 0,
+    ),
+    "顧問先従業員規模": (
+        None,  # 顧問先の属性であり操作不可
+        None, 0,
+    ),
+    "顧問先業種": (
+        None,  # 顧問先の属性であり操作不可
+        None, 0,
+    ),
+}
+
+
+def compute_feature_stats(df, feature_names):
+    stats = {}
+    for col in feature_names:
+        if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
+            stats[col] = {"mean": float(df[col].mean()), "median": float(df[col].median()),
+                          "q25": float(df[col].quantile(0.25)), "q75": float(df[col].quantile(0.75))}
+    return stats
+
+
+def generate_action_suggestions(model, X, feature_names, feature_stats, target_direction="increase", top_n=5):
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X)
+    shap_row = shap_values[0] if len(X.shape) > 1 and len(X) == 1 else np.mean(shap_values, axis=0) if len(X) > 1 else shap_values
+    data_row = X.iloc[0] if len(X.shape) > 1 else X
+
+    sorted_idx = np.argsort(shap_row) if target_direction == "increase" else np.argsort(-shap_row)
+    suggestions = []
+    for feat_idx in sorted_idx:
+        if len(suggestions) >= top_n:
+            break
+        impact = float(shap_row[feat_idx])
+        if target_direction == "increase" and impact >= 0:
+            continue
+        if target_direction == "decrease" and impact <= 0:
+            continue
+
+        fname = feature_names[feat_idx]
+        current = data_row.iloc[feat_idx]
+
+        # ACTION_TEMPLATESから実行しやすいアクションを取得
+        tmpl = ACTION_TEMPLATES.get(fname)
+
+        if not isinstance(current, (int, float, np.integer, np.floating)):
+            if tmpl:
+                action_text = tmpl[0] or tmpl[1] or f"「{fname}」を見直す"
+            else:
+                action_text = f"「{fname}」を見直す"
+            suggestions.append({"feature": fname, "current": str(current), "target": "要検討",
+                                "action": action_text,
+                                "detail": f"推定効果: 残存月数 +{abs(impact):.1f}ヶ月",
+                                "impact": round(abs(impact), 2), "effort": "低"})
+            continue
+
+        cv = float(current)
+        stats = feature_stats.get(fname, {})
+        median = stats.get("median", cv)
+        step = tmpl[2] if tmpl else None
+
+        # テンプレートがない or 操作不可（step==0）の特徴量はスキップ
+        if tmpl and step == 0:
+            continue
+
+        # 改善方向と1段階改善を決定
+        if tmpl:
+            if cv > median and tmpl[1]:
+                # 値が高くて悪影響 → 下げる方向のアクション
+                action_text = tmpl[1]
+                target = round(cv - step, 2)
+            elif cv <= median and tmpl[0]:
+                # 値が低くて悪影響 → 上げる方向のアクション
+                action_text = tmpl[0]
+                target = round(cv + step, 2)
+            elif tmpl[0]:
+                action_text = tmpl[0]
+                target = round(cv + step, 2)
+            elif tmpl[1]:
+                action_text = tmpl[1]
+                target = round(cv - step, 2)
+            else:
+                continue
+        else:
+            # テンプレートなし → 汎用メッセージ（1段階=現在値の10%改善）
+            step = max(abs(cv * 0.1), 0.5)
+            if cv > median:
+                target = round(cv - step, 2)
+                action_text = f"「{fname}」を {cv:.1f} → {target:.1f} に改善する"
+            else:
+                target = round(cv + step, 2)
+                action_text = f"「{fname}」を {cv:.1f} → {target:.1f} に改善する"
+
+        if abs(target - cv) < 0.01:
+            continue
+
+        # 実行コストの判定
+        effort = "低" if tmpl else "中"
+
+        suggestions.append({
+            "feature": fname, "current": round(cv, 2), "target": target,
+            "action": action_text,
+            "detail": f"{fname}: {cv:.1f} → {target:.1f}（推定効果: 残存月数 +{abs(impact):.1f}ヶ月）",
+            "impact": round(abs(impact), 2),
+            "effort": effort,
+        })
+    return suggestions
+
+
+# =====================================================================
+# ページ設定
+# =====================================================================
 st.set_page_config(
     page_title="顧問先離反予測AI | 士業向けデモ",
     page_icon="🏛️",
@@ -48,187 +310,157 @@ st.set_page_config(
 )
 
 TARGET_COL = "解約までの予測月数"
-RISK_THRESHOLD_HIGH = 12  # 12ヶ月以内 = 高リスク
-RISK_THRESHOLD_MED = 24   # 24ヶ月以内 = 中リスク
+RISK_HIGH = 12
+RISK_MED = 24
 
-# =============================================================================
-# セッション状態の初期化
-# =============================================================================
-for key, default in {
+# =====================================================================
+# セッション状態
+# =====================================================================
+defaults = {
     "model": None, "trained": False, "label_encoders": None,
     "feature_cols": None, "metrics": None, "train_df": None,
     "X_test": None, "y_test": None, "shap_values": None,
     "X_shap_sample": None, "feature_stats": None,
     "using_default": False, "default_loaded": False,
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
+}
+for k, v in defaults.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
 
 
-def load_default_data():
-    """デフォルトサンプルデータの自動読み込み"""
-    train_path = os.path.join(os.path.dirname(__file__), "sample_data", "shigyou_train.csv")
-    if not os.path.exists(train_path):
-        return
-    try:
-        df = pd.read_csv(train_path)
-        st.session_state.train_df = df
-        st.session_state.using_default = True
-        st.session_state.default_loaded = True
-        _train_model(df)
-    except Exception:
-        st.session_state.default_loaded = True
-
-
-def _train_model(df: pd.DataFrame):
-    """モデル学習のヘルパー"""
+def _train(df):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-
-        feature_cols = [c for c in df.columns if c not in [TARGET_COL, "顧問先ID"]]
-        st.session_state.feature_cols = feature_cols
-
+        feat_cols = [c for c in df.columns if c not in [TARGET_COL, "顧問先ID"]]
+        st.session_state.feature_cols = feat_cols
         df_work = df.drop(columns=["顧問先ID"], errors="ignore")
-        df_processed, le = preprocess_data(df_work.copy(), TARGET_COL, is_training=True)
-        X_train, X_test, y_train, y_test = split_data(df_processed.copy(), TARGET_COL, test_size=0.2, random_state=42)
-
-        model = train_model(X_train, y_train)
-        y_pred = predict(model, X_test)
-        metrics = calculate_metrics(y_test, y_pred)
-
-        # SHAP
-        shap_vals, X_sample = calculate_shap_values(model, X_test, max_samples=500)
-
-        # 特徴量統計（逆SHAP用）
-        stats = compute_feature_stats(df_work, feature_cols)
-
+        df_proc, le = preprocess_data(df_work.copy(), TARGET_COL, is_training=True)
+        X_tr, X_te, y_tr, y_te = split_data(df_proc.copy(), TARGET_COL)
+        model = train_model(X_tr, y_tr)
+        y_pred = model.predict(X_te)
+        metrics = calculate_metrics(y_te, y_pred)
+        sv, Xs = calculate_shap_values(model, X_te)
+        stats = compute_feature_stats(df_work, feat_cols)
         st.session_state.update({
             "model": model, "label_encoders": le, "trained": True,
-            "feature_cols": feature_cols, "X_test": X_test, "y_test": y_test,
-            "metrics": metrics, "shap_values": shap_vals, "X_shap_sample": X_sample,
+            "feature_cols": feat_cols, "X_test": X_te, "y_test": y_te,
+            "metrics": metrics, "shap_values": sv, "X_shap_sample": Xs,
             "feature_stats": stats,
         })
 
 
-# 初回読み込み
+# デフォルトデータ読み込み
 if not st.session_state.default_loaded:
-    load_default_data()
+    p = os.path.join(os.path.dirname(__file__), "sample_data", "shigyou_train.csv")
+    if os.path.exists(p):
+        try:
+            df = pd.read_csv(p)
+            st.session_state.train_df = df
+            st.session_state.using_default = True
+            _train(df)
+        except Exception:
+            pass
+    st.session_state.default_loaded = True
 
-# =============================================================================
+# =====================================================================
 # サイドバー
-# =============================================================================
+# =====================================================================
 st.sidebar.markdown("# 🏛️ 顧問先離反予測AI")
 st.sidebar.markdown("**士業事務所向けデモ**")
 st.sidebar.markdown("---")
 
 if st.session_state.using_default:
-    st.sidebar.info("💡 デモデータ（150社）で自動学習済みです。\n独自データをアップロードして差し替えも可能です。")
+    st.sidebar.info("💡 デモデータ（150社）で自動学習済み。\n独自データのアップロードも可能です。")
 
 st.sidebar.subheader("📁 データアップロード")
-uploaded = st.sidebar.file_uploader(
-    "顧問先データ（CSV/Excel）", type=["csv", "xlsx", "xls"], key="upload_train"
-)
+uploaded = st.sidebar.file_uploader("顧問先データ（CSV/Excel）", type=["csv", "xlsx", "xls"], key="up")
 
 if uploaded is not None:
     new_df = load_file(uploaded)
     if new_df is not None and TARGET_COL in new_df.columns:
         st.session_state.train_df = new_df
         st.session_state.using_default = False
-        st.sidebar.success(f"✅ {len(new_df)}件のデータを読み込みました")
+        st.sidebar.success(f"✅ {len(new_df)}件読み込み完了")
     elif new_df is not None:
         st.sidebar.error(f"❌ 「{TARGET_COL}」カラムが必要です")
 
 st.sidebar.markdown("---")
-
 if st.session_state.train_df is not None:
-    btn_label = "🔄 再学習" if st.session_state.trained else "▶️ モデル学習"
-    if st.sidebar.button(btn_label, type="primary", use_container_width=True):
+    lbl = "🔄 再学習" if st.session_state.trained else "▶️ モデル学習"
+    if st.sidebar.button(lbl, type="primary", use_container_width=True):
         with st.spinner("学習中..."):
-            _train_model(st.session_state.train_df)
+            _train(st.session_state.train_df)
         st.sidebar.success("✅ 学習完了")
 
 st.sidebar.markdown("---")
 st.sidebar.caption("AI経営パートナー × データサイエンス")
 st.sidebar.caption("MVP #1 — 士業向け離反予測デモ v0.1")
 
-# =============================================================================
+# =====================================================================
 # メインエリア
-# =============================================================================
+# =====================================================================
 st.title("🏛️ 顧問先離反予測AI")
 st.markdown(
     "LightGBM + SHAP + **逆SHAP** で、顧問先の離反リスクを予測し、"
     "**「何を変えれば離反を防げるか」**を具体的に提案します。"
 )
 
-# --- タブ ---
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 離反リスク一覧",
-    "📈 モデル評価",
-    "🔍 SHAP要因分析",
-    "💡 逆SHAP改善提案",
-    "📋 データプレビュー",
+    "📊 離反リスク一覧", "📈 モデル評価", "🔍 SHAP要因分析",
+    "💡 逆SHAP改善提案", "📋 データプレビュー",
 ])
 
-# =============================================================================
+# =====================================================================
 # Tab 1: 離反リスク一覧
-# =============================================================================
+# =====================================================================
 with tab1:
     st.header("顧問先 離反リスク一覧")
-
     if st.session_state.trained and st.session_state.train_df is not None:
         df = st.session_state.train_df.copy()
         model = st.session_state.model
         le = st.session_state.label_encoders
         feat_cols = st.session_state.feature_cols
 
-        # 全データに対して予測
         df_work = df.drop(columns=["顧問先ID", TARGET_COL], errors="ignore")
         df_proc, _ = preprocess_data(df_work.copy(), target_col=None, label_encoders=le, is_training=False)
-        preds = predict(model, df_proc)
-
+        preds = model.predict(df_proc)
         df["予測残存月数"] = np.round(preds, 1)
 
-        # リスクレベル
-        def risk_level(months):
-            if months <= RISK_THRESHOLD_HIGH:
+        def _risk(m):
+            if m <= RISK_HIGH:
                 return "🔴 高リスク"
-            elif months <= RISK_THRESHOLD_MED:
+            if m <= RISK_MED:
                 return "🟡 中リスク"
             return "🟢 低リスク"
 
-        df["リスクレベル"] = df["予測残存月数"].apply(risk_level)
-        df_sorted = df.sort_values("予測残存月数").reset_index(drop=True)
+        df["リスクレベル"] = df["予測残存月数"].apply(_risk)
+        df_s = df.sort_values("予測残存月数").reset_index(drop=True)
 
-        # KPI
-        n_high = (df_sorted["予測残存月数"] <= RISK_THRESHOLD_HIGH).sum()
-        n_med = ((df_sorted["予測残存月数"] > RISK_THRESHOLD_HIGH) & (df_sorted["予測残存月数"] <= RISK_THRESHOLD_MED)).sum()
-        n_low = (df_sorted["予測残存月数"] > RISK_THRESHOLD_MED).sum()
+        n_h = (df_s["予測残存月数"] <= RISK_HIGH).sum()
+        n_m = ((df_s["予測残存月数"] > RISK_HIGH) & (df_s["予測残存月数"] <= RISK_MED)).sum()
+        n_l = (df_s["予測残存月数"] > RISK_MED).sum()
 
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("全顧問先数", f"{len(df)}社")
-        c2.metric("🔴 高リスク", f"{n_high}社", help=f"{RISK_THRESHOLD_HIGH}ヶ月以内に離反の恐れ")
-        c3.metric("🟡 中リスク", f"{n_med}社")
-        c4.metric("🟢 低リスク", f"{n_low}社")
+        c2.metric("🔴 高リスク", f"{n_h}社", help=f"{RISK_HIGH}ヶ月以内")
+        c3.metric("🟡 中リスク", f"{n_m}社")
+        c4.metric("🟢 低リスク", f"{n_l}社")
 
         st.markdown("---")
         st.subheader("🔴 要注意顧問先 TOP10")
-
-        top10 = df_sorted.head(10)
-        display_cols = ["顧問先ID", "リスクレベル", "予測残存月数", "契約年数",
-                        "月額顧問料", "直近3ヶ月連絡頻度", "直近6ヶ月面談回数",
-                        "入金遅延回数", "価格交渉フラグ"]
-        display_cols = [c for c in display_cols if c in top10.columns]
-        st.dataframe(top10[display_cols], use_container_width=True, hide_index=True)
+        top10 = df_s.head(10)
+        show = ["顧問先ID", "リスクレベル", "予測残存月数", "契約年数", "月額顧問料",
+                "直近3ヶ月連絡頻度", "直近6ヶ月面談回数", "入金遅延回数", "価格交渉フラグ"]
+        show = [c for c in show if c in top10.columns]
+        st.dataframe(top10[show], use_container_width=True, hide_index=True)
 
         st.markdown("---")
         st.subheader("全顧問先リスク分布")
-
-        # ヒストグラム
-        fig, ax = plt.subplots(figsize=(10, 4))
         setup_japanese_font()
+        fig, ax = plt.subplots(figsize=(10, 4))
         ax.hist(df["予測残存月数"], bins=20, color="#2563EB", alpha=0.7, edgecolor="white")
-        ax.axvline(RISK_THRESHOLD_HIGH, color="red", linestyle="--", label=f"高リスク ({RISK_THRESHOLD_HIGH}ヶ月)")
-        ax.axvline(RISK_THRESHOLD_MED, color="orange", linestyle="--", label=f"中リスク ({RISK_THRESHOLD_MED}ヶ月)")
+        ax.axvline(RISK_HIGH, color="red", ls="--", label=f"高リスク ({RISK_HIGH}ヶ月)")
+        ax.axvline(RISK_MED, color="orange", ls="--", label=f"中リスク ({RISK_MED}ヶ月)")
         ax.set_xlabel("予測残存月数")
         ax.set_ylabel("顧問先数")
         ax.legend()
@@ -236,16 +468,14 @@ with tab1:
         st.pyplot(fig)
         plt.close(fig)
 
-        # CSV DL
-        csv = df_sorted.to_csv(index=False, encoding="utf-8-sig")
-        st.download_button("📥 リスク一覧をCSVでダウンロード", csv, "risk_list.csv", "text/csv",
-                           use_container_width=True)
+        csv = df_s.to_csv(index=False, encoding="utf-8-sig")
+        st.download_button("📥 リスク一覧をCSVでダウンロード", csv, "risk_list.csv", "text/csv", use_container_width=True)
     else:
         st.info("モデルを学習するとリスク一覧が表示されます")
 
-# =============================================================================
+# =====================================================================
 # Tab 2: モデル評価
-# =============================================================================
+# =====================================================================
 with tab2:
     st.header("モデル評価指標")
     if st.session_state.trained and st.session_state.metrics:
@@ -260,48 +490,52 @@ with tab2:
     else:
         st.info("モデルを学習すると評価指標が表示されます")
 
-# =============================================================================
+# =====================================================================
 # Tab 3: SHAP要因分析
-# =============================================================================
+# =====================================================================
 with tab3:
     st.header("SHAP要因分析")
     st.markdown("**「なぜこの顧問先は離反リスクが高いのか？」**を可視化します。")
 
     if st.session_state.trained and st.session_state.shap_values is not None:
-        X_sample = st.session_state.X_shap_sample
-        shap_vals = st.session_state.shap_values
+        sv = st.session_state.shap_values
+        Xs = st.session_state.X_shap_sample
 
-        use_english = not check_japanese_font_available()
-        X_display = X_sample
+        setup_japanese_font()
 
         st.subheader("📊 SHAP Summary Plot")
-        st.caption("赤=値が高い、青=値が低い。右に寄るほど離反リスクを上げる要因。")
-        fig1 = create_summary_plot(shap_vals, X_display)
+        st.caption("赤=値が高い、青=値が低い。右に寄るほど予測残存月数を延ばす（離反防止）要因。")
+        fig1, _ = plt.subplots(figsize=(10, 8))
+        shap.summary_plot(sv, Xs, max_display=15, show=False, plot_size=None)
+        plt.tight_layout()
         st.pyplot(fig1)
-        plt.close(fig1)
+        plt.close("all")
 
         st.markdown("---")
         st.subheader("📊 特徴量重要度")
-        fig2 = create_bar_plot(shap_vals, X_display)
+        fig2, _ = plt.subplots(figsize=(10, 8))
+        shap.summary_plot(sv, Xs, plot_type="bar", max_display=15, show=False, plot_size=None)
+        plt.tight_layout()
         st.pyplot(fig2)
-        plt.close(fig2)
+        plt.close("all")
 
         st.markdown("---")
         st.subheader("📋 特徴量重要度ランキング")
-        importance_df = get_feature_importance(shap_vals, X_sample.columns.tolist())
-        st.dataframe(importance_df, use_container_width=True, hide_index=True)
+        imp_df = get_feature_importance(sv, Xs.columns.tolist())
+        st.dataframe(imp_df, use_container_width=True, hide_index=True)
     else:
         st.info("モデルを学習するとSHAP分析が表示されます")
 
-# =============================================================================
+# =====================================================================
 # Tab 4: 逆SHAP改善提案（★最大の差別化）
-# =============================================================================
+# =====================================================================
 with tab4:
     st.header("💡 逆SHAP改善提案")
     st.markdown("""
-    通常のSHAP: **「なぜ離反リスクが高いか？」**（Why）
-    逆SHAP: **「何を変えれば離反を防げるか？」**（How）
-    → 具体的なアクション提案を自動生成します。
+    | | 通常のSHAP | 逆SHAP |
+    |---|---|---|
+    | 問い | なぜ離反リスクが高いか？（Why） | **何を変えれば離反を防げるか？（How）** |
+    | 出力 | 要因の説明 | **具体的アクション提案** |
     """)
 
     if st.session_state.trained and st.session_state.train_df is not None:
@@ -311,90 +545,76 @@ with tab4:
         feat_cols = st.session_state.feature_cols
         stats = st.session_state.feature_stats
 
-        # 全データの予測
         df_work = df.drop(columns=["顧問先ID", TARGET_COL], errors="ignore")
         df_proc, _ = preprocess_data(df_work.copy(), target_col=None, label_encoders=le, is_training=False)
-        preds = predict(model, df_proc)
+        preds = model.predict(df_proc)
         df["予測残存月数"] = np.round(preds, 1)
 
-        # 高リスク顧問先を抽出
-        high_risk = df[df["予測残存月数"] <= RISK_THRESHOLD_HIGH].sort_values("予測残存月数")
+        high_risk = df[df["予測残存月数"] <= RISK_HIGH].sort_values("予測残存月数")
 
         if len(high_risk) == 0:
             st.success("🎉 高リスク顧問先は現在ありません！")
         else:
-            st.warning(f"🔴 **{len(high_risk)}社** が高リスク（{RISK_THRESHOLD_HIGH}ヶ月以内に離反の恐れ）")
-
-            # 顧問先選択
+            st.warning(f"🔴 **{len(high_risk)}社** が高リスク（{RISK_HIGH}ヶ月以内に離反の恐れ）")
             client_ids = high_risk["顧問先ID"].tolist()
-            selected_id = st.selectbox("改善提案を表示する顧問先を選択", client_ids)
+            selected = st.selectbox("改善提案を表示する顧問先を選択", client_ids)
 
-            if selected_id:
-                row = df[df["顧問先ID"] == selected_id].iloc[0]
-                st.markdown(f"### 顧問先: **{selected_id}**")
+            if selected:
+                row = df[df["顧問先ID"] == selected].iloc[0]
+                st.markdown(f"### 顧問先: **{selected}**")
 
-                # 基本情報カード
-                info_cols = st.columns(4)
-                info_cols[0].metric("予測残存月数", f"{row['予測残存月数']:.1f}ヶ月")
-                info_cols[1].metric("契約年数", f"{row['契約年数']}年")
-                info_cols[2].metric("月額顧問料", f"¥{int(row['月額顧問料']):,}")
-                info_cols[3].metric("面談回数(6M)", f"{int(row['直近6ヶ月面談回数'])}回")
+                ic = st.columns(4)
+                ic[0].metric("予測残存月数", f"{row['予測残存月数']:.1f}ヶ月")
+                ic[1].metric("契約年数", f"{row['契約年数']}年")
+                ic[2].metric("月額顧問料", f"¥{int(row['月額顧問料']):,}")
+                ic[3].metric("面談回数(6M)", f"{int(row['直近6ヶ月面談回数'])}回")
 
                 st.markdown("---")
                 st.subheader("🎯 改善アクション提案")
 
-                # 逆SHAP実行
-                row_features = df_work[df["顧問先ID"] == selected_id].copy()
-                row_proc, _ = preprocess_data(row_features.copy(), target_col=None,
-                                              label_encoders=le, is_training=False)
+                row_feat = df_work[df["顧問先ID"] == selected].copy()
+                row_proc, _ = preprocess_data(row_feat.copy(), target_col=None, label_encoders=le, is_training=False)
 
-                suggestions = generate_action_suggestions(
-                    model, row_proc, feat_cols, stats,
-                    target_direction="increase",  # 残存月数を上げたい = 離反防止
-                    top_n=5,
-                )
+                suggestions = generate_action_suggestions(model, row_proc, feat_cols, stats, "increase", top_n=5)
 
                 if suggestions:
                     for i, s in enumerate(suggestions, 1):
-                        impact_pct = s["impact"]
-                        st.markdown(f"""
-                        **提案 {i}: {s['action']}**
-                        > 現在値: `{s['current']}` → 改善目標: `{s['target']}`
-                        > 推定改善効果: **+{impact_pct:.1f}ヶ月**
-                        """)
+                        effort_badge = {"低": "🟢 すぐできる", "中": "🟡 少し工夫が必要", "高": "🔴 要検討"}.get(s.get("effort", "中"), "🟡")
+                        with st.container():
+                            st.markdown(f"### 提案 {i}: {s['action']}")
+                            st.caption(s.get("detail", ""))
+                            col_a, col_b, col_c = st.columns(3)
+                            col_a.metric("推定効果", f"+{s['impact']:.1f} ヶ月")
+                            col_b.metric("現在値 → 目標値", f"{s['current']} → {s['target']}")
+                            col_c.metric("実行コスト", effort_badge)
                         st.markdown("---")
                 else:
-                    st.info("この顧問先には数値ベースの改善提案を生成できませんでした。定性的な要因（業種・規模等）の見直しを検討してください。")
+                    st.info("数値ベースの改善提案を生成できませんでした。定性的要因の見直しを検討してください。")
 
-                # 個別SHAP Force Plot的な表示
                 st.subheader("📊 この顧問先の要因分解")
                 explainer = shap.TreeExplainer(model)
                 sv = explainer.shap_values(row_proc)
-                sv_row = sv[0]
-
                 factor_df = pd.DataFrame({
                     "特徴量": feat_cols,
-                    "SHAP値": np.round(sv_row, 3),
-                    "影響方向": ["離反リスク↑" if v < 0 else "離反防止↑" for v in sv_row],
+                    "SHAP値": np.round(sv[0], 3),
+                    "影響方向": ["⬇️ 離反リスク上昇" if v < 0 else "⬆️ 離反防止" for v in sv[0]],
                 }).sort_values("SHAP値").reset_index(drop=True)
                 st.dataframe(factor_df, use_container_width=True, hide_index=True)
     else:
         st.info("モデルを学習すると改善提案が表示されます")
 
-# =============================================================================
+# =====================================================================
 # Tab 5: データプレビュー
-# =============================================================================
+# =====================================================================
 with tab5:
     st.header("データプレビュー")
     if st.session_state.train_df is not None:
         df = st.session_state.train_df
         if st.session_state.using_default:
             st.info("💡 デモデータ（150社の合成顧問先データ）を表示しています")
-
         display_data_info(df, "顧問先データ")
         st.markdown("##### 先頭20行")
         st.dataframe(df.head(20), use_container_width=True)
-
         st.markdown("---")
         st.subheader("📊 基本統計量")
         st.dataframe(df.describe(), use_container_width=True)
