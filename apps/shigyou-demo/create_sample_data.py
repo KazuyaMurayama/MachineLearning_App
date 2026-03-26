@@ -3,6 +3,7 @@
 =========================
 税理士事務所の顧問先データを合成生成する。
 離反予測モデルのデモ用。
+高リスク・中リスク・低リスクがバランスよく含まれるよう設計。
 """
 
 import numpy as np
@@ -19,10 +20,10 @@ monthly_fee = np.random.choice([30000, 50000, 80000, 100000, 150000, 200000, 300
 contact_freq_3m = np.random.poisson(6, N).clip(0, 30)
 meeting_count_6m = np.random.poisson(3, N).clip(0, 12)
 question_trend = np.random.normal(0, 1, N).round(2)  # 正=増加, 負=減少
-payment_delay_count = np.random.poisson(0.5, N).clip(0, 8)
-staff_change_count = np.random.poisson(0.3, N).clip(0, 4)
-fee_negotiation = np.random.binomial(1, 0.15, N)
-service_usage_ratio = np.random.beta(3, 2, N).round(2)
+payment_delay_count = np.random.poisson(0.8, N).clip(0, 8)
+staff_change_count = np.random.poisson(0.5, N).clip(0, 4)
+fee_negotiation = np.random.binomial(1, 0.20, N)
+service_usage_ratio = np.random.beta(2, 3, N).round(2)  # 低め寄り
 company_size = np.random.choice(
     ["1-5名", "6-10名", "11-30名", "31-50名", "51-100名", "100名以上"], N,
     p=[0.20, 0.25, 0.25, 0.15, 0.10, 0.05]
@@ -33,21 +34,22 @@ industry = np.random.choice(
 )
 
 # --- 目的変数: 解約までの予測月数（低い=離反リスク高） ---
-base_months = 36.0
+# 高リスク(12ヶ月以内)が15-20%、中リスク(12-24ヶ月)が25-30%、低リスク(24ヶ月超)が残り
+base_months = 20.0  # ベースを下げて分布を広げる
 churn_months = (
     base_months
-    + contract_years * 0.8
-    + np.log1p(monthly_fee / 10000) * 2.0
-    + contact_freq_3m * 0.5
-    + meeting_count_6m * 1.5
-    + question_trend * 3.0
-    - payment_delay_count * 4.0
-    - staff_change_count * 5.0
-    - fee_negotiation * 8.0
-    + service_usage_ratio * 6.0
-    + np.random.normal(0, 4, N)
+    + contract_years * 0.6
+    + np.log1p(monthly_fee / 10000) * 1.5
+    + contact_freq_3m * 0.4
+    + meeting_count_6m * 1.2
+    + question_trend * 3.5
+    - payment_delay_count * 4.5
+    - staff_change_count * 5.5
+    - fee_negotiation * 7.0
+    + service_usage_ratio * 5.0
+    + np.random.normal(0, 5, N)
 )
-churn_months = churn_months.clip(1, 80).round(1)
+churn_months = churn_months.clip(2, 60).round(1)
 
 df = pd.DataFrame({
     "顧問先ID": [f"C{str(i+1).zfill(3)}" for i in range(N)],
@@ -64,6 +66,13 @@ df = pd.DataFrame({
     "顧問先業種": industry,
     "解約までの予測月数": churn_months,
 })
+
+# 分布確認
+n_high = (churn_months <= 12).sum()
+n_med = ((churn_months > 12) & (churn_months <= 24)).sum()
+n_low = (churn_months > 24).sum()
+print(f"Distribution: High-risk(<=12M)={n_high}, Mid-risk(12-24M)={n_med}, Low-risk(>24M)={n_low}")
+print(f"Stats: min={churn_months.min():.1f}, median={np.median(churn_months):.1f}, max={churn_months.max():.1f}")
 
 # 保存
 out_dir = os.path.join(os.path.dirname(__file__), "sample_data")
