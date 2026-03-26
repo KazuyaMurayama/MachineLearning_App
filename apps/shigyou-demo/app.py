@@ -117,7 +117,10 @@ def split_data(df, target_col, test_size=0.2, random_state=42):
 
 
 def train_model(X_train, y_train):
-    model = lgb.LGBMRegressor(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42, verbose=-1, force_col_wise=True)
+    model = lgb.LGBMRegressor(
+        n_estimators=100, learning_rate=0.1, max_depth=6,
+        random_state=42, verbose=-1, force_col_wise=True,
+    )
     model.fit(X_train, y_train)
     return model
 
@@ -153,6 +156,7 @@ def get_feature_importance(shap_values, feature_names):
 # 特徴量ごとの「すぐ実行できるアクション」テンプレート
 # key=特徴量名, value=(改善方向が"上げる"時のアクション, "下げる"時のアクション, 1段階の改善幅)
 ACTION_TEMPLATES = {
+    # --- 既存特徴量 ---
     "直近3ヶ月連絡頻度": (
         "担当者からの情報提供メールを月1回追加する",
         None, 1,
@@ -165,12 +169,12 @@ ACTION_TEMPLATES = {
         "こちらから「最近お困りのことはありますか？」と声がけする機会を作る",
         None, 0.5,
     ),
-    "入金遅延回数": (
+    "直近12ヶ月入金遅延回数": (
         None,
         "請求書発行を5日早め、リマインドメールを自動化する",
         1,
     ),
-    "担当変更回数": (
+    "累計担当変更回数": (
         None,
         "担当変更時の引継ぎ面談（15分）を必須化する",
         1,
@@ -184,22 +188,31 @@ ACTION_TEMPLATES = {
         "次回面談で未利用のオプションサービスを1つ紹介する",
         None, 0.1,
     ),
-    "契約年数": (
-        None,  # 契約年数は操作不可
-        None, 0,
+    # --- 新規追加特徴量 ---
+    "最終面談からの経過日数": (
+        None,
+        "今週中に電話またはZoomで15分の近況確認を設定する",
+        30,  # 30日短縮
     ),
-    "月額顧問料": (
-        None,  # 顧問料は直接操作しにくい
-        None, 0,
+    "直近12ヶ月顧問料改定": (
+        None,  # 値上げ自体は操作しにくい
+        "値上げ後1ヶ月以内に追加サービス（経営分析レポート等）を無償提供し、値上げの納得感を高める",
+        1,
     ),
-    "顧問先従業員規模": (
-        None,  # 顧問先の属性であり操作不可
-        None, 0,
+    "顧問先売上成長率": (
+        "業績改善に直結する提案（補助金・助成金活用、経費削減策）を次回面談で実施する",
+        None, 5,  # 5%改善
     ),
-    "顧問先業種": (
-        None,  # 顧問先の属性であり操作不可
-        None, 0,
+    "月次レポート提出遅延日数": (
+        None,
+        "月次レポートの作成テンプレートを整備し、提出期限を3日短縮する",
+        3,  # 3日短縮
     ),
+    # --- 操作不可の特徴量 ---
+    "契約年数": (None, None, 0),
+    "月額顧問料": (None, None, 0),
+    "顧問先従業員規模": (None, None, 0),
+    "顧問先業種": (None, None, 0),
 }
 
 
@@ -450,7 +463,8 @@ with tab1:
         st.subheader("🔴 要注意顧問先 TOP10")
         top10 = df_s.head(10)
         show = ["顧問先ID", "リスクレベル", "予測残存月数", "契約年数", "月額顧問料",
-                "直近3ヶ月連絡頻度", "直近6ヶ月面談回数", "入金遅延回数", "価格交渉フラグ"]
+                "最終面談からの経過日数", "直近6ヶ月面談回数", "直近12ヶ月入金遅延回数",
+                "質問数トレンド", "価格交渉フラグ"]
         show = [c for c in show if c in top10.columns]
         st.dataframe(top10[show], use_container_width=True, hide_index=True)
 
