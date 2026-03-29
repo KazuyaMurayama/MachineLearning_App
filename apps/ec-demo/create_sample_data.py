@@ -185,6 +185,14 @@ for sku in sku_list:
         })
 
 sales_df = pd.DataFrame(rows)
+
+# Add lag features per SKU (shifted to avoid leakage)
+sales_df["日付_dt"] = pd.to_datetime(sales_df["日付"])
+sales_df = sales_df.sort_values(["SKU", "日付_dt"]).reset_index(drop=True)
+sales_df["前週平均販売数量"] = sales_df.groupby("SKU")["販売数量"].transform(lambda x: x.shift(1).rolling(7, min_periods=1).mean()).fillna(0).round(1)
+sales_df["前月平均販売数量"] = sales_df.groupby("SKU")["販売数量"].transform(lambda x: x.shift(1).rolling(30, min_periods=1).mean()).fillna(0).round(1)
+sales_df = sales_df.drop(columns=["日付_dt"])
+
 print(f"[売上予測] SKU={N_SKU}, Days={N_DAYS}, Rows={len(sales_df)}")
 
 # ============================================================
