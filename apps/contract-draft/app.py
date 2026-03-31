@@ -1,0 +1,247 @@
+"""
+契約書ドラフトAI
+================
+税理士・社労士・行政書士向けの契約書テンプレート自動生成ツール
+フォームに事務所情報を入力するだけで、業種に応じた契約書ドラフトを生成
+"""
+import streamlit as st
+from datetime import date,timedelta
+
+# === テンプレート定数 ===
+TEMPLATES={
+"税理士":{
+    "title":"税務顧問契約書",
+    "template":"""# 税務顧問契約書
+
+{office_name}（以下「甲」という）と{client_name}（以下「乙」という）は、以下のとおり税務顧問契約を締結する。
+
+## 第1条（委託業務の範囲）
+乙は甲に対し、以下の業務を委託する。
+1. 月次試算表の作成・報告
+2. 決算書の作成
+3. 法人税・消費税・地方税の確定申告書の作成・提出
+4. 年末調整業務
+5. 税務相談（随時）
+{extra_services}
+
+## 第2条（顧問料）
+1. 月額顧問料: **{monthly_fee}**（消費税別）
+2. 決算料: **{settlement_fee}**（消費税別）
+3. 支払方法: 毎月末日締め、翌月{payment_day}日までに甲の指定口座へ振込
+4. 振込手数料は乙の負担とする
+
+## 第3条（契約期間）
+1. 契約期間: {start_date} から {end_date} まで（{duration}）
+2. 期間満了の1ヶ月前までに甲乙いずれからも書面による解約の申入れがない場合、同一条件にて1年間自動更新する
+
+## 第4条（資料の提供）
+1. 乙は、甲の業務遂行に必要な帳簿書類・証憑類を速やかに提供する
+2. 資料の提供が遅延した場合、申告期限に間に合わない場合があることを乙は了承する
+
+## 第5条（守秘義務）
+1. 甲は、業務上知り得た乙の秘密情報を第三者に漏洩しない
+2. AI処理を行う場合は、別途「AI処理同意書」の締結を要する
+3. 守秘義務は契約終了後3年間存続する
+
+## 第6条（免責事項）
+1. 乙が提供した資料の記載内容に誤りがあった場合、それに基づく申告内容について甲は責任を負わない
+2. 税法改正等による不利益について、甲は事前にその影響を説明するよう努める
+
+## 第7条（解約）
+1. 甲乙いずれも、1ヶ月前までに書面で通知することにより本契約を解約できる
+2. 解約時、甲は受領済みの書類を速やかに乙に返還する
+
+## 第8条（管轄裁判所）
+本契約に関する紛争は、{jurisdiction}地方裁判所を第一審の専属的合意管轄裁判所とする。
+
+---
+
+{start_date} 締結
+
+甲（税理士事務所）: {office_name}　　印
+
+乙（顧問先）: {client_name}　　印
+"""},
+"社労士":{
+    "title":"社会保険労務士業務委託契約書",
+    "template":"""# 社会保険労務士業務委託契約書
+
+{office_name}（以下「甲」という）と{client_name}（以下「乙」という）は、以下のとおり業務委託契約を締結する。
+
+## 第1条（委託業務の範囲）
+乙は甲に対し、以下の業務を委託する。
+1. 社会保険（健康保険・厚生年金）の取得・喪失届の作成・提出
+2. 雇用保険の取得・喪失届の作成・提出
+3. 労働保険の年度更新手続き
+4. 算定基礎届・月額変更届の作成・提出
+5. 労務相談（随時）
+{extra_services}
+
+## 第2条（顧問料）
+1. 月額顧問料: **{monthly_fee}**（消費税別）
+2. 就業規則の作成・改定: 別途見積り
+3. 支払方法: 毎月末日締め、翌月{payment_day}日までに甲の指定口座へ振込
+
+## 第3条（契約期間）
+1. 契約期間: {start_date} から {end_date} まで（{duration}）
+2. 期間満了の1ヶ月前までに書面による解約の申入れがない場合、1年間自動更新する
+
+## 第4条（届出の期限）
+1. 乙は、従業員の入退社・異動等が生じた場合、速やかに甲に連絡する
+2. 届出に必要な情報の提供が遅延した場合の不利益について、甲は責任を負わない
+
+## 第5条（守秘義務）
+1. 甲は、業務上知り得た乙の従業員に関する個人情報等を第三者に漏洩しない
+2. 個人情報の取扱いは「個人情報の保護に関する法律」に準拠する
+3. AI処理を行う場合は、個人を特定できる情報を匿名化した上で処理する
+
+## 第6条（解約）
+甲乙いずれも、1ヶ月前までに書面で通知することにより本契約を解約できる。
+
+## 第7条（管轄裁判所）
+本契約に関する紛争は、{jurisdiction}地方裁判所を第一審の専属的合意管轄裁判所とする。
+
+---
+
+{start_date} 締結
+
+甲（社労士事務所）: {office_name}　　印
+
+乙（顧問先）: {client_name}　　印
+"""},
+"行政書士":{
+    "title":"行政書士業務委託契約書",
+    "template":"""# 行政書士業務委託契約書
+
+{office_name}（以下「甲」という）と{client_name}（以下「乙」という）は、以下のとおり業務委託契約を締結する。
+
+## 第1条（委託業務の内容）
+乙は甲に対し、以下の業務を委託する。
+1. {main_service}
+{extra_services}
+
+## 第2条（報酬）
+1. 報酬額: **{total_fee}**（消費税別）
+2. 着手金: 報酬額の50%を契約締結時に支払う
+3. 残金: 業務完了後{payment_day}日以内に支払う
+
+## 第3条（業務の期限）
+甲は、乙から必要書類を受領後、{delivery_days}営業日以内に業務を完了するよう努める。ただし、行政機関の審査期間は含まない。
+
+## 第4条（必要書類の提供）
+1. 乙は、甲が業務遂行に必要とする書類・情報を速やかに提供する
+2. 乙の書類提供の遅延により業務が遅延した場合、甲は責任を負わない
+
+## 第5条（守秘義務）
+1. 甲は、業務上知り得た乙の秘密情報を第三者に漏洩しない
+2. 行政書士法第12条の守秘義務に基づき、業務上の秘密を厳守する
+3. AI処理を行う場合は、別途同意を得た上で匿名化処理を実施する
+
+## 第6条（免責事項）
+1. 乙が提供した情報・書類の内容に誤りがあった場合、それに基づく申請の却下について甲は責任を負わない
+2. 行政機関の裁量により許可が得られなかった場合でも、甲の報酬請求権は消滅しない
+
+## 第7条（解約）
+1. 業務着手前: 乙は着手金を放棄して解約できる
+2. 業務着手後: 進捗に応じた報酬を精算の上、解約できる
+
+## 第8条（管轄裁判所）
+本契約に関する紛争は、{jurisdiction}地方裁判所を第一審の専属的合意管轄裁判所とする。
+
+---
+
+{start_date} 締結
+
+甲（行政書士事務所）: {office_name}　　印
+
+乙（依頼者）: {client_name}　　印
+"""},
+}
+
+# === Page Config ===
+st.set_page_config(page_title="契約書ドラフトAI",page_icon="📝",layout="wide",initial_sidebar_state="collapsed")
+
+# === CSS ===
+st.markdown("""
+<style>
+.draft-hero{text-align:center;padding:36px 0 24px 0;background:linear-gradient(180deg,#F5F3FF,#FFFFFF);border-radius:16px;margin-bottom:12px;}
+.draft-hero h1{font-size:2.2rem;color:#7C3AED;}
+.draft-hero p{font-size:1.1rem;color:#475569;}
+.section-divider{border:none;border-top:2px solid #E2E8F0;margin:32px 0;}
+</style>
+""",unsafe_allow_html=True)
+
+# === Main ===
+st.markdown("""
+<div class="draft-hero">
+<h1>📝 契約書ドラフトAI</h1>
+<p>士業の種別と顧問先情報を入力するだけで、<br>業種に応じた契約書ドラフトを自動生成します。</p>
+</div>
+""",unsafe_allow_html=True)
+
+# 業種選択
+biz=st.radio("士業の種別を選択",list(TEMPLATES.keys()),horizontal=True)
+tmpl=TEMPLATES[biz]
+
+st.markdown(f"### 📝 {tmpl['title']} — 情報入力")
+st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+
+with st.form("contract_form"):
+    fc1,fc2=st.columns(2)
+    with fc1:
+        office=st.text_input("事務所名（甲）",value="○○税理士事務所" if biz=="税理士" else f"○○{biz}事務所")
+        client=st.text_input("顧問先名（乙）",value="△△株式会社")
+        start=st.date_input("契約開始日",value=date.today())
+    with fc2:
+        if biz in ["税理士","社労士"]:
+            monthly_fee=st.text_input("月額顧問料",value="50,000円")
+            duration=st.selectbox("契約期間",["1年間","2年間","3年間"],index=0)
+            payment_day=st.selectbox("支払期日（翌月）",["10","15","20","25","末"],index=3)
+        else:
+            total_fee=st.text_input("報酬額",value="150,000円")
+            main_service=st.text_input("主な業務内容",value="建設業許可申請")
+            delivery_days=st.number_input("納期（営業日）",value=15,min_value=5,max_value=60)
+    extra=st.text_area("追加業務（1行に1項目）",value="",height=80,placeholder="例: 記帳代行\n給与計算代行")
+    jurisdiction=st.text_input("管轄裁判所",value="東京")
+    submitted=st.form_submit_button("📝 契約書を生成する",type="primary",use_container_width=True)
+
+if submitted:
+    # 追加業務の整形
+    extra_lines=extra.strip().split("\n") if extra.strip() else []
+    extra_md=""
+    for i,line in enumerate(extra_lines,6 if biz in ["税理士","社労士"] else 2):
+        extra_md+=f"\n{i}. {line.strip()}"
+    # テンプレート変数
+    duration_str=duration if biz in ["税理士","社労士"] else "単発業務"
+    years=int(duration[0]) if biz in ["税理士","社労士"] else 1
+    end=(start.replace(year=start.year+years)-timedelta(days=1))
+    params={
+        "office_name":office,"client_name":client,
+        "start_date":start.strftime("%Y年%m月%d日"),
+        "end_date":end.strftime("%Y年%m月%d日"),
+        "duration":duration_str,"jurisdiction":jurisdiction,
+        "extra_services":extra_md,
+    }
+    if biz in ["税理士","社労士"]:
+        params["monthly_fee"]=monthly_fee
+        params["payment_day"]=payment_day
+        if biz=="税理士":
+            settlement_fee=st.session_state.get("_sf","月額顧問料の4〜6ヶ月分")
+            params["settlement_fee"]=settlement_fee
+    else:
+        params["total_fee"]=total_fee
+        params["main_service"]=main_service
+        params["delivery_days"]=str(delivery_days)
+        params["payment_day"]="30"
+    # 生成
+    rendered=tmpl["template"].format(**params)
+    st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+    st.markdown("## 📄 生成された契約書ドラフト")
+    st.markdown(rendered)
+    st.download_button(f"📥 {tmpl['title']}をダウンロード",rendered,
+        f"{tmpl['title']}.md","text/markdown",use_container_width=True)
+    st.info("💡 このドラフトは雛形です。実際の契約締結前に、必ず内容をご確認ください。")
+
+# Footer
+st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+st.caption("AI経営パートナー × データサイエンス | 契約書ドラフトAI v1.0")
