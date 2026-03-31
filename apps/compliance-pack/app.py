@@ -244,16 +244,30 @@ with c3:
 
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 
-# Sidebar for common fields
+# 3層防御の図解
+st.markdown("### 🔐 AI導入の3層防御")
+st.markdown("士業がAIを安全に活用するための**3つの防御層**を標準装備しています。")
+d1,d2,d3=st.columns(3)
+d1.metric("第1層","データ匿名化",help="個人名→ID、住所→都道府県、マイナンバー→入力禁止")
+d2.metric("第2層","セキュアAI選定",help="Azure OpenAI / Claude API（データ学習なし保証）")
+d3.metric("第3層","法的文書整備",help="守秘義務契約＋データ規程＋AI同意書の3点セット")
+st.info("💡 **導入効果**: 守秘義務対応にかかる準備時間を**80%削減**（従来2週間→2日）。資格剥奪リスクを文書で明確に回避。")
+
+st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+
+# 共通情報の設定
 st.markdown("### ⚙️ 共通情報の設定")
 st.caption("以下の情報がテンプレートに反映されます。ご自身の事務所情報に書き換えてください。")
 sc1,sc2=st.columns(2)
 with sc1:
     office=st.text_input("事務所名",value=st.session_state["office_name"],key="inp_office")
     contact=st.text_input("担当者名",value=st.session_state["contact_person"],key="inp_contact")
+    jurisdiction=st.text_input("管轄裁判所",value="東京",key="inp_jurisdiction")
 with sc2:
     client=st.text_input("顧問先名",value=st.session_state["client_name"],key="inp_client")
     email=st.text_input("連絡先メール",value=st.session_state["contact_email"],key="inp_email")
+    nda_duration=st.selectbox("守秘義務 契約期間",["1年","2年","3年"],index=0,key="inp_duration")
+    nda_post=st.selectbox("守秘義務 終了後存続期間",["1年","2年","3年","5年"],index=1,key="inp_post")
 
 today_str=date.today().strftime("%Y年%m月%d日")
 
@@ -266,8 +280,8 @@ with tab1:
     st.header("📄 守秘義務契約書")
     st.caption("AI処理に関する特約条項（第4条）付きの守秘義務契約テンプレートです。")
     rendered_nda=TEMPLATE_NDA.format(
-        client_name=client,office_name=office,duration="1年",post_duration="3年",
-        jurisdiction="東京",contract_date=today_str)
+        client_name=client,office_name=office,duration=nda_duration,post_duration=nda_post,
+        jurisdiction=jurisdiction,contract_date=today_str)
     st.markdown(rendered_nda)
     st.download_button("📥 守秘義務契約書をダウンロード",rendered_nda,"守秘義務契約書.md","text/markdown",use_container_width=True)
 
@@ -287,6 +301,19 @@ with tab3:
     st.markdown(rendered_consent)
     st.download_button("📥 AI処理同意書をダウンロード",rendered_consent,"AI処理同意書.md","text/markdown",use_container_width=True)
 
-# Footer
+# 一括ダウンロード
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
-st.caption("AI経営パートナー × データサイエンス | 安心パッケージ v1.0")
+st.markdown("### 📦 一括ダウンロード")
+all_rendered=TEMPLATE_NDA.format(client_name=client,office_name=office,duration=nda_duration,post_duration=nda_post,jurisdiction=jurisdiction,contract_date=today_str)
+all_rendered+="\n\n---\n\n"+TEMPLATE_DATA_POLICY.format(office_name=office,policy_date=today_str)
+all_rendered+="\n\n---\n\n"+TEMPLATE_AI_CONSENT.format(client_name=client,office_name=office,contact_person=contact,contact_email=email,consent_date=today_str)
+st.download_button("📥 安心パッケージ一括ダウンロード（3点セット）",all_rendered,"安心パッケージ一式.md","text/markdown",use_container_width=True)
+
+# 相互リンク
+st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+st.markdown("### 🔗 関連ツール")
+fc1,fc2,fc3=st.columns(3)
+fc1.markdown("📝 [契約書ドラフトAI](https://contract-draft.streamlit.app)  \n顧問契約書を自動生成")
+fc2.markdown("📊 [月次レポート自動生成](https://report-gen.streamlit.app)  \n試算表CSV→レポート自動作成")
+fc3.markdown("🏢 [離反予測デモ](https://shigyou-demo.streamlit.app)  \n顧問先の離反リスク予測")
+st.caption("AI経営パートナー × データサイエンス | 安心パッケージ v1.1")

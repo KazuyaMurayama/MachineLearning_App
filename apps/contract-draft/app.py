@@ -195,6 +195,8 @@ with st.form("contract_form"):
     with fc2:
         if biz in ["税理士","社労士"]:
             monthly_fee=st.text_input("月額顧問料",value="50,000円")
+            if biz=="税理士":
+                settlement_fee=st.text_input("決算料",value="月額顧問料の4〜6ヶ月分")
             duration=st.selectbox("契約期間",["1年間","2年間","3年間"],index=0)
             payment_day=st.selectbox("支払期日（翌月）",["10","15","20","25","末"],index=3)
         else:
@@ -226,7 +228,6 @@ if submitted:
         params["monthly_fee"]=monthly_fee
         params["payment_day"]=payment_day
         if biz=="税理士":
-            settlement_fee=st.session_state.get("_sf","月額顧問料の4〜6ヶ月分")
             params["settlement_fee"]=settlement_fee
     else:
         params["total_fee"]=total_fee
@@ -241,7 +242,13 @@ if submitted:
     st.download_button(f"📥 {tmpl['title']}をダウンロード",rendered,
         f"{tmpl['title']}.md","text/markdown",use_container_width=True)
     st.info("💡 このドラフトは雛形です。実際の契約締結前に、必ず内容をご確認ください。")
+    st.warning("📌 **AI処理を行う場合**は、「安心パッケージ」のAI処理同意書も合わせてご利用ください。契約書第5条の守秘義務条項と連動しています。")
 
-# Footer
+# Footer — 相互リンク
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
-st.caption("AI経営パートナー × データサイエンス | 契約書ドラフトAI v1.0")
+st.markdown("### 🔗 関連ツール")
+fc1,fc2,fc3=st.columns(3)
+fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
+fc2.markdown("📊 [月次レポート自動生成](https://report-gen.streamlit.app)  \n試算表CSV→レポート自動作成")
+fc3.markdown("🏢 [離反予測デモ](https://shigyou-demo.streamlit.app)  \n顧問先の離反リスク予測")
+st.caption("AI経営パートナー × データサイエンス | 契約書ドラフトAI v1.1")
