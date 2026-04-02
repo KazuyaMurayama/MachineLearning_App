@@ -36,6 +36,30 @@ SERVICES = {
 }
 SERVICE_NAMES = list(SERVICES.keys())
 
+# === 業種別アドバイス ===
+INDUSTRY_ADVICE = {
+    "製造業": "原価管理強化→経営計画策定の提案が効果的",
+    "IT業": "IT導入支援＋助成金申請のセット提案が有効",
+    "医療・介護": "社保手続き＋給与計算の一括受託で工数削減を訴求",
+    "建設業": "助成金申請＋社保手続きで法令遵守と資金確保を同時提案",
+    "飲食業": "記帳代行＋給与計算のセットで日常業務の負担軽減を訴求",
+    "小売業": "記帳代行＋経営計画策定で売上分析と資金繰り改善を提案",
+    "不動産業": "M&A支援＋経営計画策定で資産活用の最適化を提案",
+    "サービス業": "給与計算＋社保手続きの一括受託で管理部門のコスト削減を訴求",
+}
+
+# === サービス別効果フレーズ ===
+SERVICE_EFFECTS = {
+    "記帳代行": "経理業務の工数を月20時間削減",
+    "給与計算": "給与計算ミスによるトラブルをゼロ化",
+    "年末調整": "年末調整業務の工数を大幅削減し、届出漏れを防止",
+    "社保手続き": "届出漏れ・手続きミスを完全防止",
+    "助成金申請": "平均100〜300万円の助成金を獲得",
+    "経営計画策定": "融資審査の通過率が大幅向上",
+    "M&A支援": "事業承継・譲渡をスムーズに実現し企業価値を最大化",
+    "IT導入支援": "IT導入補助金を活用し実質負担を1/2に",
+}
+
 def load_csv(path_or_file):
     try:
         if isinstance(path_or_file, str):
@@ -134,6 +158,17 @@ def calc_recommendations(df, service_cols, confidence_matrix, support):
     rec_df = (rec_df.sort_values(["顧問先ID", "推定月間増収額"], ascending=[True, False])
               .groupby("顧問先ID").head(3)
               .reset_index(drop=True))
+
+    # 提案優先度ランク（A/B/C）
+    def _priority(row):
+        if row["Confidence"] >= 0.6 and row["推定年間増収額"] >= 300000:
+            return "A（高）"
+        elif row["Confidence"] >= 0.4 or row["推定年間増収額"] >= 150000:
+            return "B（中）"
+        else:
+            return "C（低）"
+    rec_df["優先度"] = rec_df.apply(_priority, axis=1)
+
     return rec_df
 
 # ============================================================
@@ -228,10 +263,13 @@ n_cs_clients = rec_df["顧問先ID"].nunique() if len(rec_df) > 0 else 0
 total_annual = rec_df["推定年間増収額"].sum() if len(rec_df) > 0 else 0
 avg_recs = rec_df.groupby("顧問先ID").size().mean() if len(rec_df) > 0 else 0
 
-kc1, kc2, kc3 = st.columns(3)
+avg_unit_price = rec_df["単価（月額）"].mean() if len(rec_df) > 0 else 0
+
+kc1, kc2, kc3, kc4 = st.columns(4)
 kc1.metric("🎯 クロスセル対象顧問先数", f"{n_cs_clients}件", f"全{n_clients}件中")
 kc2.metric("💰 推定年間増収額（合計）", f"¥{total_annual:,.0f}")
 kc3.metric("📊 平均推奨サービス数", f"{avg_recs:.1f}件/顧問先")
+kc4.metric("💵 平均提案単価", f"¥{avg_unit_price:,.0f}/月")
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -256,7 +294,7 @@ with tab1:
         st.info("推奨サービスが計算できませんでした。")
     else:
         # フィルター
-        col_f1, col_f2 = st.columns(2)
+        col_f1, col_f2, col_f3, col_f4 = st.columns(4)
         with col_f1:
             min_revenue = st.slider(
                 "推定年間増収額（下限）",
@@ -272,13 +310,31 @@ with tab1:
                 svc_cols,
                 default=[]
             )
+        with col_f3:
+            industry_list = sorted(rec_df["業種"].dropna().unique().tolist())
+            industry_filter = st.multiselect(
+                "業種で絞込",
+                industry_list,
+                default=[]
+            )
+        with col_f4:
+            priority_options = ["A（高）", "B（中）", "C（低）"]
+            priority_filter = st.multiselect(
+                "優先度で絞込",
+                priority_options,
+                default=[]
+            )
 
         filtered_rec = rec_df[rec_df["推定年間増収額"] >= min_revenue]
         if svc_filter:
             filtered_rec = filtered_rec[filtered_rec["推奨サービス"].isin(svc_filter)]
+        if industry_filter:
+            filtered_rec = filtered_rec[filtered_rec["業種"].isin(industry_filter)]
+        if priority_filter:
+            filtered_rec = filtered_rec[filtered_rec["優先度"].isin(priority_filter)]
 
         st.markdown(f"**{len(filtered_rec)}件** の提案機会")
-        show_cols = ["顧問先名", "業種", "推奨サービス", "単価（月額）", "Confidence", "推定月間増収額", "推定年間増収額"]
+        show_cols = ["顧問先名", "業種", "推奨サービス", "優先度", "単価（月額）", "Confidence", "推定月間増収額", "推定年間増収額"]
         st.dataframe(
             filtered_rec[show_cols].sort_values("推定年間増収額", ascending=False).reset_index(drop=True),
             use_container_width=True,
@@ -293,6 +349,76 @@ with tab1:
             "text/csv",
             use_container_width=True
         )
+
+        # ─────────────────────────────────────────
+        # 顧問先個別カルテ
+        # ─────────────────────────────────────────
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        st.subheader("📋 顧問先個別カルテ")
+
+        client_names = sorted(df["顧問先名"].dropna().unique().tolist()) if "顧問先名" in df.columns else []
+        if client_names:
+            selected_client = st.selectbox("顧問先を選択", client_names, key="client_card_select")
+
+            client_row = df[df["顧問先名"] == selected_client].iloc[0]
+            client_industry = client_row.get("業種", "不明")
+
+            # 利用中サービス / 未利用サービス
+            using_svcs = [s for s in svc_cols if client_row.get(s, 0) == 1]
+            not_using_svcs = [s for s in svc_cols if client_row.get(s, 0) == 0]
+
+            col_card1, col_card2 = st.columns(2)
+            with col_card1:
+                st.markdown("**現在利用中のサービス**")
+                if using_svcs:
+                    for s in using_svcs:
+                        st.markdown(f"- ✅ {s}")
+                else:
+                    st.caption("利用中のサービスはありません")
+
+            with col_card2:
+                st.markdown("**未利用サービス＋推奨スコア**")
+                client_recs = rec_df[rec_df["顧問先名"] == selected_client].sort_values("Confidence", ascending=False)
+                if len(client_recs) > 0:
+                    for _, r in client_recs.iterrows():
+                        st.markdown(
+                            f"- 🔹 {r['推奨サービス']}（Confidence: {r['Confidence']:.3f} / "
+                            f"優先度: {r['優先度']}）"
+                        )
+                else:
+                    st.caption("推奨サービスはありません")
+
+            # 推定年間増収額合計
+            client_annual_total = int(client_recs["推定年間増収額"].sum()) if len(client_recs) > 0 else 0
+            st.metric("この顧問先の推定年間増収額合計", f"¥{client_annual_total:,.0f}")
+
+            # 業種に応じたワンポイントアドバイス
+            advice = INDUSTRY_ADVICE.get(client_industry, "複数サービスのセット提案で顧問先の業務効率化を訴求")
+            st.info(f"💡 **この顧問先への提案ポイント**（{client_industry}）: {advice}")
+
+            # ─────────────────────────────────────────
+            # 提案トークスクリプト
+            # ─────────────────────────────────────────
+            if len(client_recs) > 0:
+                if st.button("📝 提案トークスクリプトを生成", key="talk_script_btn"):
+                    st.markdown("---")
+                    st.markdown("#### 提案トークスクリプト")
+                    for _, r in client_recs.iterrows():
+                        svc_name = r["推奨サービス"]
+                        unit_price = r["単価（月額）"]
+                        effect = SERVICE_EFFECTS.get(svc_name, "業務効率の大幅な改善")
+                        script = (
+                            f"「{selected_client}様、いつもお世話になっております。\n"
+                            f"御社と同じ{client_industry}のお客様で、{svc_name}を導入された事務所では、\n"
+                            f"月額{unit_price:,}円で{effect}という成果が出ております。\n"
+                            f"一度お話の機会をいただけないでしょうか。」"
+                        )
+                        st.text_area(
+                            f"{svc_name}（優先度: {r['優先度']}）",
+                            value=script,
+                            height=130,
+                            key=f"script_{selected_client}_{svc_name}"
+                        )
 
 # ─────────────────────────────────────────
 with tab2:
