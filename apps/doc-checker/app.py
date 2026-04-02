@@ -16,6 +16,9 @@ CHECKLISTS = {
         "description": "都道府県知事・国土交通大臣への建設業許可申請に必要な書類チェック",
         "authority": "都道府県知事 / 国土交通大臣",
         "standard_days": "30〜60日（審査期間）",
+        "estimated_cost": "15〜30万円（行政書士報酬含む）",
+        "prep_days": "2〜4週間",
+        "window_info": "都道府県の建設業課（例: 東京都 都市整備局）",
         "items": [
             {
                 "name": "建設業許可申請書（様式第1号）",
@@ -58,6 +61,7 @@ CHECKLISTS = {
                 "required": True,
                 "point": "成年後見・被保佐人に登記されていないことの証明。発行後3ヶ月以内",
                 "ng_example": "有効期限切れ（発行から3ヶ月超過）",
+                "how_to_get": "法務局（東京法務局後見登録課）で取得。郵送申請も可",
             },
             {
                 "name": "身分証明書（本籍地の市区町村発行）",
@@ -70,12 +74,14 @@ CHECKLISTS = {
                 "required": True,
                 "point": "法人の場合必須。発行後3ヶ月以内のもの",
                 "ng_example": "個人事業主申請に法人登記を添付する誤り",
+                "how_to_get": "法務局（オンライン申請可: 登記・供託オンラインシステム）",
             },
             {
                 "name": "納税証明書（法人税・消費税）",
                 "required": True,
                 "point": "未納がないことの証明。都道府県・国税の両方が必要な場合あり",
                 "ng_example": "消費税分の証明書が漏れている",
+                "how_to_get": "税務署（e-Taxで取得可能）。都道府県税は各都道府県税事務所",
             },
         ],
     },
@@ -84,6 +90,9 @@ CHECKLISTS = {
         "description": "食品衛生法に基づく飲食店営業許可の申請書類チェック",
         "authority": "保健所（都道府県/政令市）",
         "standard_days": "10〜20日（施設検査を含む）",
+        "estimated_cost": "3〜10万円",
+        "prep_days": "1〜2週間",
+        "window_info": "管轄の保健所 衛生課（事前相談推奨）",
         "items": [
             {
                 "name": "飲食店営業許可申請書",
@@ -96,6 +105,7 @@ CHECKLISTS = {
                 "required": True,
                 "point": "調理師免許・栄養士免許または講習会修了証。1施設につき1名以上",
                 "ng_example": "資格者が他店舗との兼任（原則不可）",
+                "how_to_get": "各都道府県の食品衛生協会で養成講習会を受講（1日・約1万円）",
             },
             {
                 "name": "施設の平面図（厨房レイアウト）",
@@ -140,6 +150,9 @@ CHECKLISTS = {
         "description": "常時10人以上の従業員がいる事業場の就業規則届出（労働基準法第89条）",
         "authority": "所轄労働基準監督署",
         "standard_days": "受理即日〜1週間（届出のみ）",
+        "estimated_cost": "10〜30万円（社労士報酬含む）",
+        "prep_days": "2〜4週間",
+        "window_info": "所轄労働基準監督署 監督課",
         "items": [
             {
                 "name": "就業規則届（様式第9号）",
@@ -208,18 +221,23 @@ CHECKLISTS = {
         "description": "法人設立・従業員雇用時の社会保険（健康保険・厚生年金）新規適用手続き",
         "authority": "所轄年金事務所",
         "standard_days": "受理後5〜10日（保険証交付）",
+        "estimated_cost": "3〜5万円（社労士報酬含む）",
+        "prep_days": "3〜5日",
+        "window_info": "所轄年金事務所（日本年金機構）/ e-Gov電子申請可",
         "items": [
             {
                 "name": "健康保険・厚生年金保険新規適用届",
                 "required": True,
                 "point": "事業所の所在地・名称・事業主氏名を正確に記載。法人番号の記入を忘れずに",
                 "ng_example": "法人番号の誤り、事業所名が登記と不一致",
+                "how_to_get": "日本年金機構HPからダウンロード。e-Gov電子申請でも提出可",
             },
             {
                 "name": "法人の登記事項証明書（原本）",
                 "required": True,
                 "point": "発行後3ヶ月以内のもの。事業内容・所在地が申請書と一致しているか確認",
                 "ng_example": "本店移転後の旧住所で申請",
+                "how_to_get": "法務局（オンライン申請可: 登記・供託オンラインシステム）",
             },
             {
                 "name": "被保険者資格取得届（従業員全員分）",
@@ -268,7 +286,7 @@ st.set_page_config(
     page_title="申請書類チェッカー",
     page_icon="✅",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # ============================================================
@@ -288,6 +306,25 @@ st.markdown("""
 .progress-label{font-size:1.1rem;font-weight:bold;color:#0891B2;}
 </style>
 """, unsafe_allow_html=True)
+
+# ============================================================
+# Sidebar — 使い方ガイド
+# ============================================================
+with st.sidebar:
+    st.markdown("## 📖 使い方ガイド")
+    st.markdown(
+        "**3ステップで書類チェック完了!**\n\n"
+        "1. **書類種別を選択** — チェックしたい申請種別を選びます\n"
+        "2. **各書類をチェック** — 準備状況を「済 / 未済 / 該当なし」で入力\n"
+        "3. **結果を確認** — 不備一覧・完了率・アクションプランを確認\n"
+    )
+    st.markdown("---")
+    st.markdown("### 対応書類種別")
+    for doc_key, cl_data in CHECKLISTS.items():
+        st.markdown(f"{cl_data['icon']} **{doc_key}**")
+    st.markdown("---")
+    st.caption("**AI経営パートナー × データサイエンス**")
+    st.caption("申請書類チェッカー v1.0")
 
 # ============================================================
 # Main
@@ -320,6 +357,10 @@ with tab1:
     col_info1, col_info2 = st.columns(2)
     col_info1.markdown(f"- **申請先**: {cl['authority']}")
     col_info2.markdown(f"- **標準処理期間**: {cl['standard_days']}")
+    col_info3, col_info4 = st.columns(2)
+    col_info3.markdown(f"- **費用目安**: {cl['estimated_cost']}")
+    col_info4.markdown(f"- **準備期間**: {cl['prep_days']}")
+    st.markdown(f"- **申請窓口**: {cl['window_info']}")
     st.markdown(f"_{cl['description']}_")
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -413,6 +454,21 @@ with tab1:
                     req = "【必須】" if r["item"]["required"] else "【任意】"
                     st.markdown(f'<div class="check-item-ok">✅ {req} {r["item"]["name"]}</div>', unsafe_allow_html=True)
 
+        # アクションプラン
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        st.markdown("### 🚀 次のアクション")
+        if ng_items:
+            st.markdown("未済の必須書類を準備しましょう。以下に入手先・準備方法のヒントをまとめます。")
+            for r in ng_items:
+                how = r["item"].get("how_to_get", "")
+                if how:
+                    st.markdown(f"- **{r['item']['name']}** → {how}")
+                else:
+                    st.markdown(f"- **{r['item']['name']}** → 申請先窓口にお問い合わせください")
+        else:
+            st.success("全ての必須書類が準備完了です! 申請先に事前相談の予約を取りましょう。")
+            st.markdown(f"**申請窓口**: {cl['window_info']}")
+
         # PDFチェックシート風Markdownダウンロード
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         md_lines = [
@@ -462,6 +518,7 @@ with tab2:
     for doc_key, cl_data in CHECKLISTS.items():
         with st.expander(f"{cl_data['icon']} {doc_key} — {len(cl_data['items'])}項目"):
             st.markdown(f"**申請先**: {cl_data['authority']}　|　**標準処理期間**: {cl_data['standard_days']}")
+            st.markdown(f"**費用目安**: {cl_data['estimated_cost']}　|　**準備期間**: {cl_data['prep_days']}　|　**窓口**: {cl_data['window_info']}")
             st.markdown(f"_{cl_data['description']}_")
             st.markdown("")
             for idx, item in enumerate(cl_data["items"], 1):
