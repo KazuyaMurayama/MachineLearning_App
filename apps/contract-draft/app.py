@@ -159,7 +159,7 @@ TEMPLATES={
 }
 
 # === Page Config ===
-st.set_page_config(page_title="契約書ドラフトAI",page_icon="📝",layout="wide",initial_sidebar_state="collapsed")
+st.set_page_config(page_title="契約書ドラフトAI",page_icon="📝",layout="wide",initial_sidebar_state="expanded")
 
 # === CSS ===
 st.markdown("""
@@ -168,8 +168,42 @@ st.markdown("""
 .draft-hero h1{font-size:2.2rem;color:#7C3AED;}
 .draft-hero p{font-size:1.1rem;color:#475569;}
 .section-divider{border:none;border-top:2px solid #E2E8F0;margin:32px 0;}
+.kpi-card{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:18px 14px;text-align:center;}
+.kpi-card .kpi-value{font-size:1.5rem;font-weight:700;color:#7C3AED;margin:4px 0;}
+.kpi-card .kpi-label{font-size:0.85rem;color:#64748B;}
+.effect-box{background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:12px;padding:20px;margin:8px 0;}
+.effect-box .effect-title{font-size:0.9rem;color:#64748B;margin-bottom:2px;}
+.effect-box .effect-value{font-size:1.3rem;font-weight:700;color:#7C3AED;}
+.effect-box .effect-detail{font-size:0.8rem;color:#94A3B8;}
 </style>
 """,unsafe_allow_html=True)
+
+# === Sidebar ===
+with st.sidebar:
+    st.markdown("## 📝 契約書ドラフトAI")
+    st.markdown("---")
+    st.markdown("### 使い方ガイド")
+    st.markdown("""
+**Step 1:** 士業の種別を選択
+**Step 2:** 事務所・顧問先情報を入力
+**Step 3:** 生成ボタンでドラフト作成＆ダウンロード
+""")
+    st.markdown("---")
+    st.markdown("### こんな時に使えます")
+    st.markdown("""
+- 新規顧問先との契約時
+- 契約更新時
+- AI導入時の追加契約時
+""")
+    st.markdown("---")
+    st.markdown("### 関連ツール")
+    st.markdown("""
+- 安心パッケージ（守秘義務契約・AI処理同意書）
+- 月次レポート自動生成
+- 離反予測デモ
+""")
+    st.markdown("---")
+    st.caption("契約書ドラフトAI v1.2")
 
 # === Main ===
 st.markdown("""
@@ -179,6 +213,58 @@ st.markdown("""
 </div>
 """,unsafe_allow_html=True)
 
+# === 導入効果セクション ===
+st.markdown("#### 導入効果")
+eff1,eff2,eff3=st.columns(3)
+with eff1:
+    st.markdown("""<div class="effect-box">
+<div class="effect-title">契約書作成時間</div>
+<div class="effect-value">2時間 → 10分</div>
+<div class="effect-detail">92%削減</div>
+</div>""",unsafe_allow_html=True)
+with eff2:
+    st.markdown("""<div class="effect-box">
+<div class="effect-title">弁護士依頼費</div>
+<div class="effect-value">¥50,000〜¥150,000 → ¥0</div>
+<div class="effect-detail">自動生成で不要に</div>
+</div>""",unsafe_allow_html=True)
+with eff3:
+    st.markdown("""<div class="effect-box">
+<div class="effect-title">年間削減額</div>
+<div class="effect-value">約¥60万</div>
+<div class="effect-detail">月5件の契約書作成想定</div>
+</div>""",unsafe_allow_html=True)
+
+# === KPIメトリクス ===
+st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+kc1,kc2,kc3,kc4=st.columns(4)
+with kc1:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-label">対応士業</div>
+<div class="kpi-value">3種類</div>
+<div class="kpi-label">税理士/社労士/行政書士</div>
+</div>""",unsafe_allow_html=True)
+with kc2:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-label">テンプレート条項数</div>
+<div class="kpi-value">8条</div>
+<div class="kpi-label">各テンプレートの条文数平均</div>
+</div>""",unsafe_allow_html=True)
+with kc3:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-label">AI対応条項</div>
+<div class="kpi-value">含む</div>
+<div class="kpi-label">守秘義務+AI同意連携</div>
+</div>""",unsafe_allow_html=True)
+with kc4:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-label">自動更新対応</div>
+<div class="kpi-value">○</div>
+<div class="kpi-label">契約期間自動計算</div>
+</div>""",unsafe_allow_html=True)
+
+st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+
 # 業種選択
 biz=st.radio("士業の種別を選択",list(TEMPLATES.keys()),horizontal=True)
 tmpl=TEMPLATES[biz]
@@ -186,26 +272,63 @@ tmpl=TEMPLATES[biz]
 st.markdown(f"### 📝 {tmpl['title']} — 情報入力")
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 
-with st.form("contract_form"):
-    fc1,fc2=st.columns(2)
-    with fc1:
-        office=st.text_input("事務所名（甲）",value="○○税理士事務所" if biz=="税理士" else f"○○{biz}事務所")
-        client=st.text_input("顧問先名（乙）",value="△△株式会社")
-        start=st.date_input("契約開始日",value=date.today())
-    with fc2:
-        if biz in ["税理士","社労士"]:
-            monthly_fee=st.text_input("月額顧問料",value="50,000円")
-            if biz=="税理士":
-                settlement_fee=st.text_input("決算料",value="月額顧問料の4〜6ヶ月分")
-            duration=st.selectbox("契約期間",["1年間","2年間","3年間"],index=0)
-            payment_day=st.selectbox("支払期日（翌月）",["10","15","20","25","末"],index=3)
-        else:
-            total_fee=st.text_input("報酬額",value="150,000円")
-            main_service=st.text_input("主な業務内容",value="建設業許可申請")
-            delivery_days=st.number_input("納期（営業日）",value=15,min_value=5,max_value=60)
-    extra=st.text_area("追加業務（1行に1項目）",value="",height=80,placeholder="例: 記帳代行\n給与計算代行")
-    jurisdiction=st.text_input("管轄裁判所",value="東京")
-    submitted=st.form_submit_button("📝 契約書を生成する",type="primary",use_container_width=True)
+# === session_state 初期化 ===
+for key in ["office","client","start","monthly_fee","settlement_fee","duration",
+            "payment_day","total_fee","main_service","delivery_days","extra","jurisdiction"]:
+    if key not in st.session_state:
+        st.session_state[key]=None
+
+# === 入力フォーム（st.form廃止 → リアルタイムプレビュー対応） ===
+fc1,fc2=st.columns(2)
+with fc1:
+    office=st.text_input("事務所名（甲）",value="○○税理士事務所" if biz=="税理士" else f"○○{biz}事務所",key=f"office_{biz}")
+    client=st.text_input("顧問先名（乙）",value="△△株式会社",key=f"client_{biz}")
+    start=st.date_input("契約開始日",value=date.today(),key=f"start_{biz}")
+with fc2:
+    if biz in ["税理士","社労士"]:
+        monthly_fee=st.text_input("月額顧問料",value="50,000円",key=f"fee_{biz}")
+        if biz=="税理士":
+            settlement_fee=st.text_input("決算料",value="月額顧問料の4〜6ヶ月分",key=f"settle_{biz}")
+        duration=st.selectbox("契約期間",["1年間","2年間","3年間"],index=0,key=f"dur_{biz}")
+        payment_day=st.selectbox("支払期日（翌月）",["10","15","20","25","末"],index=3,key=f"pay_{biz}")
+    else:
+        total_fee=st.text_input("報酬額",value="150,000円",key=f"tfee_{biz}")
+        main_service=st.text_input("主な業務内容",value="建設業許可申請",key=f"svc_{biz}")
+        delivery_days=st.number_input("納期（営業日）",value=15,min_value=5,max_value=60,key=f"del_{biz}")
+extra=st.text_area("追加業務（1行に1項目）",value="",height=80,placeholder="例: 記帳代行\n給与計算代行",key=f"extra_{biz}")
+jurisdiction=st.text_input("管轄裁判所",value="東京",key=f"jur_{biz}")
+
+# === リアルタイムプレビュー ===
+with st.expander("📋 プレビュー（入力内容が即反映されます）",expanded=False):
+    extra_lines=extra.strip().split("\n") if extra.strip() else []
+    extra_md=""
+    for i,line in enumerate(extra_lines,6 if biz in ["税理士","社労士"] else 2):
+        extra_md+=f"\n{i}. {line.strip()}"
+    duration_str=duration if biz in ["税理士","社労士"] else "単発業務"
+    years=int(duration[0]) if biz in ["税理士","社労士"] else 1
+    end=(start.replace(year=start.year+years)-timedelta(days=1))
+    preview_params={
+        "office_name":office,"client_name":client,
+        "start_date":start.strftime("%Y年%m月%d日"),
+        "end_date":end.strftime("%Y年%m月%d日"),
+        "duration":duration_str,"jurisdiction":jurisdiction,
+        "extra_services":extra_md,
+    }
+    if biz in ["税理士","社労士"]:
+        preview_params["monthly_fee"]=monthly_fee
+        preview_params["payment_day"]=payment_day
+        if biz=="税理士":
+            preview_params["settlement_fee"]=settlement_fee
+    else:
+        preview_params["total_fee"]=total_fee
+        preview_params["main_service"]=main_service
+        preview_params["delivery_days"]=str(delivery_days)
+        preview_params["payment_day"]="30"
+    preview_rendered=tmpl["template"].format(**preview_params)
+    st.markdown(preview_rendered)
+
+# === 生成ボタン ===
+submitted=st.button("📝 契約書を生成する",type="primary",use_container_width=True)
 
 if submitted:
     # 追加業務の整形
@@ -244,11 +367,11 @@ if submitted:
     st.info("💡 このドラフトは雛形です。実際の契約締結前に、必ず内容をご確認ください。")
     st.warning("📌 **AI処理を行う場合**は、「安心パッケージ」のAI処理同意書も合わせてご利用ください。契約書第5条の守秘義務条項と連動しています。")
 
-# Footer — 相互リンク
+# Footer — 関連ツール（外部URLなし）
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
 fc1,fc2,fc3=st.columns(3)
-fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
-fc2.markdown("📊 [月次レポート自動生成](https://report-gen.streamlit.app)  \n試算表CSV→レポート自動作成")
-fc3.markdown("🏢 [離反予測デモ](https://shigyou-demo.streamlit.app)  \n顧問先の離反リスク予測")
-st.caption("AI経営パートナー × データサイエンス | 契約書ドラフトAI v1.1")
+fc1.markdown("🛡️ **安心パッケージ**  \n守秘義務契約・AI処理同意書")
+fc2.markdown("📊 **月次レポート自動生成**  \n試算表CSV→レポート自動作成")
+fc3.markdown("🏢 **離反予測デモ**  \n顧問先の離反リスク予測")
+st.caption("AI経営パートナー × データサイエンス | 契約書ドラフトAI v1.2")
