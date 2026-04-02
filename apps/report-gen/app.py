@@ -134,6 +134,56 @@ def generate_report_md(df_cur,df_prev,mom,yoy,anomalies,client_name,report_month
 # === Page Config ===
 st.set_page_config(page_title="月次レポート自動生成",page_icon="📊",layout="wide",initial_sidebar_state="expanded")
 
+# === Custom CSS ===
+st.markdown("""
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+    color: white;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.hero-section h1 {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.hero-section p {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    margin: 0;
+}
+.kpi-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.kpi-card h3 {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+}
+.kpi-card .value {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.kpi-card .delta-pos { color: #16a34a; font-size: 0.9rem; }
+.kpi-card .delta-neg { color: #dc2626; font-size: 0.9rem; }
+.section-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #2563EB, #e2e8f0);
+    margin: 1.5rem 0;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # === Session State ===
 for k,v in {"df_cur":None,"df_prev":None,"loaded":False,"client_name":"株式会社サンプル商事"}.items():
     if k not in st.session_state: st.session_state[k]=v
@@ -150,6 +200,28 @@ if not st.session_state.loaded:
 st.sidebar.markdown("# 📊 月次レポート自動生成")
 st.sidebar.markdown("**freee/MF試算表CSVから自動でレポートを作成**")
 st.sidebar.markdown("---")
+
+# サイドバー: 使い方ガイド
+st.sidebar.markdown("### 📖 使い方ガイド")
+st.sidebar.markdown("""
+**Step 1**: 当期CSVアップロード（必須）
+**Step 2**: 前期CSVアップロード（任意・YoY比較用）
+**Step 3**: 対象月を選択してレポート生成
+""")
+st.sidebar.markdown("""
+<details><summary>📄 CSVフォーマット</summary>
+
+列名例:
+`年月, 売上高, 売上原価, 売上総利益, 販売管理費計, 営業利益, 経常利益`
+
+- 1行目: ヘッダー（列名）
+- 2行目以降: 月次データ（万円単位）
+- 年月列の形式: `2025-04` など
+
+</details>
+""", unsafe_allow_html=True)
+st.sidebar.markdown("---")
+
 st.sidebar.subheader("📁 当期データ")
 up_cur=st.sidebar.file_uploader("当期試算表CSV",type=["csv"],key="up_cur")
 if up_cur:
@@ -165,13 +237,19 @@ client_name=st.sidebar.text_input("顧問先名",value=st.session_state.client_n
 st.session_state.client_name=client_name
 st.sidebar.markdown("---")
 st.sidebar.caption("AI経営パートナー × データサイエンス")
-st.sidebar.caption("月次レポート自動生成 v1.0")
+st.sidebar.caption("月次レポート自動生成 v1.1")
 
-# === Main ===
-st.title("📊 月次レポート自動生成ツール")
-st.markdown("freee/MFの試算表CSVをアップロードするだけで、**前月比・前年同月比・異常値検知**を自動実行し、顧問先向けレポートを生成します。")
+# === Main: Hero Section ===
+st.markdown("""
+<div class="hero-section">
+<h1>📊 月次レポート自動生成</h1>
+<p>freee/MFの試算表CSVをアップロードするだけで、<br>前月比・前年同月比・異常値検知を自動実行します。</p>
+</div>
+""", unsafe_allow_html=True)
 
 st.info("💡 **導入効果**: レポート作成時間 **3時間→15分**（年間約120時間の工数削減、約¥180万相当）")
+
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 if st.session_state.df_cur is not None:
     df_cur=st.session_state.df_cur
@@ -184,22 +262,30 @@ if st.session_state.df_cur is not None:
         report_month=sel_month
     else:
         sel_idx=len(df_cur)-1; report_month="最新月"
+
     # KPIサマリーカード
     row=df_cur.iloc[sel_idx]
     kc1,kc2,kc3,kc4=st.columns(4)
     prev_row=df_cur.iloc[sel_idx-1] if sel_idx>0 else None
     for col_widget,acct in zip([kc1,kc2,kc3,kc4],["売上高","売上総利益","営業利益","経常利益"]):
         if acct in df_cur.columns:
-            val=float(row[acct]); delta=None
+            val=float(row[acct]); delta=None; delta_val=0
             if prev_row is not None and acct in df_cur.columns:
-                pv=float(prev_row[acct]); delta=f"{(val-pv)/abs(pv)*100:+.1f}%" if pv!=0 else None
+                pv=float(prev_row[acct])
+                if pv!=0:
+                    delta_val=(val-pv)/abs(pv)*100
+                    delta=f"{delta_val:+.1f}%"
             col_widget.metric(acct,f"¥{val:,.0f}万",delta)
-    st.markdown("---")
+
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
     # 分析実行（選択月ベース）
     df_cur_to=df_cur.iloc[:sel_idx+1]
     mom=calc_mom(df_cur_to)
     yoy=calc_yoy(df_cur_to,df_prev) if df_prev is not None else {}
     anomalies=detect_anomalies(mom,yoy)
+    # 異常値科目セットを作成（グラフハイライト用）
+    anomaly_accounts=set(a["科目"] for a in anomalies)
     report_md=generate_report_md(df_cur_to,df_prev,mom,yoy,anomalies,client_name,report_month)
 
     # タブ
@@ -216,16 +302,31 @@ if st.session_state.df_cur is not None:
         months=df_cur["年月"].tolist()
         for acct in KEY_ACCOUNTS:
             if acct in df_cur.columns:
-                fig,ax=plt.subplots(figsize=(10,3))
+                fig,ax=plt.subplots(figsize=(10,3.5))
                 vals_cur=df_cur[acct].values.astype(float)
-                ax.bar(range(len(months)),vals_cur,color="#2563EB",alpha=0.7,label="当期")
+                # 選択月ハイライト: 選択月は別色、それ以外は通常色
+                bar_colors=["#f97316" if i==sel_idx else "#2563EB" for i in range(len(months))]
+                bar_alphas=[1.0 if i==sel_idx else 0.7 for i in range(len(months))]
+                bars=ax.bar(range(len(months)),vals_cur,color=bar_colors,alpha=0.85,label="当期")
+                # 選択月のバーだけアルファ調整
+                for i,b in enumerate(bars):
+                    b.set_alpha(bar_alphas[i])
                 if df_prev is not None and acct in df_prev.columns:
                     vals_prev=df_prev[acct].values.astype(float)
                     n=min(len(vals_cur),len(vals_prev))
-                    ax.plot(range(n),vals_prev[:n],color="#94A3B8",linewidth=2,marker="o",markersize=4,label="前期",ls="--")
-                ax.set_title(acct,fontsize=13,fontweight="bold")
-                ax.set_xticks(range(len(months))); ax.set_xticklabels([m[-3:] for m in months],fontsize=9)
-                ax.set_ylabel("万円"); ax.legend(loc="upper left"); plt.tight_layout()
+                    ax.plot(range(n),vals_prev[:n],color="#94A3B8",linewidth=2.5,
+                        marker="o",markersize=5,label="前期",ls="--",alpha=0.9)
+                # 異常値科目は赤タイトル
+                title_color="#dc2626" if acct in anomaly_accounts else "#1e293b"
+                title_prefix="⚠ " if acct in anomaly_accounts else ""
+                ax.set_title(f"{title_prefix}{acct}",fontsize=13,fontweight="bold",color=title_color)
+                ax.set_xticks(range(len(months)))
+                ax.set_xticklabels([m[-3:] if len(m)>=3 else m for m in months],fontsize=9)
+                ax.set_ylabel("万円")
+                ax.legend(loc="upper left",framealpha=0.9)
+                ax.grid(axis="y",alpha=0.3,linestyle="--")
+                ax.set_axisbelow(True)
+                plt.tight_layout()
                 st.pyplot(fig); plt.close(fig)
 
     with tab3:
@@ -236,6 +337,10 @@ if st.session_state.df_cur is not None:
             adf=pd.DataFrame(anomalies)
             show_cols=[c for c in ["severity","科目","種別","変動率","方向","当月","前月","前年同月","差額"] if c in adf.columns]
             st.dataframe(adf[show_cols],use_container_width=True,hide_index=True)
+            # 異常値CSVダウンロード
+            anomaly_csv=adf[show_cols].to_csv(index=False).encode("utf-8-sig")
+            st.download_button("📥 異常値一覧をCSVダウンロード",anomaly_csv,
+                f"異常値アラート_{report_month}.csv","text/csv",use_container_width=True)
         else:
             st.success("異常値は検出されませんでした。")
 
@@ -243,17 +348,23 @@ if st.session_state.df_cur is not None:
         st.header("📊 データプレビュー")
         st.subheader("当期データ")
         st.dataframe(df_cur,use_container_width=True)
+        cur_csv=df_cur.to_csv(index=False).encode("utf-8-sig")
+        st.download_button("📥 当期データをCSVダウンロード",cur_csv,
+            "当期データ.csv","text/csv",use_container_width=True,key="dl_cur")
         if df_prev is not None:
             st.subheader("前期データ")
             st.dataframe(df_prev,use_container_width=True)
+            prev_csv=df_prev.to_csv(index=False).encode("utf-8-sig")
+            st.download_button("📥 前期データをCSVダウンロード",prev_csv,
+                "前期データ.csv","text/csv",use_container_width=True,key="dl_prev")
 else:
     st.info("サイドバーから試算表CSVをアップロードしてください。\n\nデモデータが自動で読み込まれている場合は、そのままご利用いただけます。")
 
-# 相互リンク（常時表示）
-st.markdown("---")
+# フッター: 関連ツール（テキストのみ、外部URL削除）
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
 fc1,fc2,fc3=st.columns(3)
-fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
-fc2.markdown("📝 [契約書ドラフトAI](https://contract-draft.streamlit.app)  \n顧問契約書を自動生成")
-fc3.markdown("🏢 [離反予測デモ](https://shigyou-demo.streamlit.app)  \n顧問先の離反リスク予測")
+fc1.markdown("🛡️ **安心パッケージ**  \n守秘義務契約・AI処理同意書")
+fc2.markdown("📝 **契約書ドラフトAI**  \n顧問契約書を自動生成")
+fc3.markdown("🏢 **離反予測デモ**  \n顧問先の離反リスク予測")
 st.caption("AI経営パートナー × データサイエンス | 月次レポート自動生成 v1.1")
