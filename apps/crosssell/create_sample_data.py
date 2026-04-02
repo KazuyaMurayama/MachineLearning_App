@@ -29,6 +29,17 @@ SERVICE_NAMES = list(SERVICES.keys())
 
 N_CLIENTS = 150
 
+
+def generate_unique_names(n, rng):
+    """重複のないユニークな顧問先名をn件生成する"""
+    names = set()
+    while len(names) < n:
+        name = (rng.choice(NAME_PARTS1) + rng.choice(NAME_PARTS2)
+                + rng.choice(COMPANY_TYPES))
+        names.add(name)
+    return list(names)
+
+
 # 業種・規模に応じたサービス利用確率テーブル
 # 行: 業種, 列: サービス
 PROB_INDUSTRY = {
@@ -44,19 +55,21 @@ PROB_INDUSTRY = {
 # 規模による補正係数（大きいほど利用率↑）
 SIZE_MULT = {"1-5名": 0.7, "6-20名": 1.0, "21-50名": 1.2, "51-100名": 1.4}
 
+rng = np.random.RandomState(42)
+unique_names = generate_unique_names(N_CLIENTS, rng)
+
 records = []
 for i in range(N_CLIENTS):
-    industry = np.random.choice(INDUSTRIES)
-    size = np.random.choice(SIZES)
-    name = (np.random.choice(NAME_PARTS1) + np.random.choice(NAME_PARTS2)
-            + np.random.choice(COMPANY_TYPES))
-    base_fee = np.random.choice([30000, 50000, 80000, 100000, 150000, 200000])
-    years = np.random.randint(1, 11)  # 契約年数1-10年
+    industry = rng.choice(INDUSTRIES)
+    size = rng.choice(SIZES)
+    name = unique_names[i]
+    base_fee = rng.choice([30000, 50000, 80000, 100000, 150000, 200000])
+    years = rng.randint(1, 11)  # 契約年数1-10年
 
     probs = np.array(PROB_INDUSTRY[industry]) * SIZE_MULT[size]
     probs = np.clip(probs, 0.0, 0.95)
 
-    usage = (np.random.random(len(SERVICE_NAMES)) < probs).astype(int)
+    usage = (rng.random(len(SERVICE_NAMES)) < probs).astype(int)
 
     row = {
         "顧問先ID": f"C{str(i+1).zfill(3)}",

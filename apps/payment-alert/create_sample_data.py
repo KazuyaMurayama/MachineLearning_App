@@ -18,26 +18,37 @@ N_CLIENTS = 150
 N_MONTHS = 12
 BASE_YEAR = 2024
 
-# 顧問先ごとの特性を決める
+
+def generate_unique_names(n, rng):
+    """重複のないユニークな顧問先名をn件生成する"""
+    names = set()
+    while len(names) < n:
+        name = (rng.choice(NAME_PARTS1) + rng.choice(NAME_PARTS2)
+                + rng.choice(COMPANY_TYPES))
+        names.add(name)
+    return list(names)
+
+
+rng = np.random.RandomState(42)
+unique_names = generate_unique_names(N_CLIENTS, rng)
+
+# 顧問先ごとの特性を決める（遅延タイプを明示的に割り当てて設計比率を保証）
+delay_types = (["正常"] * int(N_CLIENTS * 0.70)
+               + ["一時遅延"] * int(N_CLIENTS * 0.20)
+               + ["常習遅延"] * int(N_CLIENTS * 0.10))
+rng.shuffle(delay_types)
+
 profiles = []
 for i in range(N_CLIENTS):
-    r = np.random.random()
-    if r < 0.70:
-        delay_type = "正常"
-    elif r < 0.90:
-        delay_type = "一時遅延"
-    else:
-        delay_type = "常習遅延"
-    worsening = (delay_type != "正常") and (np.random.random() < 0.30)
+    delay_type = delay_types[i]
+    worsening = (delay_type != "正常") and (rng.random() < 0.30)
 
-    name = (np.random.choice(NAME_PARTS1) + np.random.choice(NAME_PARTS2)
-            + np.random.choice(COMPANY_TYPES))
     profiles.append({
         "顧問先ID": f"C{str(i+1).zfill(3)}",
-        "顧問先名": name,
-        "月額顧問料": np.random.choice([30000, 50000, 80000, 100000, 150000, 200000]),
-        "業種": np.random.choice(INDUSTRIES),
-        "従業員規模": np.random.choice(SIZES),
+        "顧問先名": unique_names[i],
+        "月額顧問料": rng.choice([30000, 50000, 80000, 100000, 150000, 200000]),
+        "業種": rng.choice(INDUSTRIES),
+        "従業員規模": rng.choice(SIZES),
         "delay_type": delay_type,
         "worsening": worsening,
     })
@@ -52,18 +63,18 @@ for profile in profiles:
     for m_idx, month_label in enumerate(month_labels):
         # 遅延日数を決定
         if delay_type == "正常":
-            base_delay = int(np.random.randint(0, 6))
+            base_delay = int(rng.randint(0, 6))
         elif delay_type == "一時遅延":
-            if np.random.random() < 0.35:
-                base_delay = int(np.random.randint(6, 16))
+            if rng.random() < 0.35:
+                base_delay = int(rng.randint(6, 16))
             else:
-                base_delay = int(np.random.randint(0, 6))
+                base_delay = int(rng.randint(0, 6))
         else:  # 常習遅延
-            base_delay = int(np.random.randint(16, 61))
+            base_delay = int(rng.randint(16, 61))
 
         # 悪化傾向: 直近3ヶ月(m_idx >= 9)で段階的に悪化
         if worsening and m_idx >= 9:
-            extra = int((m_idx - 8) * np.random.uniform(3.0, 8.0))
+            extra = int((m_idx - 8) * rng.uniform(3.0, 8.0))
             base_delay = min(base_delay + extra, 90)
 
         # 請求日: 毎月月初
