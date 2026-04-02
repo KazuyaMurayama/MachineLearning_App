@@ -199,7 +199,7 @@ AI処理にあたり、以下の匿名化を実施します。
 """
 
 # === Page Config ===
-st.set_page_config(page_title="安心パッケージ | 士業向けコンプライアンス",page_icon="🛡️",layout="wide",initial_sidebar_state="collapsed")
+st.set_page_config(page_title="安心パッケージ | 士業向けコンプライアンス",page_icon="🛡️",layout="wide",initial_sidebar_state="expanded")
 
 # === Custom CSS ===
 st.markdown("""
@@ -210,12 +210,37 @@ st.markdown("""
 .hero-compliance h1{font-size:2.2rem;color:#059669;}
 .hero-compliance p{font-size:1.1rem;color:#475569;line-height:1.7;}
 .section-divider{border:none;border-top:2px solid #E2E8F0;margin:32px 0;}
+.kpi-card{border-radius:12px;padding:20px;text-align:center;background:linear-gradient(180deg,#F0FDF4,#FFFFFF);border:1px solid #059669;margin-bottom:8px;}
+.kpi-card .kpi-value{font-size:2rem;font-weight:bold;color:#059669;margin:8px 0 4px 0;}
+.kpi-card .kpi-label{font-size:0.9rem;color:#475569;}
+.hero-section{text-align:center;padding:36px 0 24px 0;}
 </style>
 """,unsafe_allow_html=True)
 
 # === Session State ===
 for k,v in {"office_name":"○○税理士事務所","client_name":"△△株式会社","contact_person":"山田太郎","contact_email":"info@example.com"}.items():
     if k not in st.session_state: st.session_state[k]=v
+
+# === Sidebar ===
+with st.sidebar:
+    st.header("🛡️ 安心パッケージ")
+    st.markdown("---")
+    st.subheader("📖 使い方ガイド")
+    st.markdown("""
+1. **① 共通情報入力** — 事務所名・顧問先名などを入力
+2. **② タブでテンプレート確認** — 3種類のテンプレートをプレビュー
+3. **③ ダウンロード** — 個別 or 一括でダウンロード
+""")
+    st.markdown("---")
+    st.subheader("👥 対応士業一覧")
+    st.markdown("""
+- 🧮 **税理士** — 顧問先データのAI分析対応
+- 👷 **社労士** — 従業員情報の取扱い規程
+- 📝 **行政書士** — 許認可データの管理体制
+""")
+    st.markdown("---")
+    st.caption("安心パッケージ v1.1")
+    st.caption("© AI経営パートナー × データサイエンス")
 
 # === Main ===
 st.title("🛡️ 安心パッケージ")
@@ -229,6 +254,19 @@ st.markdown("""
 AI活用への不安をゼロにします。</p>
 </div>
 """,unsafe_allow_html=True)
+
+# KPI cards
+kc1,kc2,kc3,kc4=st.columns(4)
+with kc1:
+    st.markdown('<div class="kpi-card"><div class="kpi-label">テンプレート数</div><div class="kpi-value">3種類</div></div>',unsafe_allow_html=True)
+with kc2:
+    st.markdown('<div class="kpi-card"><div class="kpi-label">AI対応条項数</div><div class="kpi-value">5条項</div></div>',unsafe_allow_html=True)
+with kc3:
+    st.markdown('<div class="kpi-card"><div class="kpi-label">カバー法令数</div><div class="kpi-value">3法令</div></div>',unsafe_allow_html=True)
+with kc4:
+    st.markdown('<div class="kpi-card"><div class="kpi-label">準備時間削減</div><div class="kpi-value">80%削減</div></div>',unsafe_allow_html=True)
+
+st.markdown("")
 
 # 3-card overview
 c1,c2,c3=st.columns(3)
@@ -251,7 +289,29 @@ d1,d2,d3=st.columns(3)
 d1.metric("第1層","データ匿名化",help="個人名→ID、住所→都道府県、マイナンバー→入力禁止")
 d2.metric("第2層","セキュアAI選定",help="Azure OpenAI / Claude API（データ学習なし保証）")
 d3.metric("第3層","法的文書整備",help="守秘義務契約＋データ規程＋AI同意書の3点セット")
-st.info("💡 **導入効果**: 守秘義務対応にかかる準備時間を**80%削減**（従来2週間→2日）。資格剥奪リスクを文書で明確に回避。")
+st.markdown("### 💡 導入効果")
+bf1,bf2=st.columns(2)
+with bf1:
+    st.error("**❌ Before（従来）**")
+    st.markdown("""
+- 弁護士に依頼して **約50万円**
+- 完成まで **約2週間**
+- 修正のたびに追加費用
+""")
+with bf2:
+    st.success("**✅ After（本ツール）**")
+    st.markdown("""
+- 利用料 **0円**
+- 最短 **2日で完成**
+- 何度でも修正・再生成可能
+""")
+st.info("📈 **想定導入事務所数**: 全国の士業事務所（税理士約8万、社労士約4万、行政書士約5万）のAI導入を支援")
+st.markdown("#### 🎯 こんな方におすすめ")
+st.markdown("""
+- **AI導入を検討中の士業事務所** — 何から始めればいいか分からない方
+- **顧問先からAIに不安の声がある** — 「うちのデータは大丈夫？」への回答を用意したい方
+- **データ取扱い規程が未整備** — 事務所内のルールを早急に整えたい方
+""")
 
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 
@@ -270,6 +330,18 @@ with sc2:
     nda_post=st.selectbox("守秘義務 終了後存続期間",["1年","2年","3年","5年"],index=1,key="inp_post")
 
 today_str=date.today().strftime("%Y年%m月%d日")
+
+# 入力バリデーション
+if not office.strip():
+    st.warning("⚠️ 事務所名が未入力です。テンプレートには「＿＿＿」が挿入されます。")
+if not client.strip():
+    st.warning("⚠️ 顧問先名が未入力です。テンプレートには「＿＿＿」が挿入されます。")
+
+# 空フィールドをプレースホルダーで埋める
+office=office.strip() if office.strip() else "＿＿＿"
+client=client.strip() if client.strip() else "＿＿＿"
+contact=contact.strip() if contact.strip() else "＿＿＿"
+email=email.strip() if email.strip() else "＿＿＿"
 
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 
@@ -313,7 +385,7 @@ st.download_button("📥 安心パッケージ一括ダウンロード（3点セ
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
 fc1,fc2,fc3=st.columns(3)
-fc1.markdown("📝 [契約書ドラフトAI](https://contract-draft.streamlit.app)  \n顧問契約書を自動生成")
-fc2.markdown("📊 [月次レポート自動生成](https://report-gen.streamlit.app)  \n試算表CSV→レポート自動作成")
-fc3.markdown("🏢 [離反予測デモ](https://shigyou-demo.streamlit.app)  \n顧問先の離反リスク予測")
+fc1.markdown("📝 **契約書ドラフトAI**  \n顧問契約書を自動生成")
+fc2.markdown("📊 **月次レポート自動生成**  \n試算表CSV→レポート自動作成")
+fc3.markdown("🏢 **離反予測デモ**  \n顧問先の離反リスク予測")
 st.caption("AI経営パートナー × データサイエンス | 安心パッケージ v1.1")
