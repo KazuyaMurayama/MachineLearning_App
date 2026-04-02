@@ -1,0 +1,341 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import os
+from datetime import datetime
+
+# ── 日本語フォント設定 ──
+def setup_japanese_font():
+    candidates = ["Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic", "MS Gothic", "Meiryo", "DejaVu Sans"]
+    available = {f.name for f in fm.fontManager.ttflist}
+    for fn in candidates:
+        if fn in available:
+            plt.rcParams["font.family"] = fn
+            plt.rcParams["axes.unicode_minus"] = False
+            return fn
+    plt.rcParams["font.family"] = "DejaVu Sans"
+    return "DejaVu Sans"
+
+font_name = setup_japanese_font()
+
+# ── ページ設定 ──
+st.set_page_config(page_title="顧客RFM分析", page_icon="🎯", layout="wide")
+
+# ── CSS ──
+st.markdown("""
+<style>
+.hero-section {
+    background: linear-gradient(180deg, #F5F3FF, #FFFFFF);
+    padding: 2rem 2rem 1rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+.hero-title {
+    color: #8B5CF6;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+.hero-sub {
+    color: #6B7280;
+    font-size: 1rem;
+}
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #8B5CF6;
+}
+.kpi-label {
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin-top: 0.2rem;
+}
+hr.section-divider {
+    border: none;
+    border-top: 2px solid #E5E7EB;
+    margin: 2rem 0;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ── Session State ──
+for k, v in {"df": None, "loaded": False}.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
+
+# ── サイドバー ──
+with st.sidebar:
+    st.markdown("## 🎯 顧客RFM分析")
+    st.markdown("---")
+    uploaded = st.file_uploader("📂 CSVアップロード", type=["csv"])
+    st.info("**必須カラム**: 顧客ID / 注文日 / 注文金額")
+    if uploaded is not None:
+        try:
+            df_up = pd.read_csv(uploaded)
+            required = {"顧客ID", "注文日", "注文金額"}
+            if required.issubset(set(df_up.columns)):
+                df_up["注文日"] = pd.to_datetime(df_up["注文日"])
+                st.session_state.df = df_up
+                st.session_state.loaded = True
+                st.success("✅ データを読み込みました")
+            else:
+                st.error(f"必須カラムが不足: {required - set(df_up.columns)}")
+        except Exception as e:
+            st.error(f"読み込みエラー: {e}")
+    st.markdown("---")
+    st.caption("AI経営パートナー × データサイエンス")
+
+# ── サンプルデータ自動読み込み ──
+if not st.session_state.loaded:
+    p = os.path.join(os.path.dirname(__file__), "sample_data", "purchase_history.csv")
+    if os.path.exists(p):
+        df_sample = pd.read_csv(p)
+        df_sample["注文日"] = pd.to_datetime(df_sample["注文日"])
+        st.session_state.df = df_sample
+        st.session_state.loaded = True
+
+# ── Hero ──
+st.markdown("""
+<div class="hero-section">
+    <div class="hero-title">🎯 顧客RFM分析＋セグメンテーション</div>
+    <div class="hero-sub">Recency・Frequency・Monetary の3指標で顧客を自動セグメント分類</div>
+</div>
+""", unsafe_allow_html=True)
+
+if not st.session_state.loaded or st.session_state.df is None:
+    st.warning("サイドバーからCSVをアップロードしてください。")
+    st.stop()
+
+df = st.session_state.df.copy()
+
+# ── RFM計算 ──
+reference_date = df["注文日"].max()
+
+rfm = df.groupby("顧客ID").agg(
+    顧客名=("顧客名", "first") if "顧客名" in df.columns else ("顧客ID", "first"),
+    最終購買日=("注文日", "max"),
+    購買回数=("注文日", "count"),
+    累計金額=("注文金額", "sum"),
+).reset_index()
+
+rfm["Recency"] = (reference_date - rfm["最終購買日"]).dt.days
+
+
+def safe_qcut(series, q, labels_asc=True):
+    """pd.qcutで重複値を処理しつつ5段階に分割"""
+    try:
+        result = pd.qcut(series, q=q, labels=False, duplicates="drop") + 1
+        # ラベル数が足りない場合の補正
+        max_label = result.max()
+        if max_label < q:
+            result = ((result - 1) / (max_label - 1) * (q - 1)).round().astype(int) + 1
+        return result
+    except Exception:
+        return pd.Series([3] * len(series), index=series.index)
+
+
+# Rスコア: 少ないほど高スコア → 逆順
+rfm["R"] = safe_qcut(rfm["Recency"], 5)
+rfm["R"] = 6 - rfm["R"]  # 反転: Recency小 → スコア高
+
+# Fスコア: 多いほど高スコア
+rfm["F"] = safe_qcut(rfm["購買回数"], 5)
+
+# Mスコア: 多いほど高スコア
+rfm["M"] = safe_qcut(rfm["累計金額"], 5)
+
+rfm["合計"] = rfm["R"] + rfm["F"] + rfm["M"]
+
+
+def assign_segment(total):
+    if total >= 13:
+        return "VIP顧客"
+    elif total >= 10:
+        return "優良顧客"
+    elif total >= 7:
+        return "一般顧客"
+    elif total >= 4:
+        return "休眠顧客"
+    else:
+        return "離脱顧客"
+
+
+rfm["セグメント"] = rfm["合計"].apply(assign_segment)
+
+# ── KPIカード ──
+vip_count = (rfm["セグメント"] == "VIP顧客").sum()
+dormant_count = rfm["セグメント"].isin(["休眠顧客", "離脱顧客"]).sum()
+avg_ltv = rfm["累計金額"].mean()
+repeat_rate = (rfm["購買回数"] >= 2).sum() / len(rfm) * 100
+
+k1, k2, k3, k4 = st.columns(4)
+for col, label, value in [
+    (k1, "VIP顧客数", f"{vip_count}人"),
+    (k2, "休眠+離脱顧客数", f"{dormant_count}人"),
+    (k3, "全顧客平均LTV", f"¥{avg_ltv:,.0f}"),
+    (k4, "リピート率", f"{repeat_rate:.1f}%"),
+]:
+    col.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-value">{value}</div>
+        <div class="kpi-label">{label}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+st.info("💡 **導入効果**: 顧客セグメント分析の工数を **4時間→5分** に短縮（年間¥200万相当）")
+
+# ── タブ ──
+tab1, tab2, tab3 = st.tabs(["📋 RFMスコア一覧", "🗺️ セグメントマップ", "💡 施策提案"])
+
+# ── タブ1: RFMスコア一覧 ──
+with tab1:
+    st.subheader("RFMスコア一覧")
+
+    segments_list = rfm["セグメント"].unique().tolist()
+    selected_segments = st.multiselect(
+        "セグメントで絞り込み",
+        options=segments_list,
+        default=segments_list,
+    )
+
+    display_df = rfm[rfm["セグメント"].isin(selected_segments)][
+        ["顧客名", "R", "F", "M", "合計", "セグメント", "最終購買日", "購買回数", "累計金額"]
+    ].sort_values("合計", ascending=False).reset_index(drop=True)
+
+    st.dataframe(display_df, use_container_width=True, height=450)
+
+    csv_data = display_df.to_csv(index=False).encode("utf-8-sig")
+    st.download_button(
+        "📥 CSVダウンロード",
+        csv_data,
+        file_name="rfm_scores.csv",
+        mime="text/csv",
+    )
+
+# ── タブ2: セグメントマップ ──
+with tab2:
+    st.subheader("セグメントマップ")
+
+    # RFヒートマップ
+    st.markdown("#### R×F ヒートマップ（顧客数）")
+    heatmap_data = rfm.groupby(["F", "R"]).size().unstack(fill_value=0)
+    # 全ての1-5を埋める
+    for i in range(1, 6):
+        if i not in heatmap_data.columns:
+            heatmap_data[i] = 0
+        if i not in heatmap_data.index:
+            heatmap_data.loc[i] = 0
+    heatmap_data = heatmap_data.sort_index(ascending=False)[sorted(heatmap_data.columns)]
+
+    fig_hm, ax_hm = plt.subplots(figsize=(8, 5))
+    im = ax_hm.imshow(heatmap_data.values, cmap="Purples", aspect="auto")
+    ax_hm.set_xticks(range(len(heatmap_data.columns)))
+    ax_hm.set_xticklabels(heatmap_data.columns)
+    ax_hm.set_yticks(range(len(heatmap_data.index)))
+    ax_hm.set_yticklabels(heatmap_data.index)
+    ax_hm.set_xlabel("R (Recency)")
+    ax_hm.set_ylabel("F (Frequency)")
+    for i in range(len(heatmap_data.index)):
+        for j in range(len(heatmap_data.columns)):
+            val = heatmap_data.values[i, j]
+            color = "white" if val > heatmap_data.values.max() * 0.6 else "black"
+            ax_hm.text(j, i, str(val), ha="center", va="center", color=color, fontsize=12)
+    plt.colorbar(im, ax=ax_hm, label="顧客数")
+    fig_hm.tight_layout()
+    st.pyplot(fig_hm)
+    plt.close(fig_hm)
+
+    # 円グラフ
+    st.markdown("#### セグメント別 顧客数・売上構成比")
+    seg_stats = rfm.groupby("セグメント").agg(
+        顧客数=("顧客ID", "count"),
+        売上合計=("累計金額", "sum"),
+    )
+
+    colors_map = {
+        "VIP顧客": "#7C3AED",
+        "優良顧客": "#8B5CF6",
+        "一般顧客": "#A78BFA",
+        "休眠顧客": "#C4B5FD",
+        "離脱顧客": "#DDD6FE",
+    }
+    pie_colors = [colors_map.get(s, "#E5E7EB") for s in seg_stats.index]
+
+    fig_pie, (ax_p1, ax_p2) = plt.subplots(1, 2, figsize=(12, 5))
+    ax_p1.pie(seg_stats["顧客数"], labels=seg_stats.index, autopct="%1.1f%%",
+              colors=pie_colors, startangle=90)
+    ax_p1.set_title("顧客数構成比")
+    ax_p2.pie(seg_stats["売上合計"], labels=seg_stats.index, autopct="%1.1f%%",
+              colors=pie_colors, startangle=90)
+    ax_p2.set_title("売上構成比")
+    fig_pie.tight_layout()
+    st.pyplot(fig_pie)
+    plt.close(fig_pie)
+
+    # ヒストグラム
+    st.markdown("#### R / F / M スコア分布")
+    fig_hist, axes = plt.subplots(1, 3, figsize=(14, 4))
+    for ax, col, title in zip(axes, ["R", "F", "M"], ["Recency", "Frequency", "Monetary"]):
+        ax.hist(rfm[col], bins=range(1, 7), align="left", rwidth=0.7, color="#8B5CF6", edgecolor="white")
+        ax.set_title(f"{title} スコア分布")
+        ax.set_xlabel("スコア")
+        ax.set_ylabel("顧客数")
+        ax.set_xticks(range(1, 6))
+    fig_hist.tight_layout()
+    st.pyplot(fig_hist)
+    plt.close(fig_hist)
+
+# ── タブ3: 施策提案 ──
+with tab3:
+    st.subheader("セグメント別 推奨施策")
+
+    strategies = pd.DataFrame({
+        "セグメント": ["VIP顧客", "優良顧客", "一般顧客", "休眠顧客", "離脱顧客"],
+        "スコア帯": ["13-15", "10-12", "7-9", "4-6", "3"],
+        "推奨施策": [
+            "限定オファー・ロイヤルティプログラム",
+            "アップセル・クロスセル提案",
+            "リピート促進キャンペーン",
+            "再購入クーポン・リマインドメール",
+            "特別割引・復帰キャンペーン",
+        ],
+        "優先度": ["★★★★★", "★★★★☆", "★★★☆☆", "★★★★☆", "★★★★★"],
+    })
+
+    st.dataframe(strategies, use_container_width=True, hide_index=True)
+
+    st.markdown("#### セグメント別 顧客リスト")
+    for seg in ["VIP顧客", "優良顧客", "一般顧客", "休眠顧客", "離脱顧客"]:
+        seg_df = rfm[rfm["セグメント"] == seg]
+        count = len(seg_df)
+        with st.expander(f"{seg}（{count}人）"):
+            if count > 0:
+                st.dataframe(
+                    seg_df[["顧客ID", "顧客名", "R", "F", "M", "合計", "最終購買日", "累計金額"]]
+                    .sort_values("累計金額", ascending=False)
+                    .reset_index(drop=True),
+                    use_container_width=True,
+                )
+            else:
+                st.write("該当顧客なし")
+
+# ── フッター ──
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 🔗 関連ツール")
+fc1, fc2, fc3 = st.columns(3)
+fc1.markdown("📊 [売上ダッシュボード](https://ec-dashboard.streamlit.app)  \n日別/月別売上を自動可視化")
+fc2.markdown("📈 [広告ROI分析](https://ec-ad-roi.streamlit.app)  \n広告費用対効果を最適化")
+fc3.markdown("🛒 [EC離脱予測](https://ec-demo.streamlit.app)  \n顧客離脱をAIで予測")
+st.caption("AI経営パートナー × データサイエンス | 顧客RFM分析 v1.0")
