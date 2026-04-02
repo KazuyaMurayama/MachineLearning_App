@@ -26,7 +26,7 @@ def setup_japanese_font():
 _font = setup_japanese_font()
 
 # === ページ設定 ===
-st.set_page_config(page_title="広告ROI分析ツール", page_icon="📈", layout="wide")
+st.set_page_config(page_title="広告ROI分析ツール", page_icon="📈", layout="wide", initial_sidebar_state="expanded")
 
 # === CSS ===
 st.markdown("""
@@ -184,15 +184,20 @@ with tab1:
     perf["CPA"] = (perf["広告費合計"] / perf["CV数"]).astype(int)
     perf = perf.sort_values("ROAS", ascending=False).reset_index(drop=True)
 
+    # チャネルフィルター
+    all_channels = perf["チャネル"].tolist()
+    selected_channels = st.multiselect("チャネルを絞込", all_channels, default=all_channels)
+    perf_filtered = perf[perf["チャネル"].isin(selected_channels)]
+
     # 棒グラフ
     fig, ax = plt.subplots(figsize=(10, 5))
-    colors = ["#059669" if r >= perf["ROAS"].median() else "#6EE7B7" for r in perf["ROAS"]]
-    bars = ax.bar(perf["チャネル"], perf["ROAS"], color=colors, edgecolor="white", linewidth=0.8)
+    colors = ["#059669" if r >= perf_filtered["ROAS"].median() else "#6EE7B7" for r in perf_filtered["ROAS"]]
+    bars = ax.bar(perf_filtered["チャネル"], perf_filtered["ROAS"], color=colors, edgecolor="white", linewidth=0.8)
     ax.axhline(y=1.0, color="#EF4444", linestyle="--", linewidth=1.5, label="損益分岐 (ROAS=1.0)")
     ax.set_ylabel("ROAS")
     ax.set_title("チャネル別 年間平均ROAS")
     ax.legend()
-    for bar, val in zip(bars, perf["ROAS"]):
+    for bar, val in zip(bars, perf_filtered["ROAS"]):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.1,
                 f"{val:.2f}x", ha="center", va="bottom", fontweight="bold", fontsize=11)
     ax.spines["top"].set_visible(False)
@@ -203,7 +208,7 @@ with tab1:
 
     # テーブル（上位ハイライト）
     st.markdown("### チャネル別パフォーマンス")
-    display_perf = perf.copy()
+    display_perf = perf_filtered.copy()
     display_perf["広告費合計"] = display_perf["広告費合計"].apply(lambda x: f"¥{x:,.0f}")
     display_perf["売上合計"] = display_perf["売上合計"].apply(lambda x: f"¥{x:,.0f}")
     display_perf["CV数"] = display_perf["CV数"].apply(lambda x: f"{x:,}")
@@ -216,7 +221,7 @@ with tab1:
     st.dataframe(display_perf, use_container_width=True, hide_index=True)
 
     # CSVダウンロード
-    csv_data = perf.to_csv(index=False).encode("utf-8-sig")
+    csv_data = perf_filtered.to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 パフォーマンスデータをCSVダウンロード", csv_data,
                        "channel_performance.csv", "text/csv")
 
@@ -225,6 +230,7 @@ with tab1:
 # ------------------------------------------------------------------
 with tab2:
     st.markdown("### 予算配分シミュレーション")
+    st.info("💡 **最適化ロジック**: 各チャネルのROAS（広告費用対効果）に比例して予算を配分します。ROASが高いチャネルに多く投資することで、同じ予算でより多くの売上が期待できます。")
 
     total_budget = st.number_input(
         "月間総予算（円）", min_value=100000, max_value=100000000,
@@ -289,6 +295,9 @@ with tab2:
     display_fmt["ROAS"] = display_fmt["ROAS"].apply(lambda x: f"{x:.2f}x")
     st.dataframe(display_fmt, use_container_width=True, hide_index=True)
 
+    csv_alloc = monthly_avg[["チャネル", "現在予算", "提案予算", "差分", "期待売上", "ROAS"]].to_csv(index=False).encode("utf-8-sig")
+    st.download_button("📥 予算配分データをCSVダウンロード", csv_alloc, "budget_allocation.csv", "text/csv")
+
     # 現在 vs 提案 の期待売上比較
     st.markdown("#### 期待売上比較")
     current_expected = (monthly_avg["現在予算"] * monthly_avg["ROAS"]).sum()
@@ -308,7 +317,7 @@ with tab3:
     st.markdown("### トレンド分析")
 
     channels = df["チャネル"].unique()
-    months = df["月"].unique()
+    sorted_months = sorted(df["月"].unique())
 
     # 月次ROAS推移（折れ線）
     st.markdown("#### チャネル別 月次ROAS推移")
@@ -333,8 +342,8 @@ with tab3:
     # 月次広告費推移（積み上げ棒グラフ）
     st.markdown("#### チャネル別 月次広告費推移（積み上げ）")
     pivot_cost = df.pivot_table(index="月", columns="チャネル", values="広告費", aggfunc="sum").fillna(0)
-    # 月の順序を保持
-    pivot_cost = pivot_cost.reindex(months)
+    # 月の順序を保証（文字列ソート: "2024年01月" < "2024年02月" ... で正しく動作）
+    pivot_cost = pivot_cost.reindex(sorted_months)
 
     fig4, ax4 = plt.subplots(figsize=(12, 5))
     bottom = np.zeros(len(pivot_cost))
@@ -359,7 +368,7 @@ with tab3:
     st.markdown("#### ROAS トレンドサマリー")
     st.caption("直近3ヶ月平均 vs 前半6ヶ月平均の比較")
 
-    month_list = list(months)
+    month_list = list(sorted_months)
     trend_records = []
     for ch in channels:
         ch_data = df[df["チャネル"] == ch].sort_values("月")
