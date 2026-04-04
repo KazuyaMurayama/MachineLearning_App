@@ -59,10 +59,20 @@ st.markdown("""
     border-radius: 12px;
     padding: 20px;
     text-align: center;
+    min-height: 140px;
 }
 .benefit-box .benefit-title { font-weight: 700; color: #064E3B; font-size: 1rem; margin-bottom: 4px; }
 .benefit-box .benefit-desc { font-size: 0.85rem; color: #475569; }
-.flow-arrow { text-align: center; font-size: 2rem; color: #059669; padding-top: 60px; }
+.step-badge {
+    display: inline-block;
+    background: #059669;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -114,7 +124,7 @@ with k2:
 with k3:
     st.markdown('<div class="kpi-card"><div class="kpi-value">ROAS</div><div class="kpi-label">広告効率を最適化</div></div>', unsafe_allow_html=True)
 with k4:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">¥0</div><div class="kpi-label">初期費用</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">即日</div><div class="kpi-label">導入可能</div></div>', unsafe_allow_html=True)
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -139,35 +149,35 @@ with b3:
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-# === 3ツールの連携フロー ===
+# === 3ツールの連携フロー（モバイル対応: 縦並び） ===
 st.markdown("### 🔄 3ツール連携でEC経営を最適化")
-st.markdown("RFM → ダッシュボード → 広告ROI の順に活用することで、分析→把握→最適化の一気通貫を実現")
+st.markdown("**RFM → ダッシュボード → 広告ROI** の順に活用し、分析→把握→最適化を実現")
+st.markdown("")
 
-f1, fa, f2, fb, f3 = st.columns([3, 1, 3, 1, 3])
-with f1:
+c1, c2, c3 = st.columns(3)
+with c1:
     st.markdown("""<div class="app-card">
+<span class="step-badge">Step 1</span>
 <div class="card-icon">👥</div>
-<div class="card-title">Step 1: 顧客RFM分析</div>
+<div class="card-title">顧客RFM分析</div>
 <div class="card-desc">購買データから顧客をVIP/優良/一般/休眠/離脱の5セグメントに自動分類。セグメント別の施策提案まで。</div>
 <div class="card-effect">✨ リピート率15%向上</div>
 <div class="card-features">R(最終購入日) × F(購入回数) × M(購入金額)</div>
 </div>""", unsafe_allow_html=True)
-with fa:
-    st.markdown('<div class="flow-arrow">→</div>', unsafe_allow_html=True)
-with f2:
+with c2:
     st.markdown("""<div class="app-card">
+<span class="step-badge">Step 2</span>
 <div class="card-icon">📈</div>
-<div class="card-title">Step 2: 売上ダッシュボード</div>
+<div class="card-title">売上ダッシュボード</div>
 <div class="card-desc">日次・月次売上を一画面で把握。±2σの異常値を自動検知し、カテゴリ別・YoY比較で深掘り。</div>
 <div class="card-effect">✨ 異常値の即日検知</div>
 <div class="card-features">日次推移 / カテゴリ分析 / 前年比較</div>
 </div>""", unsafe_allow_html=True)
-with fb:
-    st.markdown('<div class="flow-arrow">→</div>', unsafe_allow_html=True)
-with f3:
+with c3:
     st.markdown("""<div class="app-card">
+<span class="step-badge">Step 3</span>
 <div class="card-icon">📣</div>
-<div class="card-title">Step 3: 広告ROI分析</div>
+<div class="card-title">広告ROI分析</div>
 <div class="card-desc">Google/Meta/LINE等チャネル別ROAS分析。ROAS加重の最適予算配分をシミュレーション。</div>
 <div class="card-effect">✨ 広告効率30%改善</div>
 <div class="card-features">ROAS分析 / 予算配分 / 月次トレンド</div>
@@ -185,18 +195,6 @@ with s2:
     st.info("**Step 2: データ連携**\n\nShopify/BASE/楽天のCSVエクスポートをアップロードするだけ。特別な設定は不要です。")
 with s3:
     st.info("**Step 3: 週次ルーティン化**\n\n毎週の売上チェック・月次の顧客分析・四半期の広告見直しをAIがサポートします。")
-
-# === 起動方法 ===
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-with st.expander("🔧 ローカル起動方法"):
-    st.code("streamlit run apps/{アプリ名}/app.py", language="bash")
-    apps_list = [
-        ("ec-rfm", "👥", "顧客RFM分析"),
-        ("ec-dashboard", "📈", "売上ダッシュボード"),
-        ("ec-ad-roi", "📣", "広告ROI分析"),
-    ]
-    for d, icon, name in apps_list:
-        st.markdown(f"- `apps/{d}/app.py` — {icon} {name}")
 
 # Footer
 st.markdown("---")

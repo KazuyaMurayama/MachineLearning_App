@@ -52,9 +52,9 @@ st.markdown("""
     display: inline-block; font-size: 0.7rem; padding: 2px 8px;
     border-radius: 999px; margin-top: 8px; font-weight: 600;
 }
-.tag-s { background: #FEF3C7; color: #92400E; }
-.tag-a { background: #DBEAFE; color: #1E40AF; }
-.tag-b { background: #F3E8FF; color: #6B21A8; }
+.tag-recommend { background: #FEF3C7; color: #92400E; }
+.tag-efficiency { background: #DBEAFE; color: #1E40AF; }
+.tag-compliance { background: #F3E8FF; color: #6B21A8; }
 .section-divider { border: none; height: 2px; background: linear-gradient(to right, #2563EB, #e2e8f0); margin: 2rem 0; }
 .benefit-box {
     background: #F0F9FF;
@@ -62,6 +62,7 @@ st.markdown("""
     border-radius: 12px;
     padding: 20px;
     text-align: center;
+    min-height: 140px;
 }
 .benefit-box .benefit-title { font-weight: 700; color: #0C4A6E; font-size: 1rem; margin-bottom: 4px; }
 .benefit-box .benefit-desc { font-size: 0.85rem; color: #475569; }
@@ -78,17 +79,17 @@ with st.sidebar:
 **経営分析・予測**
 1. 🏢 顧問先離反予測
 2. 🌐 サービスLP+AI経営診断
-3. 🔄 クロスセル分析
+3. 📉 顧客離脱予測AI
+4. 🔄 クロスセル分析
 
 **業務効率化**
-4. 📊 月次レポート自動生成
-5. 📝 契約書ドラフトAI
-6. 💰 入金遅延アラート
+5. 📊 月次レポート自動生成
+6. 📝 契約書ドラフトAI
+7. 💰 入金遅延アラート
 
 **コンプライアンス**
-7. 🛡️ 安心パッケージ
-8. 📋 申請書類チェッカー
-9. 📉 顧客離脱予測+需要予測
+8. 🛡️ 安心パッケージ
+9. 📋 申請書類チェッカー
 """)
     st.markdown("---")
     st.markdown("### 💡 このツールの対象者")
@@ -117,7 +118,7 @@ with k1:
 with k2:
     st.markdown('<div class="kpi-card"><div class="kpi-value">80%</div><div class="kpi-label">業務時間削減</div></div>', unsafe_allow_html=True)
 with k3:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">¥500万+</div><div class="kpi-label">年間コスト削減</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">年120h+</div><div class="kpi-label">工数削減効果</div></div>', unsafe_allow_html=True)
 with k4:
     st.markdown('<div class="kpi-card"><div class="kpi-value">3士業</div><div class="kpi-label">完全対応</div></div>', unsafe_allow_html=True)
 
@@ -134,7 +135,7 @@ with b1:
 with b2:
     st.markdown("""<div class="benefit-box">
 <div class="benefit-title">⏰ 月次業務に時間を取られすぎ</div>
-<div class="benefit-desc">→ レポート・契約書・書類チェックを<br>AIが自動化。年間120時間以上の削減</div>
+<div class="benefit-desc">→ レポート3時間→15分、契約書2時間→10分。<br>AIが定型業務を自動化します</div>
 </div>""", unsafe_allow_html=True)
 with b3:
     st.markdown("""<div class="benefit-box">
@@ -146,20 +147,20 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # === アプリカード定義 ===
 APPS = {
-    "経営分析・予測": [
-        {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反率15%→5%に改善", "tag": "Tier S", "tag_class": "tag-s"},
-        {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "effect": "成約率30%向上", "tag": "Tier S", "tag_class": "tag-s"},
-        {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "effect": "顧問単価20%UP", "tag": "Tier B", "tag_class": "tag-b"},
+    "📊 経営分析・予測": [
+        {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反率15%→5%に改善", "tag": "おすすめ", "tag_class": "tag-recommend"},
+        {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "effect": "成約率30%向上", "tag": "おすすめ", "tag_class": "tag-recommend"},
+        {"icon": "📉", "name": "顧客離脱予測AI", "desc": "顧客の離脱リスクと需要予測を一体化。デモデータ自動生成で即体験可能。", "dir": "ec-demo", "effect": "離脱率25%減", "tag": "おすすめ", "tag_class": "tag-recommend"},
+        {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "effect": "顧問単価20%UP", "tag": "分析", "tag_class": "tag-efficiency"},
     ],
-    "業務効率化": [
-        {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "effect": "3時間→15分に短縮", "tag": "Tier A", "tag_class": "tag-a"},
-        {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "effect": "作成時間92%削減", "tag": "Tier A", "tag_class": "tag-a"},
-        {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "effect": "未回収率60%改善", "tag": "Tier B", "tag_class": "tag-b"},
+    "⚡ 業務効率化": [
+        {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "effect": "3時間→15分に短縮", "tag": "効率化", "tag_class": "tag-efficiency"},
+        {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "effect": "作成時間92%削減", "tag": "効率化", "tag_class": "tag-efficiency"},
+        {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "effect": "未回収率60%改善", "tag": "効率化", "tag_class": "tag-efficiency"},
     ],
-    "コンプライアンス・管理": [
-        {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "effect": "準備期間2週間→2日", "tag": "Tier A", "tag_class": "tag-a"},
-        {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "effect": "書類不備ゼロへ", "tag": "Tier B", "tag_class": "tag-b"},
-        {"icon": "📉", "name": "顧客離脱予測+需要予測", "desc": "顧客離脱リスクと需要予測を一体化。デモデータ自動生成で即体験可能。", "dir": "ec-demo", "effect": "離脱率25%減", "tag": "Tier S", "tag_class": "tag-s"},
+    "🛡️ コンプライアンス": [
+        {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "effect": "準備期間2週間→2日", "tag": "安心", "tag_class": "tag-compliance"},
+        {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "effect": "書類不備ゼロへ", "tag": "安心", "tag_class": "tag-compliance"},
     ],
 }
 
@@ -180,7 +181,8 @@ def render_cards(apps, cols=3):
 # === カテゴリ別表示 ===
 for category, apps in APPS.items():
     st.markdown(f"### {category}")
-    render_cards(apps)
+    cols = min(len(apps), 3)
+    render_cards(apps, cols=cols)
     st.markdown("")
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -195,14 +197,6 @@ with s2:
     st.info("**Step 2: データ連携**\n\nfreee/MFのCSVエクスポートをアップロードするだけ。既存の業務フローを変える必要はありません。")
 with s3:
     st.info("**Step 3: 業務に組込み**\n\n月次レポート・離反予測・入金管理をルーティンに。AIが継続的に業務をサポートします。")
-
-# === 起動方法 ===
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-with st.expander("🔧 ローカル起動方法"):
-    st.code("streamlit run apps/{アプリ名}/app.py", language="bash")
-    for cat, apps in APPS.items():
-        for app in apps:
-            st.markdown(f"- `apps/{app['dir']}/app.py` — {app['icon']} {app['name']}")
 
 # Footer
 st.markdown("---")
