@@ -43,7 +43,7 @@ st.markdown("""
     transition: box-shadow 0.2s, transform 0.2s;
     background: #ffffff;
 }
-.app-card:hover { box-shadow: 0 6px 16px rgba(37,99,235,0.12); transform: translateY(-2px); }
+.app-card:hover { box-shadow: 0 6px 16px rgba(37,99,235,0.12); transform: translateY(-2px); cursor: pointer; }
 .app-card .card-icon { font-size: 2rem; margin-bottom: 8px; }
 .app-card .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
 .app-card .card-desc { font-size: 0.85rem; color: #64748b; line-height: 1.6; }
@@ -145,6 +145,19 @@ with b3:
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+# === アプリURL定義 ===
+APP_URLS = {
+    "shigyou-demo": "https://shigyou-churn.streamlit.app",
+    "service-lp": "https://shigyou-service-lp.streamlit.app",
+    "ec-demo": "https://shigyou-ec-churn.streamlit.app",
+    "crosssell": "https://shigyou-crosssell.streamlit.app",
+    "report-gen": "https://shigyou-report.streamlit.app",
+    "contract-draft": "https://shigyou-contract.streamlit.app",
+    "payment-alert": "https://shigyou-payment.streamlit.app",
+    "compliance-pack": "https://shigyou-compliance.streamlit.app",
+    "doc-checker": "https://shigyou-doc-check.streamlit.app",
+}
+
 # === アプリカード定義 ===
 APPS = {
     "📊 経営分析・予測": [
@@ -170,13 +183,16 @@ def render_cards(apps, cols=3):
         columns = st.columns(cols)
         for col, app in zip(columns, row):
             with col:
-                st.markdown(f"""<div class="app-card">
+                url = APP_URLS.get(app["dir"], "#")
+                st.markdown(f"""<a href="{url}" target="_blank" style="text-decoration:none;color:inherit;">
+<div class="app-card">
 <div class="card-icon">{app['icon']}</div>
 <div class="card-title">{app['name']}</div>
 <div class="card-desc">{app['desc']}</div>
 <div class="card-effect">✨ {app['effect']}</div>
 <span class="card-tag {app['tag_class']}">{app['tag']}</span>
-</div>""", unsafe_allow_html=True)
+</div>
+</a>""", unsafe_allow_html=True)
 
 # === カテゴリ別表示 ===
 for category, apps in APPS.items():

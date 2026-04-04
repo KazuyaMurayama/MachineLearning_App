@@ -43,7 +43,7 @@ st.markdown("""
     transition: box-shadow 0.2s, transform 0.2s;
     background: #ffffff;
 }
-.app-card:hover { box-shadow: 0 6px 16px rgba(5,150,105,0.12); transform: translateY(-2px); }
+.app-card:hover { box-shadow: 0 6px 16px rgba(5,150,105,0.12); transform: translateY(-2px); cursor: pointer; }
 .app-card .card-icon { font-size: 2.2rem; margin-bottom: 10px; }
 .app-card .card-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
 .app-card .card-desc { font-size: 0.88rem; color: #64748b; line-height: 1.7; }
@@ -154,34 +154,46 @@ st.markdown("### 🔄 3ツール連携でEC経営を最適化")
 st.markdown("**RFM → ダッシュボード → 広告ROI** の順に活用し、分析→把握→最適化を実現")
 st.markdown("")
 
+EC_URLS = {
+    "ec-rfm": "https://ec-rfm-analysis.streamlit.app",
+    "ec-dashboard": "https://ec-sales-dashboard.streamlit.app",
+    "ec-ad-roi": "https://ec-ad-roi.streamlit.app",
+}
+
 c1, c2, c3 = st.columns(3)
 with c1:
-    st.markdown("""<div class="app-card">
+    st.markdown(f"""<a href="{EC_URLS['ec-rfm']}" target="_blank" style="text-decoration:none;color:inherit;">
+<div class="app-card">
 <span class="step-badge">Step 1</span>
 <div class="card-icon">👥</div>
 <div class="card-title">顧客RFM分析</div>
 <div class="card-desc">購買データから顧客をVIP/優良/一般/休眠/離脱の5セグメントに自動分類。セグメント別の施策提案まで。</div>
 <div class="card-effect">✨ リピート率15%向上</div>
 <div class="card-features">R(最終購入日) × F(購入回数) × M(購入金額)</div>
-</div>""", unsafe_allow_html=True)
+</div>
+</a>""", unsafe_allow_html=True)
 with c2:
-    st.markdown("""<div class="app-card">
+    st.markdown(f"""<a href="{EC_URLS['ec-dashboard']}" target="_blank" style="text-decoration:none;color:inherit;">
+<div class="app-card">
 <span class="step-badge">Step 2</span>
 <div class="card-icon">📈</div>
 <div class="card-title">売上ダッシュボード</div>
 <div class="card-desc">日次・月次売上を一画面で把握。±2σの異常値を自動検知し、カテゴリ別・YoY比較で深掘り。</div>
 <div class="card-effect">✨ 異常値の即日検知</div>
 <div class="card-features">日次推移 / カテゴリ分析 / 前年比較</div>
-</div>""", unsafe_allow_html=True)
+</div>
+</a>""", unsafe_allow_html=True)
 with c3:
-    st.markdown("""<div class="app-card">
+    st.markdown(f"""<a href="{EC_URLS['ec-ad-roi']}" target="_blank" style="text-decoration:none;color:inherit;">
+<div class="app-card">
 <span class="step-badge">Step 3</span>
 <div class="card-icon">📣</div>
 <div class="card-title">広告ROI分析</div>
 <div class="card-desc">Google/Meta/LINE等チャネル別ROAS分析。ROAS加重の最適予算配分をシミュレーション。</div>
 <div class="card-effect">✨ 広告効率30%改善</div>
 <div class="card-features">ROAS分析 / 予算配分 / 月次トレンド</div>
-</div>""", unsafe_allow_html=True)
+</div>
+</a>""", unsafe_allow_html=True)
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
