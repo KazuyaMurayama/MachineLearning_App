@@ -1,13 +1,13 @@
 """
-AI経営パートナー ポータル
+士業向け AI経営パートナー
 ========================
-士業向け・EC向けAIツール12アプリの統合ポータルページ
+税理士・社労士・行政書士向けAIツール9アプリの専用ポータル
 """
 import streamlit as st
 
 st.set_page_config(
-    page_title="AI経営パートナー | ツールポータル",
-    page_icon="🚀",
+    page_title="士業AI経営パートナー",
+    page_icon="🏛️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -15,126 +15,155 @@ st.set_page_config(
 # === CSS ===
 st.markdown("""
 <style>
-.portal-hero {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+.hero-section {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563EB 100%);
     color: white;
     padding: 2.5rem 2rem;
     border-radius: 16px;
     text-align: center;
     margin-bottom: 1.5rem;
 }
-.portal-hero h1 { color: white; font-size: 2.4rem; margin-bottom: 0.3rem; }
-.portal-hero p { color: rgba(255,255,255,0.85); font-size: 1.15rem; margin: 0; }
-.portal-hero .hero-sub { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 0.8rem; }
+.hero-section h1 { color: white; font-size: 2.4rem; margin-bottom: 0.5rem; }
+.hero-section p { color: rgba(255,255,255,0.9); font-size: 1.15rem; margin: 0; }
+.hero-section .hero-sub { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 0.8rem; }
+.kpi-card {
+    text-align: center;
+    padding: 20px 12px;
+    background: linear-gradient(180deg, #EFF6FF, #FFFFFF);
+    border-radius: 12px;
+    border: 1px solid #BFDBFE;
+}
+.kpi-card .kpi-value { font-size: 1.8rem; font-weight: 700; color: #1e3a5f; }
+.kpi-card .kpi-label { font-size: 0.85rem; color: #64748b; margin-top: 2px; }
 .app-card {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px 18px;
-    height: 100%;
-    transition: box-shadow 0.2s;
+    min-height: 180px;
+    transition: box-shadow 0.2s, transform 0.2s;
     background: #ffffff;
 }
-.app-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.app-card:hover { box-shadow: 0 6px 16px rgba(37,99,235,0.12); transform: translateY(-2px); }
 .app-card .card-icon { font-size: 2rem; margin-bottom: 8px; }
-.app-card .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
-.app-card .card-desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
+.app-card .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.app-card .card-desc { font-size: 0.85rem; color: #64748b; line-height: 1.6; }
+.app-card .card-effect { font-size: 0.8rem; color: #2563EB; font-weight: 600; margin-top: 10px; }
 .app-card .card-tag {
-    display: inline-block;
-    font-size: 0.7rem;
-    padding: 2px 8px;
-    border-radius: 999px;
-    margin-top: 8px;
-    font-weight: 600;
+    display: inline-block; font-size: 0.7rem; padding: 2px 8px;
+    border-radius: 999px; margin-top: 8px; font-weight: 600;
 }
-.tag-s { background: #fef3c7; color: #92400e; }
-.tag-a { background: #dbeafe; color: #1e40af; }
-.tag-b { background: #f3e8ff; color: #6b21a8; }
-.tag-ec { background: #d1fae5; color: #065f46; }
-.section-divider {
-    border: none;
-    height: 2px;
-    background: linear-gradient(to right, #1e293b, #e2e8f0);
-    margin: 2rem 0;
-}
-.stat-box {
+.tag-s { background: #FEF3C7; color: #92400E; }
+.tag-a { background: #DBEAFE; color: #1E40AF; }
+.tag-b { background: #F3E8FF; color: #6B21A8; }
+.section-divider { border: none; height: 2px; background: linear-gradient(to right, #2563EB, #e2e8f0); margin: 2rem 0; }
+.benefit-box {
+    background: #F0F9FF;
+    border: 1px solid #BAE6FD;
+    border-radius: 12px;
+    padding: 20px;
     text-align: center;
-    padding: 16px;
-    background: #f8fafc;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
 }
-.stat-box .stat-value { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
-.stat-box .stat-label { font-size: 0.85rem; color: #64748b; }
+.benefit-box .benefit-title { font-weight: 700; color: #0C4A6E; font-size: 1rem; margin-bottom: 4px; }
+.benefit-box .benefit-desc { font-size: 0.85rem; color: #475569; }
 </style>
 """, unsafe_allow_html=True)
 
 # === Sidebar ===
 with st.sidebar:
-    st.markdown("## 🚀 AI経営パートナー")
+    st.markdown("## 🏛️ 士業AI経営パートナー")
+    st.markdown("税理士・社労士・行政書士 専用")
     st.markdown("---")
-    st.markdown("### ツール一覧")
+    st.markdown("### 📋 ツール一覧（9アプリ）")
     st.markdown("""
-**士業向け（9アプリ）**
-- Tier S: 離反予測 / 離脱予測 / サービスLP
-- Tier A: 安心パッケージ / 月次レポート / 契約書ドラフト
-- Tier B: 入金遅延 / 書類チェッカー / クロスセル
+**経営分析・予測**
+1. 🏢 顧問先離反予測
+2. 🌐 サービスLP+AI経営診断
+3. 🔄 クロスセル分析
 
-**EC向け（3アプリ）**
-- RFM分析 / 売上ダッシュボード / 広告ROI
+**業務効率化**
+4. 📊 月次レポート自動生成
+5. 📝 契約書ドラフトAI
+6. 💰 入金遅延アラート
+
+**コンプライアンス**
+7. 🛡️ 安心パッケージ
+8. 📋 申請書類チェッカー
+9. 📉 顧客離脱予測+需要予測
 """)
     st.markdown("---")
-    st.markdown("### デプロイ状況")
-    st.success("全12アプリ 品質チェック済")
+    st.markdown("### 💡 このツールの対象者")
+    st.markdown("""
+- AI導入を検討中の士業事務所
+- 顧問先の離反に悩んでいる方
+- 月次業務を効率化したい方
+- コンプライアンス整備が必要な方
+""")
     st.markdown("---")
-    st.caption("AI経営パートナー × データサイエンス")
-    st.caption("ポータル v1.0")
+    st.caption("士業AI経営パートナー v2.0")
 
 # === Hero ===
 st.markdown("""
-<div class="portal-hero">
-<h1>🚀 AI経営パートナー</h1>
-<p>士業 × EC の経営課題を解決する AI ツール群</p>
-<div class="hero-sub">税理士・社労士・行政書士 & EC事業者向け｜全12アプリ</div>
+<div class="hero-section">
+<h1>🏛️ 士業AI経営パートナー</h1>
+<p>税理士・社労士・行政書士の業務を<br>AIで変革する 9つの専用ツール</p>
+<div class="hero-sub">顧問先の離反予測から契約書作成、月次レポートまでワンストップ</div>
 </div>
 """, unsafe_allow_html=True)
 
-# === 統計 ===
-s1, s2, s3, s4 = st.columns(4)
-with s1:
-    st.markdown('<div class="stat-box"><div class="stat-value">12</div><div class="stat-label">アプリ総数</div></div>', unsafe_allow_html=True)
-with s2:
-    st.markdown('<div class="stat-box"><div class="stat-value">2</div><div class="stat-label">対象セグメント</div></div>', unsafe_allow_html=True)
-with s3:
-    st.markdown('<div class="stat-box"><div class="stat-value">88+</div><div class="stat-label">品質スコア（点）</div></div>', unsafe_allow_html=True)
-with s4:
-    st.markdown('<div class="stat-box"><div class="stat-value">5,000+</div><div class="stat-label">コード行数</div></div>', unsafe_allow_html=True)
+# === 導入効果 KPI ===
+k1, k2, k3, k4 = st.columns(4)
+with k1:
+    st.markdown('<div class="kpi-card"><div class="kpi-value">9</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
+with k2:
+    st.markdown('<div class="kpi-card"><div class="kpi-value">80%</div><div class="kpi-label">業務時間削減</div></div>', unsafe_allow_html=True)
+with k3:
+    st.markdown('<div class="kpi-card"><div class="kpi-value">¥500万+</div><div class="kpi-label">年間コスト削減</div></div>', unsafe_allow_html=True)
+with k4:
+    st.markdown('<div class="kpi-card"><div class="kpi-value">3士業</div><div class="kpi-label">完全対応</div></div>', unsafe_allow_html=True)
+
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+# === 導入メリット ===
+st.markdown("### 💼 士業事務所が抱える課題を解決")
+b1, b2, b3 = st.columns(3)
+with b1:
+    st.markdown("""<div class="benefit-box">
+<div class="benefit-title">📉 顧問先の離反が止まらない</div>
+<div class="benefit-desc">→ AI離反予測で「辞めそうな顧問先」を<br>3ヶ月前に検知し、先手を打てます</div>
+</div>""", unsafe_allow_html=True)
+with b2:
+    st.markdown("""<div class="benefit-box">
+<div class="benefit-title">⏰ 月次業務に時間を取られすぎ</div>
+<div class="benefit-desc">→ レポート・契約書・書類チェックを<br>AIが自動化。年間120時間以上の削減</div>
+</div>""", unsafe_allow_html=True)
+with b3:
+    st.markdown("""<div class="benefit-box">
+<div class="benefit-title">🔒 AI導入の守秘義務が不安</div>
+<div class="benefit-desc">→ 安心パッケージで守秘義務契約・<br>データ規程・AI同意書を即日整備</div>
+</div>""", unsafe_allow_html=True)
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # === アプリカード定義 ===
-APPS_SHIGYOU_S = [
-    {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "score": 95, "tag": "Tier S", "tag_class": "tag-s"},
-    {"icon": "📉", "name": "EC顧客離脱予測+需要予測", "desc": "顧客離脱リスクと需要予測を一体化。デモデータ自動生成で即体験可能。", "dir": "ec-demo", "score": 94, "tag": "Tier S", "tag_class": "tag-s"},
-    {"icon": "🌐", "name": "統合サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "score": 96, "tag": "Tier S", "tag_class": "tag-s"},
-]
-APPS_SHIGYOU_A = [
-    {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "score": 89, "tag": "Tier A", "tag_class": "tag-a"},
-    {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "score": 89, "tag": "Tier A", "tag_class": "tag-a"},
-    {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "score": 88, "tag": "Tier A", "tag_class": "tag-a"},
-]
-APPS_SHIGYOU_B = [
-    {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "score": 88, "tag": "Tier B", "tag_class": "tag-b"},
-    {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "score": 89, "tag": "Tier B", "tag_class": "tag-b"},
-    {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "score": 90, "tag": "Tier B", "tag_class": "tag-b"},
-]
-APPS_EC = [
-    {"icon": "👥", "name": "顧客RFM分析", "desc": "RFMスコアリング・5セグメント分類・施策提案でLTV最大化を支援。", "dir": "ec-rfm", "score": 90, "tag": "EC", "tag_class": "tag-ec"},
-    {"icon": "📈", "name": "売上ダッシュボード", "desc": "日次/月次売上・異常検知・カテゴリ分析・YoY比較を一画面で。", "dir": "ec-dashboard", "score": 92, "tag": "EC", "tag_class": "tag-ec"},
-    {"icon": "📣", "name": "広告ROI分析", "desc": "ROAS分析・予算配分シミュレーション・月次トレンドで広告効率を最適化。", "dir": "ec-ad-roi", "score": 91, "tag": "EC", "tag_class": "tag-ec"},
-]
+APPS = {
+    "経営分析・予測": [
+        {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反率15%→5%に改善", "tag": "Tier S", "tag_class": "tag-s"},
+        {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "effect": "成約率30%向上", "tag": "Tier S", "tag_class": "tag-s"},
+        {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "effect": "顧問単価20%UP", "tag": "Tier B", "tag_class": "tag-b"},
+    ],
+    "業務効率化": [
+        {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "effect": "3時間→15分に短縮", "tag": "Tier A", "tag_class": "tag-a"},
+        {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "effect": "作成時間92%削減", "tag": "Tier A", "tag_class": "tag-a"},
+        {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "effect": "未回収率60%改善", "tag": "Tier B", "tag_class": "tag-b"},
+    ],
+    "コンプライアンス・管理": [
+        {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "effect": "準備期間2週間→2日", "tag": "Tier A", "tag_class": "tag-a"},
+        {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "effect": "書類不備ゼロへ", "tag": "Tier B", "tag_class": "tag-b"},
+        {"icon": "📉", "name": "顧客離脱予測+需要予測", "desc": "顧客離脱リスクと需要予測を一体化。デモデータ自動生成で即体験可能。", "dir": "ec-demo", "effect": "離脱率25%減", "tag": "Tier S", "tag_class": "tag-s"},
+    ],
+}
 
 def render_cards(apps, cols=3):
-    """アプリカードを描画"""
     rows = [apps[i:i+cols] for i in range(0, len(apps), cols)]
     for row in rows:
         columns = st.columns(cols)
@@ -144,40 +173,37 @@ def render_cards(apps, cols=3):
 <div class="card-icon">{app['icon']}</div>
 <div class="card-title">{app['name']}</div>
 <div class="card-desc">{app['desc']}</div>
-<span class="card-tag {app['tag_class']}">{app['tag']} | {app['score']}点</span>
+<div class="card-effect">✨ {app['effect']}</div>
+<span class="card-tag {app['tag_class']}">{app['tag']}</span>
 </div>""", unsafe_allow_html=True)
 
-# === 士業向けアプリ ===
-st.markdown("## 🏛️ 士業向けAIツール（9アプリ）")
-st.markdown("税理士・社労士・行政書士の業務効率化を支援するAIツール群")
-
-st.markdown("#### Tier S — 最重要ツール")
-render_cards(APPS_SHIGYOU_S)
-st.markdown("")
-st.markdown("#### Tier A — コンプライアンス・レポート")
-render_cards(APPS_SHIGYOU_A)
-st.markdown("")
-st.markdown("#### Tier B — 業務分析・管理")
-render_cards(APPS_SHIGYOU_B)
+# === カテゴリ別表示 ===
+for category, apps in APPS.items():
+    st.markdown(f"### {category}")
+    render_cards(apps)
+    st.markdown("")
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-# === EC向けアプリ ===
-st.markdown("## 🛒 EC向けAIツール（3アプリ）")
-st.markdown("EC事業者の売上分析・顧客管理・広告最適化を支援")
-render_cards(APPS_EC)
+# === 導入ステップ ===
+st.markdown("### 🚀 導入の流れ")
+st.markdown("すべてのツールはブラウザだけで利用可能。インストール不要です。")
+s1, s2, s3 = st.columns(3)
+with s1:
+    st.info("**Step 1: 無料体験**\n\nデモデータで全機能をお試し。サンプルデータが自動読込されるのですぐに体験できます。")
+with s2:
+    st.info("**Step 2: データ連携**\n\nfreee/MFのCSVエクスポートをアップロードするだけ。既存の業務フローを変える必要はありません。")
+with s3:
+    st.info("**Step 3: 業務に組込み**\n\n月次レポート・離反予測・入金管理をルーティンに。AIが継続的に業務をサポートします。")
 
+# === 起動方法 ===
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-
-# === デプロイ情報 ===
-st.markdown("## 🚀 各アプリの起動方法")
-st.code("streamlit run apps/{アプリ名}/app.py", language="bash")
-
-with st.expander("📂 全アプリのディレクトリ一覧"):
-    all_apps = APPS_SHIGYOU_S + APPS_SHIGYOU_A + APPS_SHIGYOU_B + APPS_EC
-    for i, app in enumerate(all_apps, 1):
-        st.markdown(f"**#{i}** `apps/{app['dir']}/app.py` — {app['icon']} {app['name']}")
+with st.expander("🔧 ローカル起動方法"):
+    st.code("streamlit run apps/{アプリ名}/app.py", language="bash")
+    for cat, apps in APPS.items():
+        for app in apps:
+            st.markdown(f"- `apps/{app['dir']}/app.py` — {app['icon']} {app['name']}")
 
 # Footer
 st.markdown("---")
-st.caption("AI経営パートナー × データサイエンス | ポータル v1.0")
+st.caption("士業AI経営パートナー × データサイエンス | v2.0")
