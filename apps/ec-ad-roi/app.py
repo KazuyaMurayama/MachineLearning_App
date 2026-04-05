@@ -122,6 +122,20 @@ with st.sidebar:
                 st.error("必須カラムが不足しています")
     st.info("**必須カラム:** 月 / チャネル / 広告費 / 売上 / CV数")
     st.markdown("---")
+
+    # 目標CPA入力
+    st.markdown("#### 🎯 目標CPA設定")
+    _tmp_df = st.session_state.df
+    if _tmp_df is not None:
+        _tmp_cpa_median = int((_tmp_df["広告費"].sum() / _tmp_df["CV数"].sum())) if _tmp_df["CV数"].sum() > 0 else 10000
+    else:
+        _tmp_cpa_median = 10000
+    target_cpa = st.number_input(
+        "目標CPA（円）", min_value=1000, max_value=500000,
+        value=_tmp_cpa_median, step=1000, format="%d",
+        help="各チャネルの目標CPA。デフォルトはデータ全体のCPA中央値です。"
+    )
+    st.markdown("---")
     st.caption("AI経営パートナー × データサイエンス")
 
 # === Hero ===
@@ -165,6 +179,40 @@ for col, label, value in [
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# === トレンド判定ユーティリティ（Tab1・Tab2で共用） ===
+def compute_channel_trend(df, channel):
+    """チャネルのROASトレンドを判定する。改善/安定/悪化を返す。"""
+    ch_data = df[df["チャネル"] == channel].sort_values("月")
+    roas_values = ch_data["ROAS"].values if "ROAS" in ch_data.columns else (ch_data["売上"] / ch_data["広告費"]).values
+    n = len(roas_values)
+    if n >= 9:
+        first_half = roas_values[:6].mean()
+        last_three = roas_values[-3:].mean()
+    elif n >= 3:
+        split = max(1, n - 3)
+        first_half = roas_values[:split].mean()
+        last_three = roas_values[-3:].mean()
+    else:
+        return "安定"
+    change_pct = ((last_three - first_half) / first_half * 100) if first_half > 0 else 0
+    if change_pct > 5:
+        return "改善"
+    elif change_pct < -5:
+        return "悪化"
+    return "安定"
+
+
+def investment_judgment(roas, trend):
+    """ROAS値とトレンドから投資判定ラベルと理由を返す。"""
+    if roas >= 2.0 and trend == "改善":
+        return "🟢 増額推奨", f"ROAS {roas:.2f}x（≥2.0）& トレンド改善"
+    elif roas >= 1.5 and trend in ("安定", "改善"):
+        return "🔵 維持", f"ROAS {roas:.2f}x（≥1.5）& トレンド{trend}"
+    elif roas < 1.0:
+        return "🔴 減額推奨", f"ROAS {roas:.2f}x（<1.0）— 赤字チャネル"
+    else:
+        return "🟡 要注意", f"ROAS {roas:.2f}x / トレンド{trend} — 改善検討"
+
 # === タブ ===
 tab1, tab2, tab3 = st.tabs(["📊 チャネル別ROAS", "💰 予算配分シミュレーション", "📈 トレンド分析"])
 
@@ -206,22 +254,58 @@ with tab1:
     st.pyplot(fig)
     plt.close(fig)
 
+    # 投資判定・CPA目標達成を計算
+    perf_filtered = perf_filtered.copy()
+    perf_filtered["トレンド"] = perf_filtered["チャネル"].apply(lambda ch: compute_channel_trend(df, ch))
+    perf_filtered["投資判定"] = perf_filtered.apply(
+        lambda r: investment_judgment(float(r["ROAS"]), r["トレンド"])[0], axis=1)
+    perf_filtered["判定理由"] = perf_filtered.apply(
+        lambda r: investment_judgment(float(r["ROAS"]), r["トレンド"])[1], axis=1)
+    perf_filtered["目標CPA達成"] = perf_filtered["CPA"].apply(
+        lambda x: "✅ 達成" if x <= target_cpa else "❌ 未達成")
+
     # テーブル（上位ハイライト）
     st.markdown("### チャネル別パフォーマンス")
     display_perf = perf_filtered.copy()
     display_perf["広告費合計"] = display_perf["広告費合計"].apply(lambda x: f"¥{x:,.0f}")
     display_perf["売上合計"] = display_perf["売上合計"].apply(lambda x: f"¥{x:,.0f}")
     display_perf["CV数"] = display_perf["CV数"].apply(lambda x: f"{x:,}")
+    display_perf["CPA_raw"] = display_perf["CPA"]
     display_perf["CPA"] = display_perf["CPA"].apply(lambda x: f"¥{x:,.0f}")
     display_perf["ROAS"] = display_perf["ROAS"].apply(lambda x: f"{x:.2f}x")
 
     # ハイライト: ROAS上位をマーク
     display_perf.insert(0, "🏆", ["⭐" if i < 2 else "" for i in range(len(display_perf))])
 
-    st.dataframe(display_perf, use_container_width=True, hide_index=True)
+    display_cols = ["🏆", "チャネル", "広告費合計", "売上合計", "CV数", "ROAS", "CPA",
+                    "投資判定", "判定理由", "目標CPA達成"]
+    st.dataframe(display_perf[display_cols], use_container_width=True, hide_index=True)
+
+    # 目標CPA未達成チャネルの改善試算
+    missed = perf_filtered[perf_filtered["CPA"] > target_cpa].copy()
+    if len(missed) > 0:
+        st.markdown("#### 🎯 目標CPA未達成チャネルの改善試算")
+        st.caption(f"目標CPA: ¥{target_cpa:,}")
+        for _, row in missed.iterrows():
+            current_cpa = int(row["CPA"])
+            gap = current_cpa - target_cpa
+            # 必要CVR改善: CPA = 広告費/CV数, CV数 = クリック数*CVR
+            # 目標CV数 = 広告費合計 / 目標CPA
+            cost = row["広告費合計"]
+            current_cv = int(row["CV数"].replace(",", "")) if isinstance(row["CV数"], str) else int(row["CV数"])
+            target_cv = cost / target_cpa
+            if current_cv > 0:
+                current_cvr_approx = current_cv / cost * target_cpa  # ratio
+                needed_cv_increase = target_cv - current_cv
+                needed_cv_increase_pct = (needed_cv_increase / current_cv * 100) if current_cv > 0 else 0
+                st.info(
+                    f"**{row['チャネル']}**: CPAを ¥{gap:,} 削減が必要 → "
+                    f"CV数を現在の{current_cv}件から{int(target_cv)}件へ "
+                    f"(+{needed_cv_increase_pct:.1f}% 改善が必要)"
+                )
 
     # CSVダウンロード
-    csv_data = perf_filtered.to_csv(index=False).encode("utf-8-sig")
+    csv_data = perf_filtered.drop(columns=["トレンド"]).to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 パフォーマンスデータをCSVダウンロード", csv_data,
                        "channel_performance.csv", "text/csv")
 
@@ -230,7 +314,7 @@ with tab1:
 # ------------------------------------------------------------------
 with tab2:
     st.markdown("### 予算配分シミュレーション")
-    st.info("💡 **最適化ロジック**: 各チャネルのROAS（広告費用対効果）に比例して予算を配分します。ROASが高いチャネルに多く投資することで、同じ予算でより多くの売上が期待できます。")
+    st.info("💡 **最適化ロジック**: 各チャネルのROAS（広告費用対効果）に比例して予算を配分します。チャネル別の最低・最大予算制約を設定でき、より現実的なシミュレーションが可能です。")
 
     total_budget = st.number_input(
         "月間総予算（円）", min_value=100000, max_value=100000000,
@@ -243,16 +327,85 @@ with tab2:
     monthly_total = monthly_avg["月平均広告費"].sum()
     monthly_avg["現在比率"] = monthly_avg["月平均広告費"] / monthly_total
 
-    # ROAS加重最適配分
+    # ROAS加重最適配分（制約なし）
     ch_roas_map = perf.set_index("チャネル")["ROAS"].astype(float).to_dict()
     monthly_avg["ROAS"] = monthly_avg["チャネル"].map(ch_roas_map)
     roas_total = monthly_avg["ROAS"].sum()
     monthly_avg["最適比率"] = monthly_avg["ROAS"] / roas_total
 
     monthly_avg["現在予算"] = (monthly_avg["現在比率"] * total_budget).astype(int)
-    monthly_avg["提案予算"] = (monthly_avg["最適比率"] * total_budget).astype(int)
+    monthly_avg["提案予算_制約なし"] = (monthly_avg["最適比率"] * total_budget).astype(int)
+    monthly_avg["期待売上_制約なし"] = (monthly_avg["提案予算_制約なし"] * monthly_avg["ROAS"]).astype(int)
+
+    # --- チャネル別予算制約 ---
+    st.markdown("#### チャネル別 予算上下限制約")
+    st.caption("各チャネルの最低予算・最大予算を設定してください。制約付きで残り予算をROAS比例配分します。")
+
+    budget_constraints = {}
+    constraint_cols = st.columns(min(len(monthly_avg), 3))
+    for idx, (_, row) in enumerate(monthly_avg.iterrows()):
+        ch_name = row["チャネル"]
+        col = constraint_cols[idx % len(constraint_cols)]
+        with col:
+            st.markdown(f"**{ch_name}** (ROAS: {row['ROAS']:.2f}x)")
+            ch_min = st.number_input(
+                f"最低予算", min_value=0, max_value=total_budget,
+                value=0, step=10000, format="%d",
+                key=f"min_{ch_name}"
+            )
+            ch_max = st.number_input(
+                f"最大予算", min_value=0, max_value=total_budget,
+                value=total_budget, step=10000, format="%d",
+                key=f"max_{ch_name}"
+            )
+            budget_constraints[ch_name] = {"min": ch_min, "max": ch_max}
+
+    # 制約付き配分計算
+    def calc_constrained_allocation(monthly_avg_df, total_bgt, constraints):
+        """最低予算を確保した上で、残りをROAS比例配分（最大予算でキャップ）"""
+        result = monthly_avg_df[["チャネル", "ROAS"]].copy()
+        # まず最低予算を確保
+        result["配分"] = result["チャネル"].map(lambda ch: constraints[ch]["min"])
+        remaining = total_bgt - result["配分"].sum()
+        if remaining < 0:
+            # 最低予算の合計が総予算を超える場合は比例で縮小
+            ratio = total_bgt / result["配分"].sum() if result["配分"].sum() > 0 else 1
+            result["配分"] = (result["配分"] * ratio).astype(int)
+            remaining = 0
+
+        # 残りをROAS比例で配分（キャップ考慮で反復）
+        unfixed = result["チャネル"].tolist()
+        for _ in range(10):  # 最大10回反復で収束
+            if remaining <= 0 or len(unfixed) == 0:
+                break
+            roas_sum = result.loc[result["チャネル"].isin(unfixed), "ROAS"].sum()
+            if roas_sum == 0:
+                break
+            new_unfixed = []
+            allocated_this_round = 0
+            for i, row in result.iterrows():
+                if row["チャネル"] not in unfixed:
+                    continue
+                share = int(remaining * row["ROAS"] / roas_sum)
+                proposed = row["配分"] + share
+                cap = constraints[row["チャネル"]]["max"]
+                if proposed > cap:
+                    allocated_this_round += (cap - row["配分"])
+                    result.at[i, "配分"] = cap
+                else:
+                    allocated_this_round += share
+                    result.at[i, "配分"] = proposed
+                    new_unfixed.append(row["チャネル"])
+            remaining -= allocated_this_round
+            unfixed = new_unfixed
+
+        result["期待売上"] = (result["配分"] * result["ROAS"]).astype(int)
+        return result
+
+    constrained = calc_constrained_allocation(monthly_avg, total_budget, budget_constraints)
+    monthly_avg["提案予算"] = constrained["配分"].values
     monthly_avg["差分"] = monthly_avg["提案予算"] - monthly_avg["現在予算"]
-    monthly_avg["期待売上"] = (monthly_avg["提案予算"] * monthly_avg["ROAS"]).astype(int)
+    monthly_avg["期待売上"] = constrained["期待売上"].values
 
     col_pie1, col_pie2 = st.columns(2)
 
@@ -270,20 +423,21 @@ with tab2:
         plt.close(fig1)
 
     with col_pie2:
-        st.markdown("#### ROAS加重 最適配分（提案）")
+        st.markdown("#### ROAS加重 最適配分（制約付き提案）")
+        proposed_ratios = monthly_avg["提案予算"] / monthly_avg["提案予算"].sum() if monthly_avg["提案予算"].sum() > 0 else monthly_avg["最適比率"]
         fig2, ax2 = plt.subplots(figsize=(6, 6))
         wedges2, texts2, autotexts2 = ax2.pie(
-            monthly_avg["最適比率"], labels=monthly_avg["チャネル"],
+            proposed_ratios, labels=monthly_avg["チャネル"],
             autopct="%1.1f%%", startangle=90,
             colors=["#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0"]
         )
-        ax2.set_title("ROAS加重 最適配分")
+        ax2.set_title("ROAS加重 最適配分（制約付き）")
         plt.tight_layout()
         st.pyplot(fig2)
         plt.close(fig2)
 
     # 結果テーブル
-    st.markdown("#### 最適配分の詳細")
+    st.markdown("#### 最適配分の詳細（制約付き）")
     display_alloc = monthly_avg[["チャネル", "現在予算", "提案予算", "差分", "期待売上", "ROAS"]].copy()
     display_alloc = display_alloc.sort_values("期待売上", ascending=False).reset_index(drop=True)
 
@@ -298,17 +452,21 @@ with tab2:
     csv_alloc = monthly_avg[["チャネル", "現在予算", "提案予算", "差分", "期待売上", "ROAS"]].to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 予算配分データをCSVダウンロード", csv_alloc, "budget_allocation.csv", "text/csv")
 
-    # 現在 vs 提案 の期待売上比較
+    # 現在 vs 制約なし vs 制約付き の期待売上比較
     st.markdown("#### 期待売上比較")
     current_expected = (monthly_avg["現在予算"] * monthly_avg["ROAS"]).sum()
+    unconstrained_expected = monthly_avg["期待売上_制約なし"].sum()
     proposed_expected = monthly_avg["期待売上"].sum()
     diff_expected = proposed_expected - current_expected
     diff_pct = (diff_expected / current_expected * 100) if current_expected > 0 else 0
 
-    mc1, mc2, mc3 = st.columns(3)
+    mc1, mc2, mc3, mc4 = st.columns(4)
     mc1.metric("現在配分の期待売上", f"¥{current_expected:,.0f}")
-    mc2.metric("最適配分の期待売上", f"¥{proposed_expected:,.0f}")
-    mc3.metric("改善額", f"¥{diff_expected:,.0f}", f"{diff_pct:+.1f}%")
+    mc2.metric("制約なし最適配分", f"¥{unconstrained_expected:,.0f}")
+    mc3.metric("制約付き最適配分", f"¥{proposed_expected:,.0f}")
+    diff_uc = proposed_expected - unconstrained_expected
+    mc4.metric("制約による影響", f"¥{diff_uc:,.0f}",
+               f"現在比 {diff_pct:+.1f}%")
 
 # ------------------------------------------------------------------
 # タブ3: トレンド分析
