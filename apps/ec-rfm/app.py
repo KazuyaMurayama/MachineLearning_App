@@ -485,11 +485,81 @@ with tab3:
             else:
                 st.write("該当顧客なし")
 
-# ── フッター ──
+# ── 定期運用チェックリスト ──
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 📋 定期運用チェックリスト")
+
+with st.expander("週次チェック"):
+    st.markdown("""
+- □ 要フォロー顧客にメール/クーポン配信
+- □ VIP顧客の購買状況を確認
+- □ 新規→一般への移行状況を確認
+""")
+
+with st.expander("月次チェック"):
+    st.markdown("""
+- □ セグメント構成比の変化を確認
+- □ 施策実施結果を振り返り
+- □ 想定率スライダーを実績値に更新
+- □ 売上ダッシュボードと突合
+""")
+
+# ── フッター（関連ツールカード） ──
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
+
+st.markdown("""
+<style>
+.tool-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    height: 100%;
+}
+.tool-card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.tool-card-title { font-size: 1.1rem; font-weight: 700; color: #1F2937; margin-bottom: 0.3rem; }
+.tool-card-desc { font-size: 0.85rem; color: #6B7280; margin-bottom: 0.8rem; }
+.tool-card a {
+    display: inline-block;
+    background: #8B5CF6;
+    color: #FFFFFF !important;
+    padding: 0.4rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.tool-card a:hover { background: #7C3AED; }
+</style>
+""", unsafe_allow_html=True)
+
 fc1, fc2, fc3 = st.columns(3)
-fc1.markdown("📊 [売上ダッシュボード](https://ec-dashboard.streamlit.app)  \n日別/月別売上を自動可視化")
-fc2.markdown("📈 [広告ROI分析](https://ec-ad-roi.streamlit.app)  \n広告費用対効果を最適化")
-fc3.markdown("🛒 [EC離脱予測](https://ec-demo.streamlit.app)  \n顧客離脱をAIで予測")
+fc1.markdown("""
+<div class="tool-card">
+    <div class="tool-card-icon">📈</div>
+    <div class="tool-card-title">売上ダッシュボード</div>
+    <div class="tool-card-desc">VIP顧客が売上に与える影響を確認する</div>
+    <a href="https://ec-sales-dashboard.streamlit.app" target="_blank">開く →</a>
+</div>
+""", unsafe_allow_html=True)
+fc2.markdown("""
+<div class="tool-card">
+    <div class="tool-card-icon">📣</div>
+    <div class="tool-card-title">広告ROI分析</div>
+    <div class="tool-card-desc">休眠顧客の復帰施策に必要な広告コストを確認する</div>
+    <a href="https://ec-ad-roi.streamlit.app" target="_blank">開く →</a>
+</div>
+""", unsafe_allow_html=True)
+fc3.markdown("""
+<div class="tool-card">
+    <div class="tool-card-icon">🛒</div>
+    <div class="tool-card-title">ECポータル</div>
+    <div class="tool-card-desc">全ツール一覧に戻る</div>
+    <a href="https://ec-ai-tools.streamlit.app" target="_blank">開く →</a>
+</div>
+""", unsafe_allow_html=True)
+
 st.caption("AI経営パートナー × データサイエンス | 顧客RFM分析 v1.0")
