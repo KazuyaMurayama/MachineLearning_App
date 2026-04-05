@@ -575,12 +575,36 @@ with tab3:
     plt.close(fig7)
 
 # ---------------------------------------------------------------------------
-# Footer
+# 定期運用チェックリスト
+# ---------------------------------------------------------------------------
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 📋 定期運用チェックリスト")
+with st.expander("週次チェック"):
+    st.markdown("- □ 日別売上で異常値を確認\n- □ カテゴリ別の前週比を確認\n- □ 異常値の原因を特定しメモ")
+with st.expander("月次チェック"):
+    st.markdown(
+        "- □ 月次レポートを確認（前月比・前年比）\n- □ カテゴリ別成長率ランキングを確認\n"
+        "- □ 客単価トレンドを確認し施策検討\n- □ RFM分析で顧客セグメントを更新"
+    )
+
+# ---------------------------------------------------------------------------
+# Footer — 関連ツールカード
 # ---------------------------------------------------------------------------
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
+_card = (
+    '<div class="kpi-card" style="text-align:left;padding:1rem 1.2rem">'
+    '<div style="font-size:1.3rem">{icon}</div>'
+    '<div style="font-weight:700;margin:0.3rem 0">{name}</div>'
+    '<div style="font-size:0.85rem;color:#475569;margin-bottom:0.5rem">{desc}</div>'
+    '<div style="font-size:0.8rem">▶ {action}</div>'
+    '<a href="{url}" target="_blank" style="font-size:0.8rem;color:#2563EB">ツールを開く →</a></div>'
+)
 fc1, fc2, fc3 = st.columns(3)
-fc1.markdown("👥 [顧客RFM分析](https://ec-rfm.streamlit.app)  \n顧客セグメントを自動分類")
-fc2.markdown("📈 [広告ROI分析](https://ec-ad-roi.streamlit.app)  \n広告費用対効果を最適化")
-fc3.markdown("🛒 [EC離脱予測](https://ec-demo.streamlit.app)  \n顧客離脱をAIで予測")
+fc1.markdown(_card.format(icon="👥", name="顧客RFM分析", desc="顧客セグメントを自動分類",
+             action="売上が落ちたセグメントを特定する", url="https://ec-rfm-analysis.streamlit.app"), unsafe_allow_html=True)
+fc2.markdown(_card.format(icon="📣", name="広告ROI分析", desc="広告費用対効果を最適化",
+             action="集客チャネルの費用対効果を確認する", url="https://ec-ad-roi.streamlit.app"), unsafe_allow_html=True)
+fc3.markdown(_card.format(icon="🛒", name="EC離脱予測", desc="顧客離脱をAIで予測",
+             action="離脱リスクの高い顧客を特定する", url="https://ec-demo.streamlit.app"), unsafe_allow_html=True)
 st.caption("AI経営パートナー × データサイエンス | 売上ダッシュボード v1.0")
