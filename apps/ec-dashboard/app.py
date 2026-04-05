@@ -216,6 +216,50 @@ _kpi(k4, "当月注文件数", f"{cur_orders:,}")
 st.markdown("")
 
 # ---------------------------------------------------------------------------
+# Insight banner & factor decomposition banner (above tabs)
+# ---------------------------------------------------------------------------
+_m_idx_top = list(monthly.sort_values("年月")["年月"])
+_sel_pos_top = _m_idx_top.index(selected_month) if selected_month in _m_idx_top else -1
+
+# --- 1. 要因分解の主因バナー ---
+if _sel_pos_top >= 1:
+    _cur_r = monthly[monthly["年月"] == selected_month].iloc[0]
+    _prev_m_ym = _m_idx_top[_sel_pos_top - 1]
+    _prev_r = monthly[monthly["年月"] == _prev_m_ym].iloc[0]
+    _d_sales = _cur_r["売上金額"] - _prev_r["売上金額"]
+    _d_aov_c = (_cur_r["客単価"] - _prev_r["客単価"]) * _prev_r["注文件数"]
+    _d_ord_c = (_cur_r["注文件数"] - _prev_r["注文件数"]) * _cur_r["客単価"]
+    _ord_pct = (_cur_r["注文件数"] / _prev_r["注文件数"] - 1) * 100 if _prev_r["注文件数"] else 0
+    _aov_pct = (_cur_r["客単価"] / _prev_r["客単価"] - 1) * 100 if _prev_r["客単価"] else 0
+    if abs(_d_aov_c) >= abs(_d_ord_c):
+        _cause = f"客単価 {_aov_pct:+.0f}%"
+    else:
+        _cause = f"注文件数 {_ord_pct:+.0f}%"
+    _arrow = "▲" if _d_sales >= 0 else "▼"
+    st.warning(f"📊 **前月比 {_arrow}¥{abs(_d_sales):,.0f}** — 主因: {_cause}")
+
+# --- 2. 今月のインサイト (1-2行サマリー) ---
+_insight_parts = []
+if yoy_pct is not None:
+    _insight_parts.append(f"売上は前年同月比 **{yoy_pct:+.1f}%**")
+if _sel_pos_top >= 1:
+    _mom_pct = (_cur_r["売上金額"] / _prev_r["売上金額"] - 1) * 100 if _prev_r["売上金額"] else 0
+    _insight_parts.append(f"前月比 **{_mom_pct:+.1f}%**")
+# Top growing category
+_sel_y = int(selected_month.split("-")[0])
+_sel_m = int(selected_month.split("-")[1])
+_df_s = df[(df["年"] == _sel_y) & (df["月"] == _sel_m)]
+_df_py = df[(df["年"] == _sel_y - 1) & (df["月"] == _sel_m)]
+if not _df_s.empty and not _df_py.empty:
+    _cc = _df_s.groupby("カテゴリ")["売上金額"].sum()
+    _cp = _df_py.groupby("カテゴリ")["売上金額"].sum()
+    _cg = ((_cc / _cp - 1) * 100).dropna().sort_values(ascending=False)
+    if len(_cg):
+        _insight_parts.append(f"カテゴリ「{_cg.index[0]}」が前年比 **{_cg.iloc[0]:+.0f}%** で牽引")
+if _insight_parts:
+    st.info("💡 **今月のインサイト**: " + "。".join(_insight_parts) + "。")
+
+# ---------------------------------------------------------------------------
 # Action List — auto-generated insights (placed above tabs)
 # ---------------------------------------------------------------------------
 def _generate_action_list(df, monthly, selected_month, months_sorted):
