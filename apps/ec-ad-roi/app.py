@@ -588,11 +588,79 @@ with tab3:
     trend_df = pd.DataFrame(trend_records)
     st.dataframe(trend_df, use_container_width=True, hide_index=True)
 
-# === 相互リンクフッター ===
+# === 定期運用チェックリスト ===
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 📋 定期運用チェックリスト")
+
+with st.expander("週次チェック", expanded=False):
+    st.markdown(
+        "- □ 各チャネルのCPA/ROASを確認\n"
+        "- □ 減額推奨チャネルの対応を検討\n"
+        "- □ 予算配分シミュレーションを実行"
+    )
+
+with st.expander("月次チェック", expanded=False):
+    st.markdown(
+        "- □ ROAS月次トレンドを確認\n"
+        "- □ 予算上下限の見直し\n"
+        "- □ 目標CPAの達成率を検証\n"
+        "- □ RFM分析で獲得顧客の質を確認"
+    )
+
+# === 関連ツールカード ===
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
+
+_tool_cards_css = """
+<style>
+.tool-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.tool-card a {
+    color: #059669;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.tool-card a:hover { text-decoration: underline; }
+.tool-card .tool-desc {
+    color: #6B7280;
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+}
+</style>
+"""
+st.markdown(_tool_cards_css, unsafe_allow_html=True)
+
 fc1, fc2, fc3 = st.columns(3)
-fc1.markdown("👥 [顧客RFM分析](https://ec-rfm.streamlit.app)  \n顧客セグメントを自動分類")
-fc2.markdown("📊 [売上ダッシュボード](https://ec-dashboard.streamlit.app)  \n日別/月別売上を自動可視化")
-fc3.markdown("🛒 [EC離脱予測](https://ec-demo.streamlit.app)  \n顧客離脱をAIで予測")
+fc1.markdown(
+    '<div class="tool-card">'
+    '<a href="https://ec-rfm-analysis.streamlit.app" target="_blank">👥 顧客RFM分析</a>'
+    '<div class="tool-desc">広告で獲得した顧客のセグメント分布を確認する</div>'
+    '</div>',
+    unsafe_allow_html=True,
+)
+fc2.markdown(
+    '<div class="tool-card">'
+    '<a href="https://ec-sales-dashboard.streamlit.app" target="_blank">📈 売上ダッシュボード</a>'
+    '<div class="tool-desc">広告施策が売上に与えた影響を確認する</div>'
+    '</div>',
+    unsafe_allow_html=True,
+)
+fc3.markdown(
+    '<div class="tool-card">'
+    '<a href="https://ec-ai-tools.streamlit.app" target="_blank">🛒 ECポータル</a>'
+    '<div class="tool-desc">全ツール一覧に戻る</div>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 st.caption("AI経営パートナー × データサイエンス | 広告ROI分析 v1.0")
