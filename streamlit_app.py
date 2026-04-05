@@ -74,22 +74,21 @@ with st.sidebar:
     st.markdown("## 🏛️ 士業AI経営パートナー")
     st.markdown("税理士・社労士・行政書士 専用")
     st.markdown("---")
-    st.markdown("### 📋 ツール一覧（9アプリ）")
+    st.markdown("### 📋 ツール一覧（8アプリ）")
     st.markdown("""
 **経営分析・予測**
 1. 🏢 顧問先離反予測
 2. 🌐 サービスLP+AI経営診断
-3. 📉 顧客離脱予測AI
-4. 🔄 クロスセル分析
+3. 🔄 クロスセル分析
 
 **業務効率化**
-5. 📊 月次レポート自動生成
-6. 📝 契約書ドラフトAI
-7. 💰 入金遅延アラート
+4. 📊 月次レポート自動生成
+5. 📝 契約書ドラフトAI
+6. 💰 入金遅延アラート
 
 **コンプライアンス**
-8. 🛡️ 安心パッケージ
-9. 📋 申請書類チェッカー
+7. 🛡️ 安心パッケージ
+8. 📋 申請書類チェッカー
 """)
     st.markdown("---")
     st.markdown("### 💡 このツールの対象者")
@@ -106,7 +105,7 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-section">
 <h1>🏛️ 士業AI経営パートナー</h1>
-<p>税理士・社労士・行政書士の業務を<br>AIで変革する 9つの専用ツール</p>
+<p>税理士・社労士・行政書士の業務を<br>AIで変革する 8つの専用ツール</p>
 <div class="hero-sub">顧問先の離反予測から契約書作成、月次レポートまでワンストップ</div>
 </div>
 """, unsafe_allow_html=True)
@@ -114,7 +113,7 @@ st.markdown("""
 # === 導入効果 KPI ===
 k1, k2, k3, k4 = st.columns(4)
 with k1:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">9</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
 with k2:
     st.markdown('<div class="kpi-card"><div class="kpi-value">80%</div><div class="kpi-label">業務時間削減</div></div>', unsafe_allow_html=True)
 with k3:
@@ -149,7 +148,6 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 APP_URLS = {
     "shigyou-demo": "https://shigyou-churn.streamlit.app",
     "service-lp": "https://shigyou-service-lp.streamlit.app",
-    "ec-demo": "https://shigyou-ec-churn.streamlit.app",
     "crosssell": "https://shigyou-crosssell.streamlit.app",
     "report-gen": "https://shigyou-report.streamlit.app",
     "contract-draft": "https://shigyou-contract.streamlit.app",
@@ -163,7 +161,6 @@ APPS = {
     "📊 経営分析・予測": [
         {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反率15%→5%に改善", "tag": "おすすめ", "tag_class": "tag-recommend"},
         {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "effect": "成約率30%向上", "tag": "おすすめ", "tag_class": "tag-recommend"},
-        {"icon": "📉", "name": "顧客離脱予測AI", "desc": "顧客の離脱リスクと需要予測を一体化。デモデータ自動生成で即体験可能。", "dir": "ec-demo", "effect": "離脱率25%減", "tag": "おすすめ", "tag_class": "tag-recommend"},
         {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "effect": "顧問単価20%UP", "tag": "分析", "tag_class": "tag-efficiency"},
     ],
     "⚡ 業務効率化": [
