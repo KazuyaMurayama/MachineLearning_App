@@ -18,8 +18,8 @@ def setup_japanese_font():
     plt.rcParams["font.family"]="DejaVu Sans"; return "DejaVu Sans"
 
 # === 定数 ===
-DEMO_URL_SHIGYOU="https://shigyou-demo.streamlit.app"  # デプロイ後に更新
-DEMO_URL_EC="https://ec-demo.streamlit.app"              # デプロイ後に更新
+DEMO_URL_SHIGYOU="https://shigyou-churn.streamlit.app"
+DEMO_URL_EC=""  # 未使用
 CONTACT_FORM_URL="https://forms.gle/XXXXXXXXXX"          # デプロイ後にGoogleフォーム等のURLに更新
 CONTACT_EMAIL="ai-partner@example.com"                    # デプロイ後に実メールアドレスに更新
 
@@ -118,7 +118,7 @@ def render_hero():
     st.markdown("""
 <div class="hero-section">
 <h1>AI経営パートナー × データサイエンス</h1>
-<p>士業・小売EC事業者の経営判断を、データとAIで変革する</p>
+<p>税理士・社労士・行政書士の経営判断を、データとAIで変革する</p>
 <p>Amazon Japan広告チーム出身のデータサイエンティストが、<br>
 貴社専用のAI予測モデルで「見えなかったリスク」を可視化します。</p>
 </div>
@@ -329,21 +329,15 @@ def render_result(score,level,biz_type,cat_scores):
     with cta1:
         st.link_button("📅 無料診断セッションを予約する",CONTACT_FORM_URL,type="primary",use_container_width=True)
     with cta2:
-        demo_url=DEMO_URL_SHIGYOU if biz_type=="士業" else DEMO_URL_EC
-        demo_label="🏢 士業デモを試す" if biz_type=="士業" else "🛒 ECデモを試す"
-        st.link_button(demo_label,demo_url,use_container_width=True)
+        st.link_button("🏢 離反予測デモを試す",DEMO_URL_SHIGYOU,use_container_width=True)
     st.markdown(f"📩 メールでのお問い合わせ: **{CONTACT_EMAIL}**")
 
 def render_diagnostic():
     st.markdown("## 🔍 AI経営診断ツール")
     st.markdown("10問の質問に答えるだけで、貴社の**AI活用成熟度**を5段階で評価し、最適なサービスプランをご提案します。")
     st.markdown("---")
-    # 業種選択
-    biz_type=st.radio("貴社の業種を選択してください",["士業","EC"],horizontal=True,key="biz_radio")
-    # 業種変更時にリセット
-    if st.session_state.get("diag_biz")!=biz_type and st.session_state.get("diag_done"):
-        st.session_state["diag_done"]=False
-    questions=QUESTIONS_SHIGYOU if biz_type=="士業" else QUESTIONS_EC
+    biz_type="士業"
+    questions=QUESTIONS_SHIGYOU
     st.markdown("---")
     # st.formで10問をまとめて送信（rerun防止）
     with st.form("diagnosis_form"):
