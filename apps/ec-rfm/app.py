@@ -95,6 +95,13 @@ with st.sidebar:
             st.error(f"読み込みエラー: {e}")
     st.markdown("---")
     st.caption("AI経営パートナー × データサイエンス")
+    st.markdown("---")
+    st.markdown("## 📊 施策シミュレーション設定")
+    slider_vip = st.slider("VIP維持率向上 (%)", 1, 30, 10, key="sl_vip") / 100
+    slider_good = st.slider("優良客単価向上 (%)", 1, 30, 15, key="sl_good") / 100
+    slider_normal = st.slider("一般リピート率向上 (%)", 1, 30, 10, key="sl_normal") / 100
+    slider_dormant = st.slider("休眠復帰率 (%)", 1, 20, 5, key="sl_dormant") / 100
+    slider_churn = st.slider("離脱復帰率 (%)", 1, 20, 3, key="sl_churn") / 100
 
 # ── サンプルデータ自動読み込み ──
 if not st.session_state.loaded:
@@ -209,33 +216,19 @@ repeat_rate = (rfm["購買回数"] >= 2).sum() / len(rfm) * 100
 vip_pct = vip_count / len(rfm) * 100
 dormant_pct = dormant_count / len(rfm) * 100
 
-k1, k2, k3, k4 = st.columns(4)
-k1.markdown(f"""
-<div class="kpi-card">
-    <div class="kpi-value">{vip_count}人</div>
-    <div class="kpi-label">VIP顧客数</div>
-    <div class="kpi-label">{vip_pct:.0f}% / 全顧客</div>
-</div>
-""", unsafe_allow_html=True)
-k2.markdown(f"""
-<div class="kpi-card">
-    <div class="kpi-value">{dormant_count}人</div>
-    <div class="kpi-label">休眠+離脱顧客数</div>
-    <div class="kpi-label">{dormant_pct:.0f}% / 要フォロー</div>
-</div>
-""", unsafe_allow_html=True)
-k3.markdown(f"""
-<div class="kpi-card">
-    <div class="kpi-value">¥{avg_ltv:,.0f}</div>
-    <div class="kpi-label">全顧客平均LTV</div>
-</div>
-""", unsafe_allow_html=True)
-k4.markdown(f"""
-<div class="kpi-card">
-    <div class="kpi-value">{repeat_rate:.1f}%</div>
-    <div class="kpi-label">リピート率</div>
-</div>
-""", unsafe_allow_html=True)
+follow_up_count = (rfm["ステータス"] == "要フォロー").sum()
+follow_up_avg_ltv = rfm.loc[rfm["ステータス"] == "要フォロー", "累計金額"].mean() if follow_up_count > 0 else 0
+follow_up_expected = follow_up_count * follow_up_avg_ltv * slider_dormant
+
+k1, k2, k3, k4, k5 = st.columns(5)
+k1.markdown(f'<div class="kpi-card"><div class="kpi-value">{vip_count}人</div><div class="kpi-label">VIP顧客数</div><div class="kpi-label">{vip_pct:.0f}% / 全顧客</div></div>', unsafe_allow_html=True)
+k2.markdown(f'<div class="kpi-card"><div class="kpi-value">{dormant_count}人</div><div class="kpi-label">休眠+離脱顧客数</div><div class="kpi-label">{dormant_pct:.0f}% / 要フォロー</div></div>', unsafe_allow_html=True)
+k3.markdown(f'<div class="kpi-card"><div class="kpi-value">¥{avg_ltv:,.0f}</div><div class="kpi-label">全顧客平均LTV</div></div>', unsafe_allow_html=True)
+k4.markdown(f'<div class="kpi-card"><div class="kpi-value">{repeat_rate:.1f}%</div><div class="kpi-label">リピート率</div></div>', unsafe_allow_html=True)
+k5.markdown(f'<div class="kpi-card"><div class="kpi-value" style="color:#DC2626;">⚠️ {follow_up_count}人</div><div class="kpi-label">要フォロー顧客</div><div class="kpi-label">予測日超過</div></div>', unsafe_allow_html=True)
+
+if follow_up_count > 0:
+    st.warning(f"⚡ 要フォロー顧客 {follow_up_count}人に今すぐクーポン配信で ¥{follow_up_expected:,.0f} の増収見込み（復帰率 {slider_dormant:.0%} 想定）")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -358,11 +351,11 @@ with tab3:
 
     # ── 施策の期待売上自動試算 ──
     assumed_rates = {
-        "VIP顧客": {"施策名": "維持率向上", "想定率": 0.10, "率ラベル": "維持率向上+10%"},
-        "優良顧客": {"施策名": "客単価向上", "想定率": 0.15, "率ラベル": "客単価向上+15%"},
-        "一般顧客": {"施策名": "リピート率向上", "想定率": 0.10, "率ラベル": "リピート率+10%"},
-        "休眠顧客": {"施策名": "復帰", "想定率": 0.05, "率ラベル": "復帰率5%"},
-        "離脱顧客": {"施策名": "復帰", "想定率": 0.03, "率ラベル": "復帰率3%"},
+        "VIP顧客": {"施策名": "維持率向上", "想定率": slider_vip, "率ラベル": f"維持率向上+{slider_vip:.0%}"},
+        "優良顧客": {"施策名": "客単価向上", "想定率": slider_good, "率ラベル": f"客単価向上+{slider_good:.0%}"},
+        "一般顧客": {"施策名": "リピート率向上", "想定率": slider_normal, "率ラベル": f"リピート率+{slider_normal:.0%}"},
+        "休眠顧客": {"施策名": "復帰", "想定率": slider_dormant, "率ラベル": f"復帰率{slider_dormant:.0%}"},
+        "離脱顧客": {"施策名": "復帰", "想定率": slider_churn, "率ラベル": f"復帰率{slider_churn:.0%}"},
     }
 
     st.markdown("#### 📊 施策実行時の期待売上効果シミュレーション")
