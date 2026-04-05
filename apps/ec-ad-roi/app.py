@@ -163,12 +163,23 @@ ch_roas = df.groupby("チャネル").agg({"広告費": "sum", "売上": "sum"}).
 ch_roas["ROAS"] = ch_roas["売上"] / ch_roas["広告費"]
 best_ch = ch_roas.loc[ch_roas["ROAS"].idxmax()]
 
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3, k4, k5 = st.columns(5)
+
+# 減額推奨チャネルを事前計算（投資判定ロジック活用）
+_ch_trends = {ch: compute_channel_trend(df, ch) for ch in ch_roas["チャネル"]}
+_danger_channels = []
+for _, r in ch_roas.iterrows():
+    label, _ = investment_judgment(float(r["ROAS"]), _ch_trends[r["チャネル"]])
+    if "減額" in label:
+        monthly_loss = int((r["広告費"] - r["売上"]) / 12)
+        _danger_channels.append({"name": r["チャネル"], "roas": r["ROAS"], "loss": monthly_loss})
+
 for col, label, value in [
     (k1, "年間広告費合計", f"¥{total_cost:,.0f}"),
     (k2, "年間売上合計（広告経由）", f"¥{total_revenue:,.0f}"),
     (k3, "全体ROAS", f"{overall_roas:.2f}x"),
     (k4, f"最優秀: {best_ch['チャネル']}", f"ROAS {best_ch['ROAS']:.2f}x"),
+    (k5, "🔴 減額推奨", f"{len(_danger_channels)}個"),
 ]:
     col.markdown(f"""
     <div class="kpi-card">
@@ -176,6 +187,13 @@ for col, label, value in [
         <div class="kpi-label">{label}</div>
     </div>
     """, unsafe_allow_html=True)
+
+# 冒頭アラート: 最も危険なチャネル or 全チャネル黒字
+if _danger_channels:
+    worst = max(_danger_channels, key=lambda x: abs(x["loss"]))
+    st.warning(f"⚡ {worst['name']} ROAS {worst['roas']:.1f}x — 月¥{abs(worst['loss']):,}の赤字。減額を推奨します")
+else:
+    st.success("✅ 全チャネル黒字。現状維持で問題ありません")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -406,6 +424,18 @@ with tab2:
     monthly_avg["提案予算"] = constrained["配分"].values
     monthly_avg["差分"] = monthly_avg["提案予算"] - monthly_avg["現在予算"]
     monthly_avg["期待売上"] = constrained["期待売上"].values
+
+    # シミュレーション結論ハイライト
+    _sim_current = (monthly_avg["現在予算"] * monthly_avg["ROAS"]).sum()
+    _sim_proposed = (constrained["配分"] * constrained["ROAS"]).sum()
+    _sim_diff = _sim_proposed - _sim_current
+    _sim_pct = (_sim_diff / _sim_current * 100) if _sim_current > 0 else 0
+    if _sim_diff > 0:
+        st.success(f"💰 最適配分で月+¥{_sim_diff:,.0f}の期待売上増（現在比+{_sim_pct:.1f}%）")
+    elif _sim_diff < 0:
+        st.warning(f"⚠️ 制約付き配分では月¥{abs(_sim_diff):,.0f}の期待売上減（現在比{_sim_pct:.1f}%）")
+    else:
+        st.info("📊 最適配分と現在配分の期待売上は同等です")
 
     col_pie1, col_pie2 = st.columns(2)
 
