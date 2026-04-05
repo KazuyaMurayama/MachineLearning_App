@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+import io
 
 # ── 日本語フォント設定 ──
 def setup_japanese_font():
@@ -174,6 +175,32 @@ def assign_segment(total):
 
 rfm["セグメント"] = rfm["合計"].apply(assign_segment)
 
+# ── 次回購買予測日の計算 ──
+def calc_next_purchase(df, rfm_df, ref_date):
+    """顧客ごとの平均購買間隔から次回購買予測日を算出"""
+    intervals = []
+    for cid, grp in df.groupby("顧客ID"):
+        dates = grp["注文日"].sort_values()
+        if len(dates) >= 2:
+            diffs = dates.diff().dropna().dt.days
+            avg_interval = diffs.mean()
+        else:
+            avg_interval = np.nan
+        intervals.append({"顧客ID": cid, "平均購買間隔": avg_interval})
+    interval_df = pd.DataFrame(intervals)
+    merged = rfm_df.merge(interval_df, on="顧客ID", how="left")
+    merged["次回予測日"] = merged.apply(
+        lambda r: r["最終購買日"] + timedelta(days=r["平均購買間隔"])
+        if pd.notna(r["平均購買間隔"]) else pd.NaT, axis=1
+    )
+    merged["ステータス"] = merged["次回予測日"].apply(
+        lambda d: "要フォロー" if pd.notna(d) and d <= ref_date else
+                  ("予測不可" if pd.isna(d) else "正常")
+    )
+    return merged
+
+rfm = calc_next_purchase(df, rfm, reference_date)
+
 # ── KPIカード ──
 vip_count = (rfm["セグメント"] == "VIP顧客").sum()
 dormant_count = rfm["セグメント"].isin(["休眠顧客", "離脱顧客"]).sum()
@@ -238,7 +265,8 @@ with tab1:
     )
 
     display_df = rfm[rfm["セグメント"].isin(selected_segments)][
-        ["顧客名", "R", "F", "M", "合計", "セグメント", "最終購買日", "購買回数", "累計金額"]
+        ["顧客名", "R", "F", "M", "合計", "セグメント", "最終購買日", "購買回数", "累計金額",
+         "次回予測日", "ステータス"]
     ].sort_values("合計", ascending=False).reset_index(drop=True)
 
     st.dataframe(display_df, use_container_width=True, height=450)
@@ -328,6 +356,47 @@ with tab2:
 with tab3:
     st.subheader("セグメント別 推奨施策")
 
+    # ── 施策の期待売上自動試算 ──
+    assumed_rates = {
+        "VIP顧客": {"施策名": "維持率向上", "想定率": 0.10, "率ラベル": "維持率向上+10%"},
+        "優良顧客": {"施策名": "客単価向上", "想定率": 0.15, "率ラベル": "客単価向上+15%"},
+        "一般顧客": {"施策名": "リピート率向上", "想定率": 0.10, "率ラベル": "リピート率+10%"},
+        "休眠顧客": {"施策名": "復帰", "想定率": 0.05, "率ラベル": "復帰率5%"},
+        "離脱顧客": {"施策名": "復帰", "想定率": 0.03, "率ラベル": "復帰率3%"},
+    }
+
+    st.markdown("#### 📊 施策実行時の期待売上効果シミュレーション")
+    effect_rows = []
+    total_expected = 0
+    for seg_name in ["VIP顧客", "優良顧客", "一般顧客", "休眠顧客", "離脱顧客"]:
+        seg_df = rfm[rfm["セグメント"] == seg_name]
+        n = len(seg_df)
+        avg_ltv = seg_df["累計金額"].mean() if n > 0 else 0
+        rate_info = assumed_rates[seg_name]
+        expected = n * avg_ltv * rate_info["想定率"]
+        total_expected += expected
+        effect_rows.append({
+            "セグメント": seg_name,
+            "対象人数": f"{n}人",
+            "平均LTV": f"¥{avg_ltv:,.0f}",
+            "想定効果率": rate_info["率ラベル"],
+            "期待売上効果": f"¥{expected:,.0f}",
+        })
+
+    effect_df = pd.DataFrame(effect_rows)
+    st.dataframe(effect_df, use_container_width=True, hide_index=True)
+
+    st.markdown(
+        f'<div class="kpi-card" style="margin-bottom:1.5rem;">'
+        f'<div class="kpi-value">¥{total_expected:,.0f}</div>'
+        f'<div class="kpi-label">全セグメント合計 施策実行時の期待売上増加額</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+    # ── 施策テーブル（既存） ──
     strategies = pd.DataFrame({
         "セグメント": ["VIP顧客", "優良顧客", "一般顧客", "休眠顧客", "離脱顧客"],
         "スコア帯": ["13-15", "10-12", "7-9", "4-6", "3"],
@@ -386,17 +455,39 @@ with tab3:
     col_act3.warning(f"**優先度**: {plan['優先度']}")
     st.markdown(f"**具体的アクション:**\n{plan['具体的アクション']}")
 
-    st.markdown("#### セグメント別 顧客リスト")
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+    # ── セグメント別アクションリスト（顧客リスト + CSVダウンロード） ──
+    st.markdown("#### 📋 セグメント別アクションリスト")
+    st.caption("明日からメール配信に使える顧客リストをセグメントごとにCSVダウンロードできます。")
+
+    # 推奨施策マッピング
+    seg_action_map = {
+        "VIP顧客": "限定オファー・ロイヤルティプログラム",
+        "優良顧客": "アップセル・クロスセル提案",
+        "一般顧客": "リピート促進キャンペーン",
+        "休眠顧客": "再購入クーポン・リマインドメール",
+        "離脱顧客": "特別割引・復帰キャンペーン",
+    }
+
     for seg in ["VIP顧客", "優良顧客", "一般顧客", "休眠顧客", "離脱顧客"]:
-        seg_df = rfm[rfm["セグメント"] == seg]
+        seg_df = rfm[rfm["セグメント"] == seg].copy()
         count = len(seg_df)
         with st.expander(f"{seg}（{count}人）"):
             if count > 0:
-                st.dataframe(
-                    seg_df[["顧客ID", "顧客名", "R", "F", "M", "合計", "最終購買日", "累計金額"]]
-                    .sort_values("累計金額", ascending=False)
-                    .reset_index(drop=True),
-                    use_container_width=True,
+                action_list = seg_df[["顧客ID", "顧客名", "最終購買日", "R", "F", "M", "合計",
+                                      "累計金額", "次回予測日", "ステータス"]].copy()
+                action_list["推奨施策"] = seg_action_map.get(seg, "")
+                action_list = action_list.sort_values("累計金額", ascending=False).reset_index(drop=True)
+                st.dataframe(action_list, use_container_width=True)
+
+                csv_buf = action_list.to_csv(index=False).encode("utf-8-sig")
+                st.download_button(
+                    f"📥 {seg}リストをCSVダウンロード",
+                    csv_buf,
+                    file_name=f"action_list_{seg}.csv",
+                    mime="text/csv",
+                    key=f"dl_{seg}",
                 )
             else:
                 st.write("該当顧客なし")
