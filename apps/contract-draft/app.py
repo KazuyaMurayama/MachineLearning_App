@@ -240,7 +240,7 @@ st.markdown("""
 .draft-hero p{font-size:1.1rem;color:#475569;}
 .section-divider{border:none;border-top:2px solid #E2E8F0;margin:32px 0;}
 .kpi-card{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:18px 14px;text-align:center;}
-.kpi-card .kpi-value{font-size:1.5rem;font-weight:700;color:#7C3AED;margin:4px 0;}
+.kpi-card .kpi-value{font-size:2.4rem;font-weight:700;color:#7C3AED;margin:4px 0;}
 .kpi-card .kpi-label{font-size:0.85rem;color:#64748B;}
 .effect-box{background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:12px;padding:20px;margin:8px 0;}
 .effect-box .effect-title{font-size:0.9rem;color:#64748B;margin-bottom:2px;}
@@ -279,8 +279,8 @@ with st.sidebar:
 # === Main ===
 st.markdown("""
 <div class="draft-hero">
-<h1>📝 契約書ドラフトAI</h1>
-<p>士業の種別と顧問先情報を入力するだけで、<br>業種に応じた契約書ドラフトを自動生成します。</p>
+<h1>📝 契約書作成、まだ手作業ですか？</h1>
+<p>士業の種別と情報を入力するだけで、AI対応条項付き契約書を自動生成。</p>
 </div>
 """,unsafe_allow_html=True)
 
@@ -289,20 +289,20 @@ st.markdown("#### 導入効果")
 eff1,eff2,eff3=st.columns(3)
 with eff1:
     st.markdown("""<div class="effect-box">
-<div class="effect-title">契約書作成時間</div>
-<div class="effect-value">2時間 → 10分</div>
-<div class="effect-detail">92%削減</div>
+<div class="effect-title">❌ Before</div>
+<div class="effect-value">弁護士依頼で¥5万+2週間</div>
+<div class="effect-detail">高コスト・長期間の手作業対応</div>
 </div>""",unsafe_allow_html=True)
 with eff2:
     st.markdown("""<div class="effect-box">
-<div class="effect-title">契約書作成コスト</div>
-<div class="effect-value">¥50,000〜¥150,000 → 大幅削減</div>
-<div class="effect-detail">テンプレート自動生成で作成コスト削減</div>
+<div class="effect-title">✅ After</div>
+<div class="effect-value">5分で契約書完成</div>
+<div class="effect-detail">AI対応条項付きドラフトを即生成</div>
 </div>""",unsafe_allow_html=True)
 with eff3:
     st.markdown("""<div class="effect-box">
-<div class="effect-title">年間削減額</div>
-<div class="effect-value">約¥60万</div>
+<div class="effect-title">📈 年間効果</div>
+<div class="effect-value">年間¥60万のコスト削減</div>
 <div class="effect-detail">月5件の契約書作成想定</div>
 </div>""",unsafe_allow_html=True)
 
