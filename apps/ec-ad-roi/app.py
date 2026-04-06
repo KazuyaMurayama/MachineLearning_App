@@ -56,7 +56,7 @@ st.markdown("""
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .kpi-value {
-    font-size: 1.6rem;
+    font-size: 2.4rem;
     font-weight: 700;
     color: #059669;
 }
@@ -142,7 +142,7 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-section">
     <div class="hero-title">📈 広告ROI分析ツール</div>
-    <div class="hero-subtitle">チャネル別ROAS分析・予算配分最適化・トレンド分析でデータドリブンな広告戦略を実現</div>
+    <div class="hero-subtitle">チャネル別ROAS・CPAを一画面で比較。予算の無駄を即可視化。</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -152,8 +152,11 @@ if df is None:
     st.warning("データが読み込まれていません。サイドバーからCSVをアップロードしてください。")
     st.stop()
 
-# === 導入効果 ===
-st.info("💡 **導入効果**: 広告費の無駄を可視化し、ROAS 20%改善（月¥50万の広告費削減）")
+# === 導入効果バナー ===
+_b1, _b2, _b3 = st.columns(3)
+_b1.error("**Before**\n\n媒体バラバラで効果不明")
+_b2.success("**After**\n\n全チャネルROASを一画面比較")
+_b3.info("**年間効果**\n\n広告効率30%改善・年間¥300万削減")
 
 # === KPIカード ===
 total_cost = df["広告費"].sum()
