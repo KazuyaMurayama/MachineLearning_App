@@ -272,7 +272,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # === Session State ===
-for k,v in {"df_cur":None,"df_prev":None,"loaded":False,"client_name":"株式会社サンプル商事"}.items():
+for k,v in {"df_cur":None,"df_prev":None,"loaded":False,"client_name":"株式会社サンプル商事","dep_rate":3.0,"wc_rate":20.0}.items():
     if k not in st.session_state: st.session_state[k]=v
 
 # === Auto-load sample data ===
@@ -327,9 +327,13 @@ st.sidebar.markdown("---")
 # === キャッシュフロー推計パラメータ ===
 st.sidebar.subheader("💰 CF推計パラメータ")
 st.sidebar.caption("減価償却費は試算表外のため推定値を使用")
-dep_rate=st.sidebar.slider("減価償却費（売上高比率 %）",min_value=0.0,max_value=15.0,value=3.0,step=0.5,
+_PRESETS={"手動入力":None,"製造業(D率5%/運転20%)":(5.0,20.0),"小売業(D率2%/運転25%)":(2.0,25.0),"サービス業(D率3%/運転15%)":(3.0,15.0),"建設業(D率4%/運転30%)":(4.0,30.0)}
+_preset=st.sidebar.selectbox("業種プリセット",list(_PRESETS.keys()))
+if _PRESETS[_preset] is not None:
+    st.session_state.dep_rate,st.session_state.wc_rate=_PRESETS[_preset]
+dep_rate=st.sidebar.slider("減価償却費（売上高比率 %）",min_value=0.0,max_value=15.0,value=st.session_state.dep_rate,step=0.5,
     help="試算表に減価償却費がない場合、売上高の一定割合で推定します")
-wc_rate=st.sidebar.slider("運転資金増加率（売上増加分の割合 %）",min_value=0.0,max_value=50.0,value=20.0,step=5.0,
+wc_rate=st.sidebar.slider("運転資金増加率（売上増加分の割合 %）",min_value=0.0,max_value=50.0,value=st.session_state.wc_rate,step=5.0,
     help="売上が増えた月は運転資金（売掛金・在庫等）も増加するとして控除します")
 st.sidebar.markdown("---")
 st.sidebar.caption("AI経営パートナー × データサイエンス")
@@ -603,6 +607,7 @@ if st.session_state.df_cur is not None:
             for c in ["経常利益","減価償却費(推定)","運転資金増加","営業CF"]:
                 if c in cf_disp.columns:
                     cf_disp[c]=cf_disp[c].apply(lambda x: f"{float(x):,.0f}万円")
+            cf_disp["アクション"]=cf_df["営業CF"].apply(lambda v: "資金に余裕あり。設備投資や人材採用のタイミング" if v>=0 else "資金流出注意。売掛金回収を加速")
             st.dataframe(cf_disp,use_container_width=True,hide_index=True)
 
             # --- 顧問先向けアドバイス ---
