@@ -150,6 +150,7 @@ st.markdown("""
 .alert-hero h1{font-size:2rem;color:#DC2626;}
 .alert-hero p{font-size:1.05rem;color:#475569;}
 .kpi-card{background:#FEF2F2;border-radius:12px;padding:16px;text-align:center;border:1px solid #FECACA;}
+.kpi-value{font-size:2.5rem;font-weight:bold;}
 .section-divider{border:none;border-top:2px solid #E2E8F0;margin:24px 0;}
 .status-red{color:#DC2626;font-weight:bold;}
 .status-yellow{color:#D97706;font-weight:bold;}
@@ -192,12 +193,15 @@ st.sidebar.caption("入金遅延アラート v1.1")
 # === Main ===
 st.markdown("""
 <div class="alert-hero">
-<h1>🔴 請求・入金遅延アラートツール</h1>
-<p>顧問先の入金遅延を自動検知し、<br>催促メールテンプレートを即座に生成します。</p>
+<h1>🔴 入金遅延、放置していませんか？</h1>
+<p>AIが遅延パターンを分析し、催促の優先順位を自動判定。未回収リスクを最小化します。</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.info("💡 **導入効果**: 遅延顧問先の見落としゼロ化 — 毎月の入金確認作業を **2時間→10分**（年間約¥120万相当の工数削減）")
+_b1, _b2, _b3 = st.columns(3)
+_b1.markdown('<div class="kpi-card">😟 <strong>Before</strong><br>遅延発生後に気づく</div>', unsafe_allow_html=True)
+_b2.markdown('<div class="kpi-card">🤖 <strong>After</strong><br>悪化傾向を事前検知</div>', unsafe_allow_html=True)
+_b3.markdown('<div class="kpi-card">📈 <strong>年間効果</strong><br>未回収率60%改善</div>', unsafe_allow_html=True)
 
 df = st.session_state.df
 if df is None:
