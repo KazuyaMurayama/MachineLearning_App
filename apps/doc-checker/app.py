@@ -405,6 +405,11 @@ st.markdown("""
 .checker-hero{text-align:center;padding:32px 0 20px 0;background:linear-gradient(180deg,#ECFEFF,#FFFFFF);border-radius:16px;margin-bottom:16px;}
 .checker-hero h1{font-size:2.1rem;color:#0891B2;}
 .checker-hero p{font-size:1.05rem;color:#475569;}
+.kpi-card .kpi-value{font-size:2.4rem;font-weight:700;color:#0891B2;margin:4px 0;}
+.effect-box{background:linear-gradient(135deg,#ECFEFF,#E0F2FE);border:1px solid #BAE6FD;border-radius:12px;padding:20px;margin:8px 0;}
+.effect-box .effect-title{font-size:0.9rem;color:#64748B;margin-bottom:2px;}
+.effect-box .effect-value{font-size:1.3rem;font-weight:700;color:#0891B2;}
+.effect-box .effect-detail{font-size:0.8rem;color:#94A3B8;}
 .check-item-ok{background:#F0FDF4;border-left:4px solid #16A34A;padding:10px 14px;border-radius:0 8px 8px 0;margin:6px 0;}
 .check-item-ng{background:#FEF2F2;border-left:4px solid #DC2626;padding:10px 14px;border-radius:0 8px 8px 0;margin:6px 0;}
 .check-item-na{background:#F8FAFC;border-left:4px solid #94A3B8;padding:10px 14px;border-radius:0 8px 8px 0;margin:6px 0;}
@@ -439,13 +444,18 @@ with st.sidebar:
 # ============================================================
 st.markdown("""
 <div class="checker-hero">
-<h1>✅ 申請書類チェッカー</h1>
-<p>建設業許可・飲食店営業許可・就業規則・社会保険の申請書類を<br>
-チェックリストで漏れなく確認し、不備を即座に特定します。</p>
+<h1>✅ 申請書類の不備、見落としていませんか？</h1>
+<p>AIが必要書類を自動チェック。不備の解決方法と審査リスクまで即表示。</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.info("💡 **導入効果**: 申請書類の不備による差し戻しをゼロ化 — 準備チェック時間を **1時間→10分**（1申請あたり50分短縮）")
+_de1,_de2,_de3=st.columns(3)
+with _de1:
+    st.markdown("""<div class="effect-box"><div class="effect-title">❌ Before</div><div class="effect-value">書類不備で差し戻し</div><div class="effect-detail">再提出・審査遅延のリスク</div></div>""",unsafe_allow_html=True)
+with _de2:
+    st.markdown("""<div class="effect-box"><div class="effect-title">✅ After</div><div class="effect-value">提出前にAIが全件チェック</div><div class="effect-detail">不備と解決策を即表示</div></div>""",unsafe_allow_html=True)
+with _de3:
+    st.markdown("""<div class="effect-box"><div class="effect-title">📈 年間効果</div><div class="effect-value">差し戻しゼロ・申請期間50%短縮</div><div class="effect-detail">準備チェック時間を大幅削減</div></div>""",unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["✅ 書類チェッカー", "📚 チェックリスト一覧"])
 
