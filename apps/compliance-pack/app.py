@@ -346,10 +346,13 @@ email=email.strip() if email.strip() else "＿＿＿"
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 
 # === Tabs ===
-tab1,tab2,tab3=st.tabs(["📄 守秘義務契約書","📋 データ取扱い規程","✅ AI処理同意書"])
+tab1,tab2,tab3,tab4=st.tabs(["📄 守秘義務契約書","📋 データ取扱い規程","✅ AI処理同意書","🔍 AI導入リスク診断"])
+
+_LEGAL_VERSION_CAPTION="最終更新: 2026年4月 | 対応法令: 個人情報保護法(2024年改正対応)"
 
 with tab1:
     st.header("📄 守秘義務契約書")
+    st.caption(_LEGAL_VERSION_CAPTION)
     st.caption("AI処理に関する特約条項（第4条）付きの守秘義務契約テンプレートです。")
     rendered_nda=TEMPLATE_NDA.format(
         client_name=client,office_name=office,duration=nda_duration,post_duration=nda_post,
@@ -359,6 +362,7 @@ with tab1:
 
 with tab2:
     st.header("📋 データ取扱い規程")
+    st.caption(_LEGAL_VERSION_CAPTION)
     st.caption("データ分類・AI処理ルール・匿名化手順・インシデント対応を網羅した規程テンプレートです。")
     rendered_policy=TEMPLATE_DATA_POLICY.format(office_name=office,policy_date=today_str)
     st.markdown(rendered_policy)
@@ -366,12 +370,41 @@ with tab2:
 
 with tab3:
     st.header("✅ AI処理同意書")
+    st.caption(_LEGAL_VERSION_CAPTION)
     st.caption("顧問先に署名いただく同意書テンプレートです。匿名化措置・使用AIサービス・撤回権を明記。")
     rendered_consent=TEMPLATE_AI_CONSENT.format(
         client_name=client,office_name=office,contact_person=contact,
         contact_email=email,consent_date=today_str)
     st.markdown(rendered_consent)
     st.download_button("📥 AI処理同意書をダウンロード",rendered_consent,"AI処理同意書.md","text/markdown",use_container_width=True)
+
+with tab4:
+    st.header("🔍 AI導入リスク診断")
+    st.caption("AI導入前に確認すべき項目をチェックし、対応状況を可視化します。")
+    st.markdown("以下の項目を確認し、対応済みの項目にチェックを入れてください。")
+    _checklist_items=[
+        "顧問先にAI処理の説明を行ったか",
+        "個人情報の匿名化フローを確立しているか",
+        "AI処理の記録（第7条）を残す仕組みがあるか",
+        "インシデント対応手順（第8条）を従業員に周知しているか",
+        "年1回のデータ取扱い教育を実施しているか",
+        "AI処理に使用するサービスのデータ学習オプトアウトを確認したか",
+        "守秘義務契約書にAI処理特約を盛り込んでいるか",
+        "AI処理同意書を顧問先から取得しているか",
+    ]
+    _checked_count=0
+    for _i,_item in enumerate(_checklist_items):
+        if st.checkbox(_item,key=f"risk_chk_{_i}"):
+            _checked_count+=1
+    _total=len(_checklist_items)
+    _score=int(_checked_count/_total*100) if _total else 0
+    st.markdown("---")
+    st.metric("対応状況スコア",f"{_checked_count}/{_total}（{_score}%）")
+    if _checked_count==_total:
+        st.success("✅ AI導入準備完了 — 全項目の対応が確認されました。")
+    else:
+        _remaining=_total-_checked_count
+        st.warning(f"⚠️ {_remaining}項目が未対応です。上記チェックリストを確認してください。")
 
 # 一括ダウンロード
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
