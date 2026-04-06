@@ -25,36 +25,54 @@ CHECKLISTS = {
                 "required": True,
                 "point": "押印漏れ・記載ミスに注意。法人の場合は代表者印必須",
                 "ng_example": "代表者氏名の旧字体・略字の使用、印鑑の欠落",
+                "resolution": "都道府県の建設業課HPから最新様式をダウンロードし記入",
+                "source": "都道府県建設業課HP",
+                "days_needed": "1〜2日",
             },
             {
                 "name": "工事経歴書（様式第2号）",
                 "required": True,
                 "point": "過去5年分の主要完成工事を記載。件数・金額の整合性を確認",
                 "ng_example": "記載件数が少ない、金額が財務諸表と不一致",
+                "resolution": "過去5年の完成工事台帳・請求書等を基に一覧を作成",
+                "source": "自社の工事台帳・契約書控え",
+                "days_needed": "3〜5日",
             },
             {
                 "name": "直前3年の財務諸表（貸借対照表・損益計算書）",
                 "required": True,
                 "point": "決算期ごとに作成。自己資本額の確認（一般許可: 500万円以上）",
                 "ng_example": "確定申告書との数値乖離、税理士署名なし",
+                "resolution": "顧問税理士に建設業許可用の財務諸表作成を依頼",
+                "source": "顧問税理士・会計事務所",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "誓約書（様式第6号）",
                 "required": True,
                 "point": "欠格要件に該当しないことの誓約。全役員・令3条使用人の分が必要",
                 "ng_example": "役員全員分がそろっていない",
+                "resolution": "全役員・令3条使用人の一覧を作成し、各人に署名押印を依頼",
+                "source": "都道府県建設業課HP（様式ダウンロード）",
+                "days_needed": "1〜3日",
             },
             {
                 "name": "専任技術者の資格証明書類",
                 "required": True,
                 "point": "資格証のコピーまたは実務経験証明書。有効期限・業種の一致を確認",
                 "ng_example": "資格と申請業種が一致しない、実務経験年数の不足",
+                "resolution": "資格証のコピーを取得。実務経験の場合は経験証明書を元勤務先に依頼",
+                "source": "資格証原本コピー／元勤務先",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "経営業務の管理責任者の証明書類",
                 "required": True,
                 "point": "5年以上の経営経験を証明する書類（決算書・契約書等）",
                 "ng_example": "経験年数の根拠書類が薄い、期間に空白がある",
+                "resolution": "過去の決算書・確定申告書・契約書等の年次一覧を整理",
+                "source": "自社保管書類・税務署（過去の申告書控え）",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "登記されていないことの証明書",
@@ -62,12 +80,18 @@ CHECKLISTS = {
                 "point": "成年後見・被保佐人に登記されていないことの証明。発行後3ヶ月以内",
                 "ng_example": "有効期限切れ（発行から3ヶ月超過）",
                 "how_to_get": "法務局（東京法務局後見登録課）で取得。郵送申請も可",
+                "resolution": "法務局で「登記されていないことの証明書」を申請取得",
+                "source": "法務局（東京法務局後見登録課）、郵送申請可",
+                "days_needed": "3〜5営業日",
             },
             {
                 "name": "身分証明書（本籍地の市区町村発行）",
                 "required": True,
                 "point": "禁治産・準禁治産・破産の登録がないことの証明。発行後3ヶ月以内",
                 "ng_example": "住民票では不可（身分証明書と別物）",
+                "resolution": "本籍地の市区町村役場で「身分証明書」を取得（郵送請求可）",
+                "source": "本籍地の市区町村役場",
+                "days_needed": "3〜7営業日（郵送の場合）",
             },
             {
                 "name": "法人の登記事項証明書",
@@ -75,6 +99,9 @@ CHECKLISTS = {
                 "point": "法人の場合必須。発行後3ヶ月以内のもの",
                 "ng_example": "個人事業主申請に法人登記を添付する誤り",
                 "how_to_get": "法務局（オンライン申請可: 登記・供託オンラインシステム）",
+                "resolution": "法務局で取得（オンライン申請可）、手数料¥600",
+                "source": "法務局（登記・供託オンラインシステム）",
+                "days_needed": "3〜5営業日",
             },
             {
                 "name": "納税証明書（法人税・消費税）",
@@ -82,6 +109,9 @@ CHECKLISTS = {
                 "point": "未納がないことの証明。都道府県・国税の両方が必要な場合あり",
                 "ng_example": "消費税分の証明書が漏れている",
                 "how_to_get": "税務署（e-Taxで取得可能）。都道府県税は各都道府県税事務所",
+                "resolution": "税務署でe-Tax申請、都道府県税事務所で都道府県税分を取得",
+                "source": "税務署（e-Tax）／都道府県税事務所",
+                "days_needed": "3〜5営業日",
             },
         ],
     },
@@ -99,6 +129,9 @@ CHECKLISTS = {
                 "required": True,
                 "point": "保健所指定の様式を使用。開業予定日の2〜3週間前に申請",
                 "ng_example": "古い様式の使用、開業後の申請",
+                "resolution": "管轄保健所HPから最新の申請書様式をダウンロードし記入",
+                "source": "管轄保健所HP",
+                "days_needed": "1日",
             },
             {
                 "name": "食品衛生責任者資格証明書（コピー）",
@@ -106,42 +139,63 @@ CHECKLISTS = {
                 "point": "調理師免許・栄養士免許または講習会修了証。1施設につき1名以上",
                 "ng_example": "資格者が他店舗との兼任（原則不可）",
                 "how_to_get": "各都道府県の食品衛生協会で養成講習会を受講（1日・約1万円）",
+                "resolution": "食品衛生協会の養成講習会を受講し修了証を取得（約1万円）",
+                "source": "各都道府県の食品衛生協会",
+                "days_needed": "1日（講習）+ 予約待ち1〜2週間",
             },
             {
                 "name": "施設の平面図（厨房レイアウト）",
                 "required": True,
                 "point": "設備の配置・寸法を記載。手洗い設備の位置・2槽シンクの確認",
                 "ng_example": "縮尺不明・設備の省略、手洗い場の位置が不適切",
+                "resolution": "内装業者または設計士に平面図作成を依頼。保健所で事前相談推奨",
+                "source": "内装業者・設計士／保健所で事前相談",
+                "days_needed": "3〜7日",
             },
             {
                 "name": "水質検査成績書（井戸水使用の場合）",
                 "required": False,
                 "point": "水道水の場合は不要。井戸水・地下水を使用する場合は直近の検査結果",
                 "ng_example": "1年以上前の古い検査結果の使用",
+                "resolution": "登録検査機関に水質検査を依頼（検査費用約1〜3万円）",
+                "source": "登録水質検査機関",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "営業許可申請手数料（収入証紙/現金）",
                 "required": True,
                 "point": "都道府県により金額が異なる（例: 東京都 18,300円）。支払方法要確認",
                 "ng_example": "金額不足、収入証紙の貼付方法の誤り",
+                "resolution": "管轄保健所に金額・支払方法を確認のうえ準備",
+                "source": "管轄保健所窓口",
+                "days_needed": "即日",
             },
             {
                 "name": "建物の使用権限を証明する書類",
                 "required": True,
                 "point": "自己所有: 登記事項証明書。賃貸: 賃貸借契約書（飲食店可の記載確認）",
                 "ng_example": "賃貸借契約書に飲食店可の明記なし",
+                "resolution": "自己所有は法務局で登記事項証明書を取得。賃貸は契約書コピーを準備",
+                "source": "法務局／不動産管理会社",
+                "days_needed": "1〜5日",
             },
             {
                 "name": "法人の登記事項証明書（法人の場合）",
                 "required": False,
                 "point": "法人申請の場合のみ必要。発行後3ヶ月以内",
                 "ng_example": "個人事業主申請に法人書類を混同",
+                "resolution": "法務局で登記事項証明書を取得（オンライン申請可）、手数料¥600",
+                "source": "法務局（登記・供託オンラインシステム）",
+                "days_needed": "3〜5営業日",
             },
             {
                 "name": "既存施設の検査済証（リノベーションの場合）",
                 "required": False,
                 "point": "既存建物の改装の場合は建築確認済証等が必要になることがある",
                 "ng_example": "無確認で大規模改装後に申請",
+                "resolution": "建物所有者・管理会社から検査済証のコピーを入手",
+                "source": "建物所有者・管理会社／市区町村建築課",
+                "days_needed": "3〜7日",
             },
         ],
     },
@@ -159,60 +213,90 @@ CHECKLISTS = {
                 "required": True,
                 "point": "事業場単位で提出。本社・支店別に届出が必要。2部提出（控え受領）",
                 "ng_example": "本社のみ提出で支店分が漏れる",
+                "resolution": "厚生労働省HPから様式第9号をダウンロードし記入",
+                "source": "厚生労働省HP",
+                "days_needed": "1日",
             },
             {
                 "name": "就業規則本文",
                 "required": True,
                 "point": "絶対的必要記載事項（始業・終業時刻、休日、賃金等）の欠落がないか確認",
                 "ng_example": "育児・介護休業、ハラスメント防止規程の未整備",
+                "resolution": "社労士に作成・レビューを依頼。厚労省のモデル就業規則を参考に作成",
+                "source": "社労士／厚生労働省モデル就業規則",
+                "days_needed": "1〜3週間",
             },
             {
                 "name": "意見書（労働者代表の署名・押印付き）",
                 "required": True,
                 "point": "過半数労働組合または過半数代表者の意見書。同意でなく意見書でOK",
                 "ng_example": "代表者の選出方法が適切でない（挙手・互選でなく使用者指名）",
+                "resolution": "労働者代表を適正に選出し、就業規則案を提示のうえ意見書に署名押印を取得",
+                "source": "労働者代表（社内選出）",
+                "days_needed": "3〜7日",
             },
             {
                 "name": "労働者代表者の選出根拠書類",
                 "required": True,
                 "point": "代表者の選出方法・日時・氏名を記録。メール・投票の記録が望ましい",
                 "ng_example": "「管理職が代表者」は不可（法定違反）",
+                "resolution": "挙手・投票・メール回覧等で代表者を選出し、選出記録を書面化",
+                "source": "社内手続き（投票・メール記録等）",
+                "days_needed": "1〜3日",
             },
             {
                 "name": "別規程（育児・介護休業規程）",
                 "required": True,
                 "point": "育児介護休業法改正対応の内容か確認。2022年・2023年改正への対応",
                 "ng_example": "古いバージョンのまま提出（産後パパ育休未対応）",
+                "resolution": "最新の育児介護休業法に対応した規程を社労士に作成依頼",
+                "source": "社労士／厚生労働省の規程例",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "別規程（ハラスメント防止規程）",
                 "required": True,
                 "point": "パワハラ防止措置（指針対応）、セクハラ・マタハラ規定を含む",
                 "ng_example": "パワハラの定義が法律と乖離している",
+                "resolution": "厚生労働省指針に準拠したハラスメント防止規程を社労士に作成依頼",
+                "source": "社労士／厚生労働省ハラスメント防止指針",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "別規程（テレワーク・副業に関する規程）",
                 "required": False,
                 "point": "テレワーク実施・副業許可の場合は別規程または本規程への記載推奨",
                 "ng_example": "テレワーク実施中なのに労働時間管理の規定がない",
+                "resolution": "厚生労働省テレワークガイドラインを参考に規程を整備",
+                "source": "社労士／厚生労働省ガイドライン",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "賃金規程（賃金に関する別規程）",
                 "required": False,
                 "point": "本規程に賃金の詳細を定めず別規程とする場合は別途届出が必要",
                 "ng_example": "賃金規程を別規程にしたが未届出",
+                "resolution": "賃金テーブル・手当一覧を整理し、社労士に賃金規程作成を依頼",
+                "source": "社労士",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "36協定（時間外・休日労働協定）",
                 "required": False,
                 "point": "時間外労働がある場合は36協定も届出が必要（就業規則とセットで確認）",
                 "ng_example": "就業規則の時間外規定と36協定の上限が矛盾",
+                "resolution": "労働基準監督署へ36協定届を届出（費用無料）",
+                "source": "労働基準監督署",
+                "days_needed": "1〜2週間",
             },
             {
                 "name": "旧就業規則（変更届の場合）",
                 "required": False,
                 "point": "変更届の場合は変更前の就業規則の写しを添付（署の指示による）",
                 "ng_example": "変更届なのに旧版を添付しない",
+                "resolution": "現行の就業規則の写しを準備（社内保管分をコピー）",
+                "source": "自社保管書類",
+                "days_needed": "即日",
             },
         ],
     },
@@ -231,6 +315,9 @@ CHECKLISTS = {
                 "point": "事業所の所在地・名称・事業主氏名を正確に記載。法人番号の記入を忘れずに",
                 "ng_example": "法人番号の誤り、事業所名が登記と不一致",
                 "how_to_get": "日本年金機構HPからダウンロード。e-Gov電子申請でも提出可",
+                "resolution": "日本年金機構HPから様式をダウンロードし記入。e-Gov電子申請でも提出可",
+                "source": "日本年金機構HP／e-Gov",
+                "days_needed": "1日",
             },
             {
                 "name": "法人の登記事項証明書（原本）",
@@ -238,42 +325,63 @@ CHECKLISTS = {
                 "point": "発行後3ヶ月以内のもの。事業内容・所在地が申請書と一致しているか確認",
                 "ng_example": "本店移転後の旧住所で申請",
                 "how_to_get": "法務局（オンライン申請可: 登記・供託オンラインシステム）",
+                "resolution": "法務局で登記事項証明書を取得（オンライン申請可）、手数料¥600",
+                "source": "法務局（登記・供託オンラインシステム）",
+                "days_needed": "3〜5営業日",
             },
             {
                 "name": "被保険者資格取得届（従業員全員分）",
                 "required": True,
                 "point": "採用日・生年月日・基本給・報酬月額を正確に記入。マイナンバー記載",
                 "ng_example": "試用期間中の従業員を漏らす、報酬月額の計算誤り",
+                "resolution": "日本年金機構HPから様式をダウンロードし、従業員ごとに記入",
+                "source": "日本年金機構HP",
+                "days_needed": "1〜2日",
             },
             {
                 "name": "事業所の賃貸借契約書または登記事項証明書",
                 "required": True,
                 "point": "実態のある事業所があることを証明。自宅兼事務所の場合も必要",
                 "ng_example": "バーチャルオフィスのみで実態なしと判断される",
+                "resolution": "賃貸の場合は管理会社から契約書コピーを取得。自己所有は法務局で登記事項証明書を取得",
+                "source": "不動産管理会社／法務局",
+                "days_needed": "1〜5日",
             },
             {
                 "name": "労働保険関係成立届の控え（雇用保険適用事業所の場合）",
                 "required": False,
                 "point": "雇用保険の適用事業所である場合は、労働保険の成立届控えを添付",
                 "ng_example": "雇用保険を未手続きのまま社保のみ申請",
+                "resolution": "ハローワークで労働保険関係成立届を提出し、控えを取得",
+                "source": "ハローワーク（公共職業安定所）",
+                "days_needed": "1〜3日",
             },
             {
                 "name": "役員報酬を決めた議事録（役員の場合）",
                 "required": False,
                 "point": "役員の報酬月額の根拠として株主総会議事録・取締役会議事録が必要",
                 "ng_example": "議事録がなく役員報酬の根拠を証明できない",
+                "resolution": "株主総会または取締役会を開催し、役員報酬決議の議事録を作成",
+                "source": "自社作成（必要に応じ司法書士に依頼）",
+                "days_needed": "1〜3日",
             },
             {
                 "name": "賃金台帳・タイムカード等の写し",
                 "required": False,
                 "point": "求められる場合あり。報酬月額の根拠として使用。直近3ヶ月分が目安",
                 "ng_example": "給与明細だけでタイムカードがない",
+                "resolution": "直近3ヶ月分の賃金台帳・タイムカードを社内で整理しコピーを準備",
+                "source": "自社保管書類（給与計算システム等）",
+                "days_needed": "1〜2日",
             },
             {
                 "name": "マイナンバー収集同意書・本人確認書類",
                 "required": True,
                 "point": "従業員のマイナンバーを収集する際の同意書と本人確認（コピー）が必要",
                 "ng_example": "マイナンバーのみ提供でID確認書類がない",
+                "resolution": "従業員にマイナンバー通知カード+身分証のコピー提出を依頼。同意書を配布・回収",
+                "source": "従業員本人（社内回収）",
+                "days_needed": "3〜7日",
             },
         ],
     },
@@ -406,14 +514,26 @@ with tab1:
         required_ok = sum(1 for r in results if r["item"]["required"] and r["status"] == "✅ 済")
         completion_rate = (required_ok / required_total * 100) if required_total > 0 else 0
 
+        # 審査リスク判定
+        if completion_rate == 100:
+            risk_label = "🟢 低リスク"
+            risk_level = "low"
+        elif completion_rate >= 80:
+            risk_label = "🟡 中リスク"
+            risk_level = "medium"
+        else:
+            risk_label = "🔴 高リスク"
+            risk_level = "high"
+
         # KPIカード
-        kc1, kc2, kc3, kc4 = st.columns(4)
+        kc1, kc2, kc3, kc4, kc5 = st.columns(5)
         kc1.metric("必須項目 完了率", f"{completion_rate:.0f}%", f"{required_ok}/{required_total}件")
         kc2.metric("✅ 準備完了", f"{len(ok_items)}件")
         kc3.metric("❌ 未済（必須）", f"{len(ng_items)}件",
                    delta=f"-{len(ng_items)}" if ng_items else None,
                    delta_color="inverse")
         kc4.metric("➖ 該当なし", f"{len(na_items)}件")
+        kc5.metric("審査リスク", risk_label)
 
         # プログレスバー
         st.markdown(f'<div class="progress-label">必須書類 完了率: {completion_rate:.0f}%</div>', unsafe_allow_html=True)
@@ -426,14 +546,29 @@ with tab1:
         else:
             st.error(f"⚠️ 必須書類 {len(ng_items)}件 が未済です。申請前に必ずご対応ください。")
 
+        # 審査リスク補足
+        if risk_level == "low":
+            st.info("🟢 **審査リスク: 低** — 必須書類がすべて揃っています。高確率で審査を通過できる見込みです。")
+        elif risk_level == "medium":
+            st.warning("🟡 **審査リスク: 中** — 必須書類の大部分は揃っていますが、不備指摘を受ける可能性があります。未済書類を早急に準備してください。")
+        else:
+            st.error("🔴 **審査リスク: 高** — 必須書類の準備が不十分です。このまま申請すると審査不通過の可能性が高いため、未済書類の準備を優先してください。")
+
         # 不備リスト（必須）
         if ng_items:
             st.markdown("### ❌ 未済の必須書類（要対応）")
             for r in ng_items:
+                resolution = r["item"].get("resolution", "")
+                source = r["item"].get("source", "")
+                days = r["item"].get("days_needed", "")
+                resolution_html = f'<small>🛠️ 解決方法: {resolution}</small><br>' if resolution else ""
+                source_html = f'<small>📍 入手先: {source}</small><br>' if source else ""
+                days_html = f'<small>⏱️ 所要日数: {days}</small>' if days else ""
                 st.markdown(
                     f'<div class="check-item-ng">❌ <b>{r["item"]["name"]}</b><br>'
                     f'<small>📌 {r["item"]["point"]}</small><br>'
-                    f'<small>⚠️ よくある不備: {r["item"]["ng_example"]}</small></div>',
+                    f'<small>⚠️ よくある不備: {r["item"]["ng_example"]}</small><br>'
+                    f'{resolution_html}{source_html}{days_html}</div>',
                     unsafe_allow_html=True
                 )
 
@@ -441,9 +576,16 @@ with tab1:
         if ng_optional:
             st.markdown("### ⚠️ 未済の任意書類（状況により必要）")
             for r in ng_optional:
+                resolution = r["item"].get("resolution", "")
+                source = r["item"].get("source", "")
+                days = r["item"].get("days_needed", "")
+                resolution_html = f'<small>🛠️ 解決方法: {resolution}</small><br>' if resolution else ""
+                source_html = f'<small>📍 入手先: {source}</small><br>' if source else ""
+                days_html = f'<small>⏱️ 所要日数: {days}</small>' if days else ""
                 st.markdown(
                     f'<div class="check-item-ng">❌ <b>{r["item"]["name"]}</b>【任意】<br>'
-                    f'<small>📌 {r["item"]["point"]}</small></div>',
+                    f'<small>📌 {r["item"]["point"]}</small><br>'
+                    f'{resolution_html}{source_html}{days_html}</div>',
                     unsafe_allow_html=True
                 )
 
