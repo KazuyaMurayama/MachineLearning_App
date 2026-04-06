@@ -498,6 +498,152 @@ with tab2:
     mc4.metric("制約による影響", f"¥{diff_uc:,.0f}",
                f"現在比 {diff_pct:+.1f}%")
 
+    # ------------------------------------------------------------------
+    # 予算移動シミュレーター
+    # ------------------------------------------------------------------
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.markdown("### 🔀 予算移動シミュレーター")
+    st.info("💡 「Google広告から¥50万をMeta広告に移したらROASはどう変わる？」をリアルタイムで試算します。")
+
+    # 移動元・移動先の選択
+    sim_channels = monthly_avg["チャネル"].tolist()
+    mv_col1, mv_col2 = st.columns(2)
+    with mv_col1:
+        move_from = st.selectbox("予算移動元チャネル", sim_channels, key="move_from")
+    with mv_col2:
+        move_to_options = [ch for ch in sim_channels if ch != move_from]
+        move_to = st.selectbox("予算移動先チャネル", move_to_options, key="move_to")
+
+    # 移動元の現在予算を取得
+    from_budget_row = monthly_avg[monthly_avg["チャネル"] == move_from]
+    from_current_budget = int(from_budget_row["現在予算"].values[0]) if len(from_budget_row) > 0 else 0
+
+    # 移動額スライダー（¥0〜移動元の現在予算）
+    move_amount = st.slider(
+        "移動額（円）",
+        min_value=0,
+        max_value=max(from_current_budget, 1),
+        value=min(100000, max(from_current_budget, 1)),
+        step=10000,
+        format="¥%d",
+        key="move_amount"
+    )
+
+    # 移動後の各チャネル予算・期待売上を計算
+    move_result_rows = []
+    total_before_sales = 0.0
+    total_after_sales = 0.0
+
+    for _, row in monthly_avg.iterrows():
+        ch = row["チャネル"]
+        current_bgt = int(row["現在予算"])
+        roas_val = float(row["ROAS"])
+
+        if ch == move_from:
+            after_bgt = current_bgt - move_amount
+        elif ch == move_to:
+            after_bgt = current_bgt + move_amount
+        else:
+            after_bgt = current_bgt
+
+        current_sales = current_bgt * roas_val
+        after_sales = after_bgt * roas_val
+        diff_sales = after_sales - current_sales
+
+        total_before_sales += current_sales
+        total_after_sales += after_sales
+
+        move_result_rows.append({
+            "チャネル": ch,
+            "現在予算": current_bgt,
+            "移動後予算": after_bgt,
+            "現在期待売上": int(current_sales),
+            "移動後期待売上": int(after_sales),
+            "差分": int(diff_sales),
+        })
+
+    move_result_df = pd.DataFrame(move_result_rows)
+    total_effect = total_after_sales - total_before_sales
+    total_effect_man = total_effect / 10000  # 万円単位
+
+    # 合計効果メトリクス表示
+    effect_sign = "+" if total_effect >= 0 else ""
+    st.metric(
+        label="💰 移動効果（月間期待売上変動）",
+        value=f"¥{total_effect:+,.0f}",
+        delta=f"{effect_sign}{total_effect_man:.1f}万円/月"
+    )
+
+    # 効果別メッセージ
+    threshold = total_before_sales * 0.005  # 0.5%を「軽微」の閾値
+    if total_effect > threshold:
+        st.success(f"この予算移動で月+¥{int(total_effect):,}（+{total_effect_man:.1f}万円）の売上増が期待できます")
+    elif total_effect < -threshold:
+        st.warning(f"この移動は売上減（月¥{int(abs(total_effect)):,} / {total_effect_man:.1f}万円）につながります。現状維持を推奨")
+    else:
+        st.info("売上への影響は軽微です（±0.5%以内）")
+
+    # Before/After 比較テーブル
+    st.markdown("#### Before / After 比較")
+    display_move = move_result_df.copy()
+    display_move["現在予算"] = display_move["現在予算"].apply(lambda x: f"¥{x:,.0f}")
+    display_move["移動後予算"] = display_move["移動後予算"].apply(lambda x: f"¥{x:,.0f}")
+    display_move["現在期待売上"] = display_move["現在期待売上"].apply(lambda x: f"¥{x:,.0f}")
+    display_move["移動後期待売上"] = display_move["移動後期待売上"].apply(lambda x: f"¥{x:,.0f}")
+    display_move["差分"] = display_move["差分"].apply(lambda x: f"+¥{x:,.0f}" if x >= 0 else f"-¥{abs(x):,.0f}")
+    st.dataframe(display_move, use_container_width=True, hide_index=True)
+
+    # ------------------------------------------------------------------
+    # ワンクリック最適移動提案
+    # ------------------------------------------------------------------
+    st.markdown("#### 💡 ワンクリック最適移動提案")
+    st.caption("全チャネルペアの移動パターン（現在予算の10%刻み）を試算し、最も効果的な移動を自動提案します。")
+
+    best_effect = 0.0
+    best_from = None
+    best_to = None
+    best_amount = 0
+
+    for i, from_row in monthly_avg.iterrows():
+        from_ch = from_row["チャネル"]
+        from_bgt = int(from_row["現在予算"])
+        from_roas = float(from_row["ROAS"])
+
+        if from_bgt <= 0:
+            continue
+
+        for j, to_row in monthly_avg.iterrows():
+            to_ch = to_row["チャネル"]
+            if from_ch == to_ch:
+                continue
+            to_roas = float(to_row["ROAS"])
+
+            # ROASが移動先の方が高い場合のみ効果あり
+            roas_diff = to_roas - from_roas
+
+            # 試算: 移動先ROASが高いほど効果が高い。
+            # 最大移動額 = 移動元現在予算 の範囲で10%刻みで試算
+            for pct in range(10, 110, 10):
+                trial_amount = int(from_bgt * pct / 100)
+                if trial_amount > from_bgt:
+                    trial_amount = from_bgt
+                effect = trial_amount * roas_diff  # 移動額 × ROAS差 = 売上変動
+                if effect > best_effect:
+                    best_effect = effect
+                    best_from = from_ch
+                    best_to = to_ch
+                    best_amount = trial_amount
+
+    if best_from and best_to and best_effect > 0:
+        best_amount_man = best_amount / 10000
+        best_effect_man = best_effect / 10000
+        st.success(
+            f"💡 最適提案: **{best_from}** → **{best_to}** に ¥{best_amount:,}（{best_amount_man:.0f}万円）移動で "
+            f"月 **+¥{int(best_effect):,}（+{best_effect_man:.1f}万円）** の改善が期待できます"
+        )
+    else:
+        st.info("現在のROAS構成では、予算移動による有意な改善余地はありません")
+
 # ------------------------------------------------------------------
 # タブ3: トレンド分析
 # ------------------------------------------------------------------
