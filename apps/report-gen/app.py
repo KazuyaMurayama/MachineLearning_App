@@ -508,6 +508,14 @@ if st.session_state.df_cur is not None:
 else:
     st.info("サイドバーから試算表CSVをアップロードしてください。\n\nデモデータが自動で読み込まれている場合は、そのままご利用いただけます。")
 
+# 定期運用チェックリスト
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 📋 定期運用チェックリスト")
+with st.expander("週次チェック"):
+    st.markdown("- □ 異常値アラートの確認\n- □ 利益率トレンドの確認")
+with st.expander("月次チェック"):
+    st.markdown("- □ 月次レポート生成・顧問先配布\n- □ 前年同月比の変化要因を顧問先と共有")
+
 # フッター: 関連ツールカード（3列）
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")

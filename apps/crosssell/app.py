@@ -559,6 +559,16 @@ with tab4:
     st.dataframe(df[disp_cols], use_container_width=True, hide_index=True)
 
 # ============================================================
+# 定期運用チェックリスト
+# ============================================================
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 📋 定期運用チェックリスト")
+with st.expander("週次チェック"):
+    st.markdown("- □ 最優先提案先への面談準備\n- □ トークスクリプトの確認")
+with st.expander("月次チェック"):
+    st.markdown("- □ 提案実績の振り返り\n- □ 新規クロスセル機会の分析更新")
+
+# ============================================================
 # 相互リンク
 # ============================================================
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)

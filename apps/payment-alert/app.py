@@ -545,6 +545,14 @@ with tab3:
                     key=f"dl_{s}"
                 )
 
+# === 定期運用チェックリスト ===
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+st.markdown("### 📋 定期運用チェックリスト")
+with st.expander("週次チェック"):
+    st.markdown("- □ 遅延一覧の確認・催促実施\n- □ 常習遅延先の対応状況確認")
+with st.expander("月次チェック"):
+    st.markdown("- □ 遅延パターン分析の更新\n- □ 機会損失額の累計確認")
+
 # === 関連ツールカード（3列） ===
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
