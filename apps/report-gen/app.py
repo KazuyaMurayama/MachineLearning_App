@@ -323,8 +323,17 @@ st.sidebar.markdown("---")
 client_name=st.sidebar.text_input("顧問先名",value=st.session_state.client_name)
 st.session_state.client_name=client_name
 st.sidebar.markdown("---")
+
+# === キャッシュフロー推計パラメータ ===
+st.sidebar.subheader("💰 CF推計パラメータ")
+st.sidebar.caption("減価償却費は試算表外のため推定値を使用")
+dep_rate=st.sidebar.slider("減価償却費（売上高比率 %）",min_value=0.0,max_value=15.0,value=3.0,step=0.5,
+    help="試算表に減価償却費がない場合、売上高の一定割合で推定します")
+wc_rate=st.sidebar.slider("運転資金増加率（売上増加分の割合 %）",min_value=0.0,max_value=50.0,value=20.0,step=5.0,
+    help="売上が増えた月は運転資金（売掛金・在庫等）も増加するとして控除します")
+st.sidebar.markdown("---")
 st.sidebar.caption("AI経営パートナー × データサイエンス")
-st.sidebar.caption("月次レポート自動生成 v1.1")
+st.sidebar.caption("月次レポート自動生成 v1.2")
 
 # === Main: Hero Section ===
 st.markdown("""
@@ -399,6 +408,49 @@ if st.session_state.df_cur is not None:
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+    # === キャッシュフロー簡易推計（間接法）===
+    def calc_monthly_cf(df, dep_rate_pct, wc_rate_pct):
+        """月次営業CF簡易推計（間接法）を計算して返す"""
+        cf_rows=[]
+        sales_col="売上高"; profit_col="経常利益"
+        if sales_col not in df.columns or profit_col not in df.columns:
+            return None
+        for i in range(len(df)):
+            row_i=df.iloc[i]
+            try:
+                profit=float(row_i[profit_col])
+                sales=float(row_i[sales_col])
+            except: continue
+            dep=sales*(dep_rate_pct/100.0)  # 減価償却費推定
+            if i>0:
+                try:
+                    prev_sales=float(df.iloc[i-1][sales_col])
+                    sales_diff=sales-prev_sales
+                    wc_change=max(sales_diff,0)*(wc_rate_pct/100.0)  # 売上増加時のみ運転資金増
+                except:
+                    wc_change=0.0
+            else:
+                wc_change=0.0
+            op_cf=profit+dep-wc_change
+            cf_rows.append({"年月":row_i.get("年月","") if "年月" in df.columns else str(i),
+                "経常利益":profit,"減価償却費(推定)":dep,"運転資金増加":wc_change,"営業CF":op_cf})
+        if not cf_rows: return None
+        return pd.DataFrame(cf_rows)
+
+    cf_df=calc_monthly_cf(df_cur, dep_rate, wc_rate)
+
+    # 資金繰りアラート（KPI直下）
+    if cf_df is not None and len(cf_df)>=1:
+        recent=cf_df["営業CF"].tolist()
+        last3=recent[-3:] if len(recent)>=3 else recent
+        last2=recent[-2:] if len(recent)>=2 else recent
+        if sum(last3)<0:
+            st.error("⚠️ 直近3ヶ月の営業CFがマイナスです。資金繰りの確認を推奨します")
+        elif len(last2)==2 and last2[-1]<0 and last2[-2]<0:
+            st.warning("営業CFが2ヶ月連続マイナス。売掛金回収の加速を検討してください")
+        else:
+            st.info("営業CFは安定しています")
+
     # 分析実行（選択月ベース）
     df_cur_to=df_cur.iloc[:sel_idx+1]
     mom=calc_mom(df_cur_to)
@@ -437,7 +489,7 @@ if st.session_state.df_cur is not None:
             st.info(insight_msg)
 
     # タブ
-    tab1,tab2,tab3,tab4=st.tabs(["📋 レポートプレビュー","📈 月次推移グラフ","⚠️ 異常値アラート","📊 データプレビュー"])
+    tab1,tab2,tab3,tab4,tab5=st.tabs(["📋 レポートプレビュー","📈 月次推移グラフ","⚠️ 異常値アラート","📊 データプレビュー","💰 キャッシュフロー推計"])
 
     with tab1:
         st.markdown(report_md)
@@ -505,6 +557,90 @@ if st.session_state.df_cur is not None:
             prev_csv=df_prev.to_csv(index=False).encode("utf-8-sig")
             st.download_button("📥 前期データをCSVダウンロード",prev_csv,
                 "前期データ.csv","text/csv",use_container_width=True,key="dl_prev")
+
+    with tab5:
+        st.header("💰 キャッシュフロー推計（簡易・間接法）")
+        st.markdown(f"""
+**推計式**: 営業CF ≈ 経常利益 ＋ 減価償却費（売上高の **{dep_rate:.1f}%** で推定）－ 運転資金増加（売上増加分の **{wc_rate:.0f}%**）
+
+> 減価償却費は試算表外のため推定値です。サイドバーで実績値に近い比率に調整してください。
+""")
+        if cf_df is None:
+            st.warning("キャッシュフローの推計には「売上高」「経常利益」列が必要です。")
+        else:
+            # --- グラフ描画 ---
+            setup_japanese_font()
+            months_cf=cf_df["年月"].tolist()
+            cf_vals=cf_df["営業CF"].values.astype(float)
+            cum_cf=np.cumsum(cf_vals)
+
+            fig,ax1=plt.subplots(figsize=(11,4.5))
+            # 棒グラフ: 月次CF（マイナスは赤、プラスは青）
+            bar_colors=["#dc2626" if v<0 else "#2563EB" for v in cf_vals]
+            bars=ax1.bar(range(len(months_cf)),cf_vals,color=bar_colors,alpha=0.8,label="月次営業CF")
+            ax1.axhline(0,color="#64748b",linewidth=1.0,linestyle="--")
+            ax1.set_ylabel("月次営業CF（万円）",color="#1e293b")
+            ax1.set_xticks(range(len(months_cf)))
+            ax1.set_xticklabels([m[-3:] if isinstance(m,str) and len(m)>=3 else str(m) for m in months_cf],fontsize=9)
+            ax1.set_title("月次営業CF推移（棒）＋累積CF（折れ線）",fontsize=13,fontweight="bold")
+            ax1.grid(axis="y",alpha=0.3,linestyle="--"); ax1.set_axisbelow(True)
+            # 折れ線: 累積CF（第2軸）
+            ax2=ax1.twinx()
+            ax2.plot(range(len(months_cf)),cum_cf,color="#f97316",linewidth=2.5,
+                marker="o",markersize=6,label="累積CF",zorder=5)
+            ax2.set_ylabel("累積営業CF（万円）",color="#f97316")
+            ax2.tick_params(axis="y",colors="#f97316")
+            # 凡例統合
+            lines1,labels1=ax1.get_legend_handles_labels()
+            lines2,labels2=ax2.get_legend_handles_labels()
+            ax1.legend(lines1+lines2,labels1+labels2,loc="upper left",framealpha=0.9)
+            plt.tight_layout()
+            st.pyplot(fig); plt.close(fig)
+
+            # --- 月次CF一覧テーブル ---
+            st.subheader("月次CF明細")
+            cf_disp=cf_df.copy()
+            for c in ["経常利益","減価償却費(推定)","運転資金増加","営業CF"]:
+                if c in cf_disp.columns:
+                    cf_disp[c]=cf_disp[c].apply(lambda x: f"{float(x):,.0f}万円")
+            st.dataframe(cf_disp,use_container_width=True,hide_index=True)
+
+            # --- 顧問先向けアドバイス ---
+            st.subheader("顧問先向けアドバイス")
+            recent_cf=cf_df["営業CF"].tolist()
+            last3_cf=recent_cf[-3:] if len(recent_cf)>=3 else recent_cf
+            last2_cf=recent_cf[-2:] if len(recent_cf)>=2 else recent_cf
+            latest_cf=recent_cf[-1] if recent_cf else 0.0
+
+            if sum(last3_cf)<0 or latest_cf<0:
+                # CF赤字
+                st.error("**【緊急対応推奨】CF赤字局面**")
+                st.markdown("""
+- 融資検討（運転資金融資・当座貸越枠の活用）を推奨
+- 売掛金のファクタリング等による即時資金化を検討
+- 仕入・固定費の緊急見直しを実施してください
+""")
+            elif len(last2_cf)==2 and last2_cf[-1]<0 and last2_cf[-2]<0:
+                # CF悪化
+                st.warning("**【CF悪化注意】資金繰り改善策の検討を推奨**")
+                st.markdown("""
+- 売掛金サイトの短縮（早期入金割引の導入等）を検討
+- 仕入れ条件の見直し（支払サイト延長交渉）を検討
+- 在庫水準の適正化で運転資金負担を軽減してください
+""")
+            else:
+                # CF好調
+                st.success("**【CF好調】余剰資金の有効活用を検討**")
+                st.markdown("""
+- 余剰資金の運用検討（定期預金・NISA等）を推奨
+- 設備投資・DX化への積極投資タイミングです
+- 内部留保を積み上げ、次の景気後退への備えを検討してください
+""")
+
+            # CF CSVダウンロード
+            cf_csv=cf_df.to_csv(index=False).encode("utf-8-sig")
+            st.download_button("📥 CF推計データをCSVダウンロード",cf_csv,
+                f"CF推計_{report_month}.csv","text/csv",use_container_width=True,key="dl_cf")
 else:
     st.info("サイドバーから試算表CSVをアップロードしてください。\n\nデモデータが自動で読み込まれている場合は、そのままご利用いただけます。")
 
