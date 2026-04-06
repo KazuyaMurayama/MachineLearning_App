@@ -188,10 +188,11 @@ for col, label, value in [
     </div>
     """, unsafe_allow_html=True)
 
-# 冒頭アラート: 最も危険なチャネル or 全チャネル黒字
+# 冒頭アラート: 問題チャネル全件 or 全チャネル黒字
 if _danger_channels:
-    worst = max(_danger_channels, key=lambda x: abs(x["loss"]))
-    st.warning(f"⚡ {worst['name']} ROAS {worst['roas']:.1f}x — 月¥{abs(worst['loss']):,}の赤字。減額を推奨します")
+    _sorted_danger = sorted(_danger_channels, key=lambda x: x["roas"])
+    _alert_parts = [f"🔴 {c['name']}: ROAS {c['roas']:.1f}x, 月¥{abs(c['loss']):,}赤字" if c["roas"] < 1.0 else f"🟡 {c['name']}: ROAS {c['roas']:.1f}x, 要注意" for c in _sorted_danger]
+    st.warning("⚡ 減額推奨チャネル — " + " / ".join(_alert_parts))
 else:
     st.success("✅ 全チャネル黒字。現状維持で問題ありません")
 
@@ -643,6 +644,7 @@ with tab2:
         )
     else:
         st.info("現在のROAS構成では、予算移動による有意な改善余地はありません")
+    st.caption("※ ROASは過去実績の平均値を使用。季節変動・予算規模による収穫逓減は考慮外です。")
 
 # ------------------------------------------------------------------
 # タブ3: トレンド分析
