@@ -55,6 +55,13 @@ st.markdown("""
 .tag-recommend { background: #FEF3C7; color: #92400E; }
 .tag-efficiency { background: #DBEAFE; color: #1E40AF; }
 .tag-compliance { background: #F3E8FF; color: #6B21A8; }
+.tag-l3 { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+.l3-section-banner {
+    background: linear-gradient(135deg, #1e3a5f 0%, #7C3AED 100%);
+    color: white; padding: 1rem 1.5rem; border-radius: 12px;
+    margin-bottom: 1rem; font-size: 0.9rem;
+}
+.l3-section-banner strong { font-size: 1rem; }
 .section-divider { border: none; height: 2px; background: linear-gradient(to right, #2563EB, #e2e8f0); margin: 2rem 0; }
 .benefit-box {
     background: #F0F9FF;
@@ -74,21 +81,26 @@ with st.sidebar:
     st.markdown("## 🏛️ 士業AI経営パートナー")
     st.markdown("税理士・社労士・行政書士 専用")
     st.markdown("---")
-    st.markdown("### 📋 ツール一覧（8アプリ）")
+    st.markdown("### 📋 ツール一覧（11アプリ）")
     st.markdown("""
-**経営分析・予測**
-1. 🏢 顧問先離反予測
-2. 🌐 サービスLP+AI経営診断
-3. 🔄 クロスセル分析
+**🚀 L3 AI経営パートナー（月額30万円）**
+1. 🏛️ 事務所経営ダッシュボード
+2. 💎 顧問先LTV予測+不採算フラグ
+3. 📋 月次AIブリーフィング
+
+**経営分析・予測（L1/L2）**
+4. 🏢 顧問先離反予測
+5. 🌐 サービスLP+AI経営診断
+6. 🔄 クロスセル分析
 
 **業務効率化**
-4. 📊 月次レポート自動生成
-5. 📝 契約書ドラフトAI
-6. 💰 入金遅延アラート
+7. 📊 月次レポート自動生成
+8. 📝 契約書ドラフトAI
+9. 💰 入金遅延アラート
 
 **コンプライアンス**
-7. 🛡️ 安心パッケージ
-8. 📋 申請書類チェッカー
+10. 🛡️ 安心パッケージ
+11. 📋 申請書類チェッカー
 """)
     st.markdown("---")
     st.markdown("### 💡 このツールの対象者")
@@ -105,7 +117,7 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-section">
 <h1>🏛️ 士業AI経営パートナー</h1>
-<p>税理士・社労士・行政書士の業務を<br>AIで変革する 8つの専用ツール</p>
+<p>税理士・社労士・行政書士の業務を<br>AIで変革する 11の専用ツール</p>
 <div class="hero-sub">顧問先の離反予測から契約書作成、月次レポートまでワンストップ</div>
 </div>
 """, unsafe_allow_html=True)
@@ -113,7 +125,7 @@ st.markdown("""
 # === 導入効果 KPI ===
 k1, k2, k3, k4 = st.columns(4)
 with k1:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">8</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">11</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
 with k2:
     st.markdown('<div class="kpi-card"><div class="kpi-value">80%</div><div class="kpi-label">業務時間削減</div></div>', unsafe_allow_html=True)
 with k3:
@@ -146,6 +158,9 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # === アプリURL定義 ===
 APP_URLS = {
+    "shigyou-office-dashboard": "https://shigyou-office-dashboard.streamlit.app",
+    "shigyou-ltv": "https://shigyou-ltv.streamlit.app",
+    "shigyou-briefing": "https://shigyou-briefing.streamlit.app",
     "shigyou-demo": "https://shigyou-churn.streamlit.app",
     "service-lp": "https://shigyou-service-lp.streamlit.app",
     "crosssell": "https://shigyou-crosssell.streamlit.app",
@@ -158,6 +173,11 @@ APP_URLS = {
 
 # === アプリカード定義 ===
 APPS = {
+    "🚀 L3 AI経営パートナー（月額30万円）": [
+        {"icon": "🏛️", "name": "事務所経営ダッシュボード", "desc": "8アプリのデータを1画面に集約。全顧問先の離反リスク・入金状況・クロスセル機会を俯瞰し、月次コンサル資料を5分で出力。", "dir": "shigyou-office-dashboard", "effect": "月次経営会議の資料が5分で完成", "tag": "L3新機能", "tag_class": "tag-recommend"},
+        {"icon": "💎", "name": "顧問先LTV予測+不採算フラグ", "desc": "LightGBM+SHAPで顧問先1社ごとの5年間LTVを予測。VIP/成長/不採算クラスタに自動分類し、改善アクションを提示。", "dir": "shigyou-ltv", "effect": "不採算先特定→利益率5%改善", "tag": "L3新機能", "tag_class": "tag-recommend"},
+        {"icon": "📋", "name": "月次AIブリーフィング", "desc": "離反リスクTOP5・入金遅延対応・クロスセル機会・翌月アクションを自動生成。月額30万円のコンサル価値を可視化。", "dir": "shigyou-briefing", "effect": "30分→5分で月次経営レポート完成", "tag": "L3新機能", "tag_class": "tag-recommend"},
+    ],
     "📊 経営分析・予測": [
         {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反率15%→5%に改善", "tag": "おすすめ", "tag_class": "tag-recommend"},
         {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "effect": "成約率30%向上", "tag": "おすすめ", "tag_class": "tag-recommend"},
@@ -194,6 +214,10 @@ def render_cards(apps, cols=3):
 # === カテゴリ別表示 ===
 for category, apps in APPS.items():
     st.markdown(f"### {category}")
+    if "L3" in category:
+        st.markdown("""<div class="l3-section-banner">
+<strong>🚀 L3 AI経営パートナー</strong> — データサイエンティスト採用（月50〜100万円）より安く、船井総研コンサル（月20〜50万円）と同等の経営改善価値を提供します。
+</div>""", unsafe_allow_html=True)
     cols = min(len(apps), 3)
     render_cards(apps, cols=cols)
     st.markdown("")
@@ -213,4 +237,4 @@ with s3:
 
 # Footer
 st.markdown("---")
-st.caption("士業AI経営パートナー × データサイエンス | v2.0")
+st.caption("士業AI経営パートナー × データサイエンス | v3.0 — L3（月額30万円）プラン対応")
