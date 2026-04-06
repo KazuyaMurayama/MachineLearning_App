@@ -5,7 +5,78 @@
 フォームに事務所情報を入力するだけで、業種に応じた契約書ドラフトを生成
 """
 import streamlit as st
+import re
 from datetime import date,timedelta
+
+
+def _extract_number(text:str)->int|None:
+    """フリーテキストから数値を抽出する（カンマ・円記号・全角数字対応）"""
+    if not text:
+        return None
+    # 全角数字→半角
+    t=text.translate(str.maketrans('０１２３４５６７８９','0123456789'))
+    t=t.replace('¥','').replace('￥','').replace('円','').replace(',','').replace('、','').replace(' ','')
+    m=re.search(r'(\d+)',t)
+    return int(m.group(1)) if m else None
+
+
+# === 条項解説データ ===
+CLAUSE_NOTES={
+"税理士":{
+    "第1条":{
+        "title":"委託業務の範囲のポイント",
+        "body":"記帳代行・給与計算を含める場合は追加業務欄に明記しましょう。業務範囲の曖昧さはトラブルの原因になります。",
+    },
+    "第2条":{
+        "title":"顧問料のポイント",
+        "body":"月額顧問料の目安: 同業種平均 ¥30,000〜¥80,000。決算料は月額の4〜6ヶ月分が相場です。年商規模・仕訳数で調整してください。",
+    },
+    "第5条":{
+        "title":"守秘義務のポイント",
+        "body":"AI処理を行う場合は「安心パッケージ」のAI処理同意書も必須です。クラウド会計連携時のデータ取扱いルールも別途定めることを推奨します。",
+    },
+    "第7条":{
+        "title":"解約条項のポイント",
+        "body":"1ヶ月前通知は最低基準です。決算期直前の解約トラブル防止には2ヶ月前通知を推奨します。引継ぎ期間の確保も重要です。",
+    },
+},
+"社労士":{
+    "第1条":{
+        "title":"委託業務の範囲のポイント",
+        "body":"就業規則の作成・改定や助成金申請は別料金になることが多いです。対象業務を明確にしておきましょう。",
+    },
+    "第2条":{
+        "title":"顧問料のポイント",
+        "body":"社労士の月額顧問料の目安: 従業員10名以下 ¥20,000〜¥40,000、30名以下 ¥40,000〜¥60,000。従業員数に応じた料金テーブルの別紙添付を推奨します。",
+    },
+    "第5条":{
+        "title":"守秘義務・個人情報のポイント",
+        "body":"従業員の個人情報（マイナンバー含む）を扱うため、個人情報保護法に加え番号法の遵守も必要です。AI処理時は匿名化が必須です。",
+    },
+    "第6条":{
+        "title":"解約条項のポイント",
+        "body":"1ヶ月前通知は最低基準。社会保険手続き中の解約は従業員に不利益が生じる可能性があるため、手続き完了までの引継ぎ義務を明記することを推奨します。",
+    },
+},
+"行政書士":{
+    "第1条":{
+        "title":"委託業務の内容のポイント",
+        "body":"許認可申請の場合、申請先の行政機関名・許可の種類を具体的に記載しましょう。業務範囲の明確化がトラブル防止の鍵です。",
+    },
+    "第2条":{
+        "title":"報酬のポイント",
+        "body":"着手金50%は一般的な水準です。建設業許可: ¥100,000〜¥200,000、会社設立: ¥80,000〜¥150,000 が相場の目安です。実費（印紙代等）は別途必要です。",
+    },
+    "第5条":{
+        "title":"守秘義務のポイント",
+        "body":"行政書士法第12条で守秘義務が法定されています。AI処理を行う場合は匿名化処理に加え、依頼者の同意取得が必須です。",
+    },
+    "第7条":{
+        "title":"解約条項のポイント",
+        "body":"業務着手後の解約は進捗に応じた報酬精算が必要です。着手前解約の場合でも着手金は返還されない点を依頼者に事前説明しておきましょう。",
+    },
+},
+}
 
 # === テンプレート定数 ===
 TEMPLATES={
@@ -224,9 +295,9 @@ with eff1:
 </div>""",unsafe_allow_html=True)
 with eff2:
     st.markdown("""<div class="effect-box">
-<div class="effect-title">弁護士依頼費</div>
-<div class="effect-value">¥50,000〜¥150,000 → ¥0</div>
-<div class="effect-detail">自動生成で不要に</div>
+<div class="effect-title">契約書作成コスト</div>
+<div class="effect-value">¥50,000〜¥150,000 → 大幅削減</div>
+<div class="effect-detail">テンプレート自動生成で作成コスト削減</div>
 </div>""",unsafe_allow_html=True)
 with eff3:
     st.markdown("""<div class="effect-box">
@@ -361,7 +432,47 @@ if submitted:
     rendered=tmpl["template"].format(**params)
     st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
     st.markdown("## 📄 生成された契約書ドラフト")
+
+    # --- 契約総額の自動試算（税理士・社労士のみ） ---
+    if biz in ["税理士","社労士"]:
+        fee_num=_extract_number(monthly_fee)
+        years=int(duration[0])
+        months=years*12
+        if fee_num is not None:
+            settle_num=None
+            if biz=="税理士":
+                settle_num=_extract_number(settlement_fee)
+            annual_fee=fee_num*months
+            if settle_num is not None:
+                total_est=annual_fee+settle_num*years
+            else:
+                total_est=annual_fee
+            tax_amount=int(total_est*0.10)
+            total_with_tax=total_est+tax_amount
+            st.markdown("### 💰 契約総額の自動試算")
+            mc1,mc2,mc3=st.columns(3)
+            mc1.metric("月額顧問料 × 期間（税別）",f"¥{annual_fee:,}")
+            if biz=="税理士" and settle_num is not None:
+                mc2.metric(f"決算料 × {years}年分（税別）",f"¥{settle_num*years:,}")
+            else:
+                mc2.metric("決算料（税別）","別途見積り")
+            mc3.metric("契約総額（税込）",f"¥{total_with_tax:,}",f"うち消費税 ¥{tax_amount:,}")
+            st.caption(f"※ 月額 ¥{fee_num:,} × {months}ヶ月"
+                       + (f" + 決算料 ¥{settle_num:,} × {years}年" if settle_num else "")
+                       + f" + 消費税10% で算出")
+            st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
+
     st.markdown(rendered)
+
+    # --- 各条項の解説・リスク注記 ---
+    notes=CLAUSE_NOTES.get(biz,{})
+    if notes:
+        st.markdown("### 📖 各条項の解説・リスク注記")
+        for clause_key in sorted(notes.keys(),key=lambda x:int(re.search(r'\d+',x).group())):
+            note=notes[clause_key]
+            with st.expander(f"{clause_key} — {note['title']}"):
+                st.markdown(note["body"])
+
     st.download_button(f"📥 {tmpl['title']}をダウンロード",rendered,
         f"{tmpl['title']}.md","text/markdown",use_container_width=True)
     st.info("💡 このドラフトは雛形です。実際の契約締結前に、必ず内容をご確認ください。")
