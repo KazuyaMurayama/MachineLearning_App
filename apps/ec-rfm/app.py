@@ -52,7 +52,7 @@ st.markdown("""
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .kpi-value {
-    font-size: 2rem;
+    font-size: 2.4rem;
     font-weight: 700;
     color: #8B5CF6;
 }
@@ -142,11 +142,14 @@ if not st.session_state.loaded:
 st.markdown("""
 <div class="hero-section">
     <div class="hero-title">🎯 顧客RFM分析＋セグメンテーション</div>
-    <div class="hero-sub">Recency・Frequency・Monetary の3指標で顧客を自動セグメント分類</div>
+    <div class="hero-sub">購買データからVIP・休眠・離脱を自動分類。施策の期待売上までAIが試算。</div>
 </div>
 """, unsafe_allow_html=True)
 
-st.info("💡 **導入効果**: 顧客セグメント分析の工数を **4時間→5分** に短縮（年間¥200万相当）")
+_c1, _c2, _c3 = st.columns(3)
+_c1.markdown('<div class="kpi-card"><div class="kpi-value">4h</div><div class="kpi-label">⏳ Before: 顧客分析に月4時間</div></div>', unsafe_allow_html=True)
+_c2.markdown('<div class="kpi-card"><div class="kpi-value">5分</div><div class="kpi-label">⚡ After: 全顧客をセグメント分類</div></div>', unsafe_allow_html=True)
+_c3.markdown('<div class="kpi-card"><div class="kpi-value">+¥200万</div><div class="kpi-label">💰 年間効果: LTV最大化で増収</div></div>', unsafe_allow_html=True)
 
 if not st.session_state.loaded or st.session_state.df is None:
     st.warning("サイドバーからCSVをアップロードしてください。")
