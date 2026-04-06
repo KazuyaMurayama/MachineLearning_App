@@ -271,6 +271,15 @@ kc2.metric("💰 推定年間増収額（合計）", f"¥{total_annual:,.0f}")
 kc3.metric("📊 平均推奨サービス数", f"{avg_recs:.1f}件/顧問先")
 kc4.metric("💵 平均提案単価", f"¥{avg_unit_price:,.0f}/月")
 
+# 冒頭インサイト: クロスセル最優先顧問先
+if len(rec_df) > 0:
+    _top = rec_df.sort_values("推定年間増収額", ascending=False).iloc[0]
+    st.markdown(
+        f"⚡ **クロスセル最優先: {_top['顧問先名']}** — "
+        f"推定追加売上 **¥{int(_top['推定年間増収額']):,}** /年"
+        f"（推奨: {_top['推奨サービス']}）"
+    )
+
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # ============================================================
@@ -554,8 +563,23 @@ with tab4:
 # ============================================================
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
-fc1, fc2, fc3 = st.columns(3)
-fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
-fc2.markdown("🔴 [入金遅延アラート](https://payment-alert.streamlit.app)  \n入金遅延を早期発見")
-fc3.markdown("✅ [申請書類チェッカー](https://doc-checker.streamlit.app)  \n書類不備をゼロ化")
+_fc1, _fc2, _fc3 = st.columns(3)
+with _fc1:
+    st.markdown("""<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:18px 14px;text-align:center;">
+<div style="font-size:1.3rem;font-weight:700;color:#D97706;margin:4px 0;">🔮 離反予測</div>
+<div style="font-size:0.85rem;color:#64748B;">提案前に離反リスクを確認</div>
+</div>""", unsafe_allow_html=True)
+    st.link_button("離反予測を開く", "https://shigyou-churn.streamlit.app", use_container_width=True)
+with _fc2:
+    st.markdown("""<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:18px 14px;text-align:center;">
+<div style="font-size:1.3rem;font-weight:700;color:#D97706;margin:4px 0;">📊 月次レポート</div>
+<div style="font-size:0.85rem;color:#64748B;">提案根拠を月次データで裏付け</div>
+</div>""", unsafe_allow_html=True)
+    st.link_button("月次レポートを開く", "https://shigyou-report.streamlit.app", use_container_width=True)
+with _fc3:
+    st.markdown("""<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:18px 14px;text-align:center;">
+<div style="font-size:1.3rem;font-weight:700;color:#D97706;margin:4px 0;">🏢 士業ポータル</div>
+<div style="font-size:0.85rem;color:#64748B;">全ツール一覧</div>
+</div>""", unsafe_allow_html=True)
+    st.link_button("士業ポータルを開く", "https://shigyou-ai-tools.streamlit.app", use_container_width=True)
 st.caption("AI経営パートナー × データサイエンス | クロスセル分析 v1.0")
