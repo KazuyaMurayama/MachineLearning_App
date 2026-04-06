@@ -412,14 +412,38 @@ st.sidebar.caption("MVP #1 — 士業向け離反予測デモ v0.1")
 # =====================================================================
 # メインエリア
 # =====================================================================
-st.title("🏛️ 顧問先離反予測AI")
-st.markdown(
-    "LightGBM + SHAP + **逆SHAP** で、顧問先の離反リスクを予測し、"
-    "**「何を変えれば離反を防げるか」**を具体的に提案します。"
-)
+st.markdown("""
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #1a2e4a, #2563EB);
+    color: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+}
+.hero-section h1 { color: white; margin-bottom: 0.5rem; }
+.hero-section p  { color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 0; }
+.banner-card {
+    background: #f0f4ff;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    text-align: center;
+}
+</style>
+<div class="hero-section">
+  <h1>今月、離れそうな顧問先は？</h1>
+  <p>AIが全顧問先のリスクをスコア化。月1件の解約防止で年間30万円超の収益差。</p>
+</div>
+""", unsafe_allow_html=True)
+
+_bc1, _bc2, _bc3 = st.columns(3)
+_bc1.markdown('<div class="banner-card">📋 <b>Before</b><br>勘と経験で<br>関係維持</div>', unsafe_allow_html=True)
+_bc2.markdown('<div class="banner-card">✅ <b>After</b><br>リスクTop3を<br>毎月自動抽出</div>', unsafe_allow_html=True)
+_bc3.markdown('<div class="banner-card">💰 <b>年間効果</b><br>解約率-20%・<br>収益保全150万円/年</div>', unsafe_allow_html=True)
+st.markdown("")
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 離反リスク一覧", "📈 モデル評価", "🔍 SHAP要因分析",
+    "📊 離反リスク一覧", "📈 モデル評価", "🔍 AI要因分析",
     "💡 改善提案（AIが分析）", "📋 データプレビュー",
 ])
 
@@ -637,10 +661,10 @@ with tab2:
         st.info("モデルを学習すると評価指標が表示されます")
 
 # =====================================================================
-# Tab 3: SHAP要因分析
+# Tab 3: AI要因分析
 # =====================================================================
 with tab3:
-    st.header("SHAP要因分析")
+    st.header("AI要因分析")
     st.markdown("**「なぜこの顧問先は離反リスクが高いのか？」**を可視化します。")
 
     if st.session_state.trained and st.session_state.shap_values is not None:
@@ -670,7 +694,7 @@ with tab3:
         imp_df = get_feature_importance(sv, Xs.columns.tolist())
         st.dataframe(imp_df, use_container_width=True, hide_index=True)
     else:
-        st.info("モデルを学習するとSHAP分析が表示されます")
+        st.info("モデルを学習するとAI分析が表示されます")
 
 # =====================================================================
 # Tab 4: 改善提案（AIが分析）（★最大の差別化）
@@ -678,7 +702,7 @@ with tab3:
 with tab4:
     st.header("💡 改善提案（AIが分析）")
     st.markdown("""
-    | | 通常のSHAP | 逆SHAP |
+    | | AI予測（要因分析） | AI提案（改善分析） |
     |---|---|---|
     | 問い | なぜ離反リスクが高いか？（Why） | **何を変えれば離反を防げるか？（How）** |
     | 出力 | 要因の説明 | **具体的アクション提案** |
