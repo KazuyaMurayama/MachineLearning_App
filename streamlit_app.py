@@ -117,7 +117,7 @@ with k1:
 with k2:
     st.markdown('<div class="kpi-card"><div class="kpi-value">80%</div><div class="kpi-label">業務時間削減</div></div>', unsafe_allow_html=True)
 with k3:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">年120h+</div><div class="kpi-label">工数削減効果</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">年150h+</div><div class="kpi-label">工数削減効果</div></div>', unsafe_allow_html=True)
 with k4:
     st.markdown('<div class="kpi-card"><div class="kpi-value">3士業</div><div class="kpi-label">完全対応</div></div>', unsafe_allow_html=True)
 
@@ -164,13 +164,13 @@ APPS = {
         {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "effect": "顧問単価20%UP", "tag": "分析", "tag_class": "tag-efficiency"},
     ],
     "⚡ 業務効率化": [
-        {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "effect": "3時間→15分に短縮", "tag": "効率化", "tag_class": "tag-efficiency"},
-        {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "effect": "作成時間92%削減", "tag": "効率化", "tag_class": "tag-efficiency"},
-        {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "effect": "未回収率60%改善", "tag": "効率化", "tag_class": "tag-efficiency"},
+        {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "effect": "利益率分析+異常値原因を自動表示", "tag": "効率化", "tag_class": "tag-efficiency"},
+        {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "effect": "条項解説+契約総額を自動試算", "tag": "効率化", "tag_class": "tag-efficiency"},
+        {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "effect": "優先度スコアで催促を最適化", "tag": "効率化", "tag_class": "tag-efficiency"},
     ],
     "🛡️ コンプライアンス": [
-        {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "effect": "準備期間2週間→2日", "tag": "安心", "tag_class": "tag-compliance"},
-        {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "effect": "書類不備ゼロへ", "tag": "安心", "tag_class": "tag-compliance"},
+        {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "effect": "AI導入リスク診断付き", "tag": "安心", "tag_class": "tag-compliance"},
+        {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "effect": "審査リスク予測+解決方法を提示", "tag": "安心", "tag_class": "tag-compliance"},
     ],
 }
 
