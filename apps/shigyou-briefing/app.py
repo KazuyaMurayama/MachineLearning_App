@@ -164,6 +164,9 @@ st.markdown("""
 <div class="hero-section">
 <h1>📋 月次AIブリーフィングレポート</h1>
 <p>30分かかっていた月次経営会議の資料が5分で完成。月額30万円のコンサル価値を可視化。</p>
+<p style="margin-top:0.6rem;font-size:0.95rem;color:rgba(255,255,255,0.75);">
+💡 L3 月額30万円の価値 ― 離反リスク・入金遅延・クロスセル機会を毎月自動レポート化。高リスク先放置による年間損失を事前に防ぐ
+</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -237,6 +240,18 @@ with tab1:
         st.warning(f"🔔 **入金遅延**: 入金遅延{delay_count}社。{top_delay['顧問先名']}（{int(top_delay['入金遅延日数'])}日超過）は早急な催促が必要です。")
     else:
         st.success("✅ **入金遅延**: 当月の入金遅延はありません。")
+
+    # 高リスク放置コスト試算
+    if len(high_risk_df) > 0:
+        annual_loss_est = int(high_risk_df["月額顧問料"].sum() * 12)
+        st.markdown(f"""
+<div class="alert-box">
+<strong>⚠️ 高リスク先を放置した場合の損失試算</strong><br>
+高リスク顧問先 <strong>{high_risk_count}社</strong>が全員解約した場合、年間損失は
+<span style="color:#DC2626;font-size:1.3rem;font-weight:700;">¥{annual_loss_est:,}</span>
+に相当します。今月中の面談・フォローが急務です。
+</div>
+""", unsafe_allow_html=True)
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 

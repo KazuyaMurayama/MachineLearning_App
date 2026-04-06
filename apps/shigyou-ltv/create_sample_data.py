@@ -27,10 +27,10 @@ N = 150
 
 # LTV固有列
 契約継続予測年数 = np.random.exponential(4, N).clip(0.5, 10).round(1)
-クロスセル成約確率 = np.random.beta(2, 4, N).round(3)  # 0〜1
-月次提供工数時間 = np.random.uniform(2, 30, N).round(1)
+クロスセル成約確率 = np.random.beta(3, 3, N).round(3)  # 0〜1 （beta(3,3)で成長クラスタ比率を改善）
+月次提供工数時間 = np.random.uniform(1, 15, N).round(1)
 時給換算原価 = np.random.choice(
-    [5000, 8000, 10000, 12000, 15000], N, p=[0.1, 0.25, 0.30, 0.25, 0.10]
+    [2000, 3000, 5000, 7000, 10000], N, p=[0.10, 0.25, 0.35, 0.20, 0.10]
 )
 過去12ヶ月クレーム数 = np.random.poisson(0.5, N).clip(0, 5)
 
@@ -51,7 +51,7 @@ LTV_5年 = (顧問料収入 + クロスセル収入 - 原価).round(0).astype(in
 # 安定: それ以外
 ltv_80pct = np.percentile(LTV_5年, 80)
 VIPフラグ = LTV_5年 >= ltv_80pct
-不採算フラグ = (LTV_5年 < 0) | (年率ROI < 0.5)
+不採算フラグ = (LTV_5年 < 0) | (年率ROI < 0.1)  # ROIしきい値を0.1に緩和して不採算比率を適正化
 成長フラグ = (クロスセル成約確率 >= 0.5) & ~VIPフラグ & ~不採算フラグ
 
 クラスタ = np.where(

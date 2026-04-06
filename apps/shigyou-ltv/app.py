@@ -127,10 +127,10 @@ def generate_sample_data(seed: int = 42) -> pd.DataFrame:
         [50000, 80000, 100000, 150000, 200000], N
     )
     契約継続予測年数 = np.random.exponential(4, N).clip(0.5, 10).round(1)
-    クロスセル成約確率 = np.random.beta(2, 4, N).round(3)
-    月次提供工数時間 = np.random.uniform(2, 30, N).round(1)
+    クロスセル成約確率 = np.random.beta(3, 3, N).round(3)
+    月次提供工数時間 = np.random.uniform(1, 15, N).round(1)
     時給換算原価 = np.random.choice(
-        [5000, 8000, 10000, 12000, 15000], N, p=[0.1, 0.25, 0.30, 0.25, 0.10]
+        [2000, 3000, 5000, 7000, 10000], N, p=[0.10, 0.25, 0.35, 0.20, 0.10]
     )
     過去12ヶ月クレーム数 = np.random.poisson(0.5, N).clip(0, 5)
 
@@ -144,7 +144,7 @@ def generate_sample_data(seed: int = 42) -> pd.DataFrame:
 
     ltv_80pct = np.percentile(LTV_5年, 80)
     VIPフラグ = LTV_5年 >= ltv_80pct
-    不採算フラグ = (LTV_5年 < 0) | (年率ROI < 0.5)
+    不採算フラグ = (LTV_5年 < 0) | (年率ROI < 0.1)
     成長フラグ = (クロスセル成約確率 >= 0.5) & ~VIPフラグ & ~不採算フラグ
 
     クラスタ = np.where(
@@ -189,7 +189,7 @@ def classify_cluster(ltv: float, roi: float, crosssell_prob: float, ltv_80pct: f
     """クラスタを判定する。"""
     if ltv >= ltv_80pct:
         return "VIP"
-    if ltv < 0 or roi < 0.5:
+    if ltv < 0 or roi < 0.1:
         return "不採算"
     if crosssell_prob >= 0.5:
         return "成長"
@@ -300,6 +300,9 @@ st.markdown("""
 <div class="hero-section">
 <h1>💎 顧問先LTV予測＋不採算フラグ</h1>
 <p>5年後、その顧問先はいくら儲かるか。不採算先を特定し、利益率を改善。</p>
+<p style="margin-top:0.6rem;font-size:0.95rem;color:rgba(255,255,255,0.75);">
+💡 L3 月額30万円の価値 ― AIが不採算先を自動検出し、工数削減・値上げ・クロスセルの3施策で年間数百万円の利益改善を実現
+</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -768,6 +771,57 @@ with tab4:
         （月次利益 {fmt_yen(monthly_profit)} × 24ヶ月）
         </div>
         """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+    # スライダー試算
+    st.subheader("🔢 改善施策シミュレーター")
+    st.markdown("施策をスライダーで調整して、この顧問先のLTV改善効果をリアルタイム試算します。")
+
+    sim_col1, sim_col2, sim_col3 = st.columns(3)
+    with sim_col1:
+        sim_crosssell_rate = st.slider(
+            "クロスセル成約確率改善",
+            min_value=0.0, max_value=1.0,
+            value=float(min(client_row["クロスセル成約確率"] + 0.2, 1.0)),
+            step=0.05, format="%.0f%%",
+            key="sim_crosssell_rate",
+            help="営業強化でクロスセル成約確率を引き上げた場合"
+        )
+    with sim_col2:
+        sim_fee_increase = st.slider(
+            "月額顧問料値上げ（万円）",
+            min_value=0, max_value=10, value=2, step=1,
+            key="sim_fee_increase",
+            help="顧問料改定による月次収入の増加額"
+        )
+    with sim_col3:
+        sim_hours_reduce = st.slider(
+            "月次工数削減（時間）",
+            min_value=0.0, max_value=float(min(client_row["月次提供工数時間"], 15.0)),
+            value=min(2.0, float(client_row["月次提供工数時間"])),
+            step=0.5,
+            key="sim_hours_reduce",
+            help="業務効率化による工数削減効果"
+        )
+
+    # 試算計算
+    months = float(client_row["継続月数"])
+    orig_crosssell = crosssell_amount * float(client_row["クロスセル成約確率"]) * crosssell_years
+    new_crosssell = crosssell_amount * sim_crosssell_rate * crosssell_years
+    delta_crosssell = new_crosssell - orig_crosssell
+
+    delta_fee = sim_fee_increase * 10000 * months
+    delta_hours = sim_hours_reduce * float(client_row["時給換算原価"]) * months
+    total_improvement = delta_crosssell + delta_fee + delta_hours
+    new_ltv = float(client_row["予測LTV_5年"]) + total_improvement
+
+    res_col1, res_col2, res_col3, res_col4 = st.columns(4)
+    res_col1.metric("クロスセル改善", f"¥{delta_crosssell:+,.0f}")
+    res_col2.metric("顧問料改定効果", f"¥{delta_fee:+,.0f}")
+    res_col3.metric("工数削減効果", f"¥{delta_hours:+,.0f}")
+    res_col4.metric("改善後 予測LTV（5年）", f"¥{new_ltv:,.0f}",
+                    delta=f"¥{total_improvement:+,.0f}")
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
