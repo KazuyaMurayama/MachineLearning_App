@@ -508,11 +508,11 @@ if st.session_state.df_cur is not None:
 else:
     st.info("サイドバーから試算表CSVをアップロードしてください。\n\nデモデータが自動で読み込まれている場合は、そのままご利用いただけます。")
 
-# フッター: 関連ツール（テキストのみ、外部URL削除）
+# フッター: 関連ツールカード（3列）
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
 fc1,fc2,fc3=st.columns(3)
-fc1.markdown("🛡️ **安心パッケージ**  \n守秘義務契約・AI処理同意書")
-fc2.markdown("📝 **契約書ドラフトAI**  \n顧問契約書を自動生成")
-fc3.markdown("🏢 **離反予測デモ**  \n顧問先の離反リスク予測")
+fc1.markdown("🔴 **入金遅延アラート**  \n入金遅延を自動検知・催促  \n[▶ ツールを開く](https://shigyou-payment.streamlit.app)")
+fc2.markdown("🏢 **離反予測**  \n顧問先の離反リスクをAI予測  \n[▶ ツールを開く](https://shigyou-churn.streamlit.app)")
+fc3.markdown("🏠 **士業ポータル**  \nAI経営パートナー総合メニュー  \n[▶ ツールを開く](https://shigyou-ai-tools.streamlit.app)")
 st.caption("AI経営パートナー × データサイエンス | 月次レポート自動生成 v1.1")
