@@ -634,3 +634,52 @@ with tab5:
         st.dataframe(df.describe(), use_container_width=True)
     else:
         st.info("サイドバーからデータをアップロードしてください")
+
+# =====================================================================
+# フッター: 関連ツールカード
+# =====================================================================
+st.markdown("---")
+st.markdown("### 🔗 関連ツール")
+ft1, ft2, ft3 = st.columns(3)
+with ft1:
+    st.markdown(
+        """
+        <div style="border:1px solid #E2E8F0;border-radius:12px;padding:20px;text-align:center;height:100%;background:#F8FAFC;">
+        <div style="font-size:2rem;">📊</div>
+        <h4 style="margin:8px 0 4px 0;">クロスセル分析</h4>
+        <p style="color:#64748B;font-size:0.9rem;">離反リスクの低い顧問先に追加提案</p>
+        <a href="https://shigyou-crosssell.streamlit.app" target="_blank"
+           style="display:inline-block;margin-top:8px;padding:6px 20px;background:#3B82F6;color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;">
+           ツールを開く →</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with ft2:
+    st.markdown(
+        """
+        <div style="border:1px solid #E2E8F0;border-radius:12px;padding:20px;text-align:center;height:100%;background:#F8FAFC;">
+        <div style="font-size:2rem;">📝</div>
+        <h4 style="margin:8px 0 4px 0;">月次レポート</h4>
+        <p style="color:#64748B;font-size:0.9rem;">顧問先の財務状況を月次で把握</p>
+        <a href="https://shigyou-report.streamlit.app" target="_blank"
+           style="display:inline-block;margin-top:8px;padding:6px 20px;background:#3B82F6;color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;">
+           ツールを開く →</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with ft3:
+    st.markdown(
+        """
+        <div style="border:1px solid #E2E8F0;border-radius:12px;padding:20px;text-align:center;height:100%;background:#F8FAFC;">
+        <div style="font-size:2rem;">🏛️</div>
+        <h4 style="margin:8px 0 4px 0;">士業ポータル</h4>
+        <p style="color:#64748B;font-size:0.9rem;">全ツール一覧</p>
+        <a href="https://shigyou-ai-tools.streamlit.app" target="_blank"
+           style="display:inline-block;margin-top:8px;padding:6px 20px;background:#6366F1;color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;">
+           ポータルを開く →</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
