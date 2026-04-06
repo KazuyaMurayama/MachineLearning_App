@@ -310,6 +310,7 @@ if _next_month_pred is not None and _mom_forecast_pct is not None:
         st.warning(
             f"📉 {_pred_label}。前月比 **{_mom_forecast_pct:+.1f}%** — 売上減少が予測されます。施策を検討してください"
         )
+        st.caption(f"→ 来月売上が {abs(_mom_forecast_pct):.1f}% 減少予測。広告強化 or コスト削減の検討を")
 
 # ---------------------------------------------------------------------------
 # 目標達成率トラッカー
@@ -318,6 +319,8 @@ _sales_target = st.session_state.get("sales_target", 0)
 if _sales_target > 0 and cur_sales >= 0:
     _progress_ratio = min(cur_sales / _sales_target, 1.0)
     st.markdown("#### 🎯 月間目標達成状況")
+    _target_man = _sales_target / 10000
+    st.caption(f"目標: ¥{_target_man:,.0f}万　実績: ¥{cur_sales / 10000:,.0f}万")
     _pc1, _pc2 = st.columns([3, 1])
     with _pc1:
         st.progress(_progress_ratio)
@@ -345,6 +348,7 @@ if _sales_target > 0 and cur_sales >= 0:
         if _days_left > 0:
             _daily_needed = _remaining / _days_left / 10000
             st.caption(f"残 {_days_left} 日 → 必要な日次売上: **¥{_daily_needed:,.1f}万/日**")
+            st.caption(f"→ 日次 ¥{_daily_needed:,.1f}万ペースが必要。販促施策の追加を検討")
         elif _days_left == 0:
             st.caption("本日が月末です。最終日の売上に注目！")
 
@@ -615,6 +619,7 @@ with tab1:
     fig2.tight_layout()
     st.pyplot(fig2)
     plt.close(fig2)
+    st.caption("※ 予測は直近6ヶ月の線形回帰に基づく推計値です。実績との乖離が生じる場合があります。")
 
     # 予測値の詳細を metric で表示
     if _fc_vals_tab and len(_fc_labels_tab) >= 1:
