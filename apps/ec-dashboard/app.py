@@ -59,12 +59,12 @@ st.markdown("""
     margin-bottom: 0.3rem;
 }
 .kpi-value {
-    font-size: 1.6rem;
+    font-size: 2.4rem;
     font-weight: 700;
     color: #1E293B;
 }
-.kpi-delta-up { color: #16A34A; font-size: 0.9rem; }
-.kpi-delta-down { color: #DC2626; font-size: 0.9rem; }
+.kpi-delta-up { color: #16A34A; font-size: 0.9rem; font-weight: 700; }
+.kpi-delta-down { color: #DC2626; font-size: 0.9rem; font-weight: 700; }
 hr.section-divider {
     border: none;
     border-top: 1px solid #E2E8F0;
@@ -163,11 +163,14 @@ latest_month = months_sorted[-1]
 st.markdown("""
 <div class="hero-section">
     <div class="hero-title">📊 EC売上ダッシュボード</div>
-    <div class="hero-sub">リアルタイム売上・KPI可視化ツール</div>
+    <div class="hero-sub">売上トレンドと異常値をAIが自動検知。毎月のExcel地獄から解放。</div>
 </div>
 """, unsafe_allow_html=True)
 
-st.info("💡 **導入効果**: 毎月のExcel集計を **3時間→3分** に短縮（年間¥150万相当）")
+_c1, _c2, _c3 = st.columns(3)
+_c1.markdown('<div style="background:#EFF6FF;border-radius:10px;padding:1rem;text-align:center"><div style="font-size:0.8rem;color:#64748B">Before</div><div style="font-size:1.2rem;font-weight:700;color:#DC2626">月3時間のExcel分析</div></div>', unsafe_allow_html=True)
+_c2.markdown('<div style="background:#F0FDF4;border-radius:10px;padding:1rem;text-align:center"><div style="font-size:0.8rem;color:#64748B">After</div><div style="font-size:1.2rem;font-weight:700;color:#16A34A">3分で全KPI把握</div></div>', unsafe_allow_html=True)
+_c3.markdown('<div style="background:#FFF7ED;border-radius:10px;padding:1rem;text-align:center"><div style="font-size:0.8rem;color:#64748B">年間効果</div><div style="font-size:1.2rem;font-weight:700;color:#D97706">年間¥150万の工数削減</div></div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Month selector (used by Tab1 and KPIs)
