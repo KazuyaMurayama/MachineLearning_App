@@ -420,7 +420,7 @@ st.markdown(
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📊 離反リスク一覧", "📈 モデル評価", "🔍 SHAP要因分析",
-    "💡 逆SHAP改善提案", "📋 データプレビュー",
+    "💡 改善提案（AIが分析）", "📋 データプレビュー",
 ])
 
 # =====================================================================
@@ -492,6 +492,16 @@ with tab1:
             f"🟡 中リスクも含めた場合の年間損失額: "
             f"**¥{high_med_loss_man:,.0f}万**　（全売上の **{high_med_ratio:.1f}%**）"
         )
+        st.caption("※ 計算方法: 月額顧問料×12ヶ月の単純合算。実際の解約時期により変動します。")
+
+        with st.expander("計算の内訳を見る"):
+            _top3_cost = df_s[df_s["予測残存月数"] <= RISK_HIGH].nlargest(3, "年間顧問料")[
+                ["顧問先ID", "月額顧問料", "年間顧問料"]
+            ].copy() if "顧問先ID" in df_s.columns else df_s[df_s["予測残存月数"] <= RISK_HIGH].nlargest(3, "年間顧問料")[
+                ["月額顧問料", "年間顧問料"]
+            ].copy()
+            _top3_cost = _top3_cost.rename(columns={"月額顧問料": "月額顧問料（円）", "年間顧問料": "年額（円）"})
+            st.dataframe(_top3_cost.reset_index(drop=True), use_container_width=True, hide_index=True)
 
         # 解約インパクト メトリクス（3列）
         m1, m2, m3 = st.columns(3)
@@ -543,10 +553,10 @@ with tab1:
                 # 離反リスクを高める要因（SHAP値が負 = 残存月数を短くする）
                 _factor_df = pd.DataFrame({
                     "特徴量": _feat,
-                    "SHAP値": _sv_row,
-                }).sort_values("SHAP値").head(3)
+                    "AI重要度スコア": _sv_row,
+                }).sort_values("AI重要度スコア").head(3)
                 top3_factors = [
-                    f"**{r['特徴量']}**（{r['SHAP値']:.1f}ヶ月）"
+                    f"**{r['特徴量']}**（{r['AI重要度スコア']:.1f}ヶ月）"
                     for _, r in _factor_df.iterrows()
                 ]
             except Exception:
@@ -602,6 +612,17 @@ with tab1:
 with tab2:
     st.header("モデル評価指標")
     if st.session_state.trained and st.session_state.metrics:
+        _r2 = st.session_state.metrics.get("R2", 0)
+        if _r2 > 0.7:
+            _precision_label = "📊 予測精度: 高"
+            _precision_color = "success"
+        elif _r2 >= 0.4:
+            _precision_label = "📊 予測精度: 中"
+            _precision_color = "warning"
+        else:
+            _precision_label = "📊 予測精度: 低"
+            _precision_color = "error"
+        getattr(st, _precision_color)(_precision_label)
         display_metrics(st.session_state.metrics)
         st.markdown("---")
         st.markdown("""
@@ -650,10 +671,10 @@ with tab3:
         st.info("モデルを学習するとSHAP分析が表示されます")
 
 # =====================================================================
-# Tab 4: 逆SHAP改善提案（★最大の差別化）
+# Tab 4: 改善提案（AIが分析）（★最大の差別化）
 # =====================================================================
 with tab4:
-    st.header("💡 逆SHAP改善提案")
+    st.header("💡 改善提案（AIが分析）")
     st.markdown("""
     | | 通常のSHAP | 逆SHAP |
     |---|---|---|
@@ -719,9 +740,9 @@ with tab4:
                 sv = explainer.shap_values(row_proc)
                 factor_df = pd.DataFrame({
                     "特徴量": feat_cols,
-                    "SHAP値": np.round(sv[0], 3),
+                    "AI重要度スコア": np.round(sv[0], 3),
                     "影響方向": ["⬇️ 離反リスク上昇" if v < 0 else "⬆️ 離反防止" for v in sv[0]],
-                }).sort_values("SHAP値").reset_index(drop=True)
+                }).sort_values("AI重要度スコア").reset_index(drop=True)
                 st.dataframe(factor_df, use_container_width=True, hide_index=True)
     else:
         st.info("モデルを学習すると改善提案が表示されます")
