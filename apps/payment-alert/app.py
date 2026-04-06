@@ -70,6 +70,39 @@ def build_alert_df(df, target_month=None):
     latest = df[df["請求年月"] == target_month].copy()
     latest["ステータス"] = latest["入金遅延日数"].apply(get_status)
     latest["遅延分類"] = latest["入金遅延日数"].apply(classify_delay)
+
+    # --- 催促優先度スコア & 機会損失額 ---
+    latest["機会損失額"] = latest["入金遅延日数"] * latest["月額顧問料"]
+    # 優先度スコア = 機会損失額を0-100に正規化（最大値ベース）
+    max_loss = latest["機会損失額"].max()
+    latest["優先度スコア"] = (
+        (latest["機会損失額"] / max_loss * 100).round(1) if max_loss > 0 else 0.0
+    )
+
+    # --- 遅延パターン分析（常習先 vs 一時的） ---
+    # 対象月以前の全データで遅延回数（ALERT_GREEN超）をカウント
+    past_data = df[df["請求年月"] <= target_month]
+    delay_counts = (
+        past_data[past_data["入金遅延日数"] > ALERT_GREEN]
+        .groupby("顧問先ID")
+        .size()
+        .rename("過去遅延回数")
+    )
+    latest = latest.merge(delay_counts, on="顧問先ID", how="left")
+    latest["過去遅延回数"] = latest["過去遅延回数"].fillna(0).astype(int)
+
+    def _delay_pattern(row):
+        if row["入金遅延日数"] <= ALERT_GREEN:
+            return ""
+        if row["過去遅延回数"] >= 3:
+            return "⚠️ 常習遅延先"
+        elif row["過去遅延回数"] == 1:
+            return "🆕 新規遅延"
+        else:
+            return "📌 要注意"
+
+    latest["遅延パターン"] = latest.apply(_delay_pattern, axis=1)
+
     # 直近3ヶ月平均遅延
     months = sorted(df["請求年月"].unique())
     target_idx = months.index(target_month) if target_month in months else len(months) - 1
@@ -154,7 +187,7 @@ st.sidebar.markdown("**必須カラム**")
 st.sidebar.caption("顧問先ID / 顧問先名 / 月額顧問料 / 請求年月 / 入金遅延日数 / 業種 / 従業員規模")
 st.sidebar.markdown("---")
 st.sidebar.caption("AI経営パートナー × データサイエンス")
-st.sidebar.caption("入金遅延アラート v1.0")
+st.sidebar.caption("入金遅延アラート v1.1")
 
 # === Main ===
 st.markdown("""
@@ -213,6 +246,29 @@ kc2.metric("🟡 注意（6-15日）", f"{n_warning}件", delta_warning_str,
 kc3.metric("💰 遅延中の顧問料合計", f"¥{total_overdue:,.0f}", "注意+危険のみ")
 kc4.metric("📅 平均遅延日数", f"{avg_delay:.1f}日" if not np.isnan(avg_delay) else "0.0日", "遅延あり顧問先")
 
+# === 遅延パターンKPIカード ===
+_alert_for_kpi, _ = build_alert_df(df, target_month=selected_month)
+_delayed = _alert_for_kpi[_alert_for_kpi["入金遅延日数"] > ALERT_GREEN]
+n_habitual = (_delayed["遅延パターン"] == "⚠️ 常習遅延先").sum()
+n_new_delay = (_delayed["遅延パターン"] == "🆕 新規遅延").sum()
+n_watch = (_delayed["遅延パターン"] == "📌 要注意").sum()
+
+pk1, pk2, pk3 = st.columns(3)
+pk1.metric("⚠️ 常習遅延先", f"{n_habitual}件", "過去3回以上遅延")
+pk2.metric("🆕 新規遅延", f"{n_new_delay}件", "今回が初の遅延")
+pk3.metric("📌 要注意", f"{n_watch}件", "過去2回目の遅延")
+
+# === 冒頭インサイト1行 ===
+if len(_delayed) > 0:
+    _top = _delayed.nlargest(1, "機会損失額").iloc[0]
+    _top_name = _top["顧問先名"]
+    _top_days = int(_top["入金遅延日数"])
+    _top_loss = _top["機会損失額"]
+    _top_pattern = _top["遅延パターン"]
+    _loss_str = f"¥{_top_loss / 10000:,.1f}万" if _top_loss >= 10000 else f"¥{_top_loss:,.0f}"
+    _pattern_note = "常習遅延先のため早急な対応を推奨" if "常習" in _top_pattern else "遅延拡大前の早期対応を推奨"
+    st.warning(f"⚡ 今月の最優先: **{_top_name}** — 遅延{_top_days}日・機会損失{_loss_str}。{_pattern_note}")
+
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # === タブ ===
@@ -245,21 +301,37 @@ with tab1:
     if industry_filter:
         filtered = filtered[filtered["業種"].isin(industry_filter)]
 
-    filtered_sorted = filtered.sort_values("入金遅延日数", ascending=False)
+    # ソート選択
+    sort_col = st.radio(
+        "並び順",
+        ["優先度スコア（高→低）", "遅延日数（多→少）", "機会損失額（高→低）"],
+        horizontal=True,
+    )
+    sort_map = {
+        "優先度スコア（高→低）": "優先度スコア",
+        "遅延日数（多→少）": "入金遅延日数",
+        "機会損失額（高→低）": "機会損失額",
+    }
+    sort_key = sort_map[sort_col]
 
     # TOP10 要注意先
-    st.subheader("🚨 TOP10 要注意先（遅延日数順）")
-    top10 = alert_df.nlargest(10, "入金遅延日数")[
-        ["ステータス", "顧問先名", "入金遅延日数", "月額顧問料", "業種", "従業員規模", "悪化傾向"]
-    ]
-    st.dataframe(top10.reset_index(drop=True), use_container_width=True, hide_index=True)
+    st.subheader("🚨 TOP10 要注意先（優先度順）")
+    top10_cols = ["ステータス", "顧問先名", "優先度スコア", "機会損失額", "入金遅延日数", "月額顧問料", "遅延パターン", "業種", "悪化傾向"]
+    top10 = alert_df.nlargest(10, sort_key)[top10_cols]
+    # 機会損失額を見やすくフォーマット
+    top10_display = top10.copy()
+    top10_display["機会損失額"] = top10_display["機会損失額"].apply(lambda x: f"¥{x:,.0f}")
+    st.dataframe(top10_display.reset_index(drop=True), use_container_width=True, hide_index=True)
 
     st.markdown("---")
     st.subheader(f"📋 全顧問先アラート一覧（{len(filtered_sorted)}件）")
-    show_cols = ["ステータス", "顧問先名", "入金遅延日数", "月額顧問料", "業種", "従業員規模", "悪化傾向"]
+    filtered_sorted = filtered.sort_values(sort_key, ascending=False)
+    show_cols = ["ステータス", "顧問先名", "優先度スコア", "機会損失額", "入金遅延日数", "月額顧問料", "遅延パターン", "業種", "従業員規模", "悪化傾向"]
     if "直近3ヶ月平均遅延" in filtered_sorted.columns:
-        show_cols.insert(4, "直近3ヶ月平均遅延")
-    st.dataframe(filtered_sorted[show_cols].reset_index(drop=True), use_container_width=True, hide_index=True)
+        show_cols.insert(6, "直近3ヶ月平均遅延")
+    all_display = filtered_sorted[show_cols].copy()
+    all_display["機会損失額"] = all_display["機会損失額"].apply(lambda x: f"¥{x:,.0f}")
+    st.dataframe(all_display.reset_index(drop=True), use_container_width=True, hide_index=True)
 
     # CSVダウンロード
     csv_data = filtered_sorted[show_cols].to_csv(index=False, encoding="utf-8-sig")
@@ -480,4 +552,4 @@ fc1, fc2, fc3 = st.columns(3)
 fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
 fc2.markdown("📝 [契約書ドラフトAI](https://contract-draft.streamlit.app)  \n顧問契約書を自動生成")
 fc3.markdown("📊 [月次レポート自動生成](https://report-gen.streamlit.app)  \n試算表CSV→レポート自動作成")
-st.caption("AI経営パートナー × データサイエンス | 入金遅延アラート v1.0")
+st.caption("AI経営パートナー × データサイエンス | 入金遅延アラート v1.1")
