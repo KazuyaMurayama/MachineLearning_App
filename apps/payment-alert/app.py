@@ -324,8 +324,8 @@ with tab1:
     st.dataframe(top10_display.reset_index(drop=True), use_container_width=True, hide_index=True)
 
     st.markdown("---")
-    st.subheader(f"📋 全顧問先アラート一覧（{len(filtered_sorted)}件）")
     filtered_sorted = filtered.sort_values(sort_key, ascending=False)
+    st.subheader(f"📋 全顧問先アラート一覧（{len(filtered_sorted)}件）")
     show_cols = ["ステータス", "顧問先名", "優先度スコア", "機会損失額", "入金遅延日数", "月額顧問料", "遅延パターン", "業種", "従業員規模", "悪化傾向"]
     if "直近3ヶ月平均遅延" in filtered_sorted.columns:
         show_cols.insert(6, "直近3ヶ月平均遅延")
