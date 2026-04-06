@@ -414,6 +414,13 @@ all_rendered+="\n\n---\n\n"+TEMPLATE_DATA_POLICY.format(office_name=office,polic
 all_rendered+="\n\n---\n\n"+TEMPLATE_AI_CONSENT.format(client_name=client,office_name=office,contact_person=contact,contact_email=email,consent_date=today_str)
 st.download_button("📥 安心パッケージ一括ダウンロード（3点セット）",all_rendered,"安心パッケージ一式.md","text/markdown",use_container_width=True)
 
+# === 定期運用チェックリスト ===
+with st.expander("📋 定期運用チェックリスト"):
+    st.markdown("**四半期**")
+    st.markdown("- □ データ取扱い規程の運用状況確認\n- □ AI処理記録の棚卸し")
+    st.markdown("**年次**")
+    st.markdown("- □ 守秘義務契約の更新\n- □ 全従業員へのデータ取扱い教育実施\n- □ 法改正対応の確認")
+
 # 相互リンク
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")

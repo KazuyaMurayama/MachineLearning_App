@@ -478,6 +478,13 @@ if submitted:
     st.info("💡 このドラフトは雛形です。実際の契約締結前に、必ず内容をご確認ください。")
     st.warning("📌 **AI処理を行う場合**は、「安心パッケージ」のAI処理同意書も合わせてご利用ください。契約書第5条の守秘義務条項と連動しています。")
 
+# === 定期運用チェックリスト ===
+with st.expander("📋 定期運用チェックリスト"):
+    st.markdown("**契約更新時**")
+    st.markdown("- □ 契約期間の満了日を確認\n- □ 顧問料の見直し検討\n- □ AI同意書の更新")
+    st.markdown("**新規契約時**")
+    st.markdown("- □ 安心パッケージ3点セットの準備\n- □ 契約書の弁護士レビュー")
+
 # Footer — 関連ツール（カード形式）
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")

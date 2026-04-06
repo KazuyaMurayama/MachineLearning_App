@@ -669,6 +669,13 @@ with tab2:
                 st.caption(f"　📌 {item['point']}")
                 st.caption(f"　⚠️ よくある不備: {item['ng_example']}")
 
+# === 定期運用チェックリスト ===
+with st.expander("📋 定期運用チェックリスト"):
+    st.markdown("**申請前**")
+    st.markdown("- □ 必須書類の完了率100%を確認\n- □ 審査リスク判定が「低」であることを確認")
+    st.markdown("**申請後**")
+    st.markdown("- □ 不備指摘事項の対応\n- □ 次回更新時期のカレンダー登録")
+
 # === 相互リンク ===
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
