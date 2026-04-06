@@ -190,6 +190,7 @@ st.markdown("""
 .crosssell-hero h1{font-size:2rem;color:#D97706;}
 .crosssell-hero p{font-size:1.05rem;color:#475569;}
 .section-divider{border:none;border-top:2px solid #E2E8F0;margin:24px 0;}
+.kpi-value{font-size:2.4rem;font-weight:700;}.effect-banner{display:flex;gap:12px;margin-bottom:16px;}.effect-card{flex:1;border-radius:12px;padding:14px 12px;text-align:center;font-size:0.9rem;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -234,13 +235,27 @@ st.sidebar.caption("クロスセル分析 v1.0")
 # ============================================================
 st.markdown("""
 <div class="crosssell-hero">
-<h1>💰 顧問先クロスセル分析ツール</h1>
-<p>顧問先の現在サービス利用状況から追加提案機会を特定し、<br>
-推定増収額を自動算出します。</p>
+<h1>💰 顧問先への追加提案、機会損失していませんか？</h1>
+<p>AIが各顧問先の未導入サービスを分析。月1件の追加契約で年間¥120万の増収。</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.info("💡 **導入効果**: 提案機会の見落としゼロ化 — 全顧問先の追加提案シミュレーションを **1秒で完了**（営業企画時間を年間60時間削減）")
+st.markdown("""
+<div class="effect-banner">
+<div class="effect-card" style="background:#FEF3C7;border:1px solid #FDE68A;">
+<div style="font-size:1.1rem;font-weight:700;color:#92400E;margin-bottom:4px;">Before</div>
+<div style="color:#78350F;">提案は担当者の勘と経験</div>
+</div>
+<div class="effect-card" style="background:#DBEAFE;border:1px solid #BFDBFE;">
+<div style="font-size:1.1rem;font-weight:700;color:#1E40AF;margin-bottom:4px;">After</div>
+<div style="color:#1E3A8A;">AI優先度スコアで提案先を自動選定</div>
+</div>
+<div class="effect-card" style="background:#D1FAE5;border:1px solid #A7F3D0;">
+<div style="font-size:1.1rem;font-weight:700;color:#065F46;margin-bottom:4px;">年間効果</div>
+<div style="color:#064E3B;font-weight:600;">顧問単価20%UP</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 df = st.session_state.df
 if df is None:
