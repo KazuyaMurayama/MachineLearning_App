@@ -545,11 +545,11 @@ with tab3:
                     key=f"dl_{s}"
                 )
 
-# === 相互リンク ===
+# === 関連ツールカード（3列） ===
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
 fc1, fc2, fc3 = st.columns(3)
-fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
-fc2.markdown("📝 [契約書ドラフトAI](https://contract-draft.streamlit.app)  \n顧問契約書を自動生成")
-fc3.markdown("📊 [月次レポート自動生成](https://report-gen.streamlit.app)  \n試算表CSV→レポート自動作成")
+fc1.markdown("📊 **月次レポート自動生成**  \n試算表CSV→レポート自動作成  \n[▶ ツールを開く](https://shigyou-report.streamlit.app)")
+fc2.markdown("🏢 **離反予測**  \n顧問先の離反リスクをAI予測  \n[▶ ツールを開く](https://shigyou-churn.streamlit.app)")
+fc3.markdown("🏠 **士業ポータル**  \nAI経営パートナー総合メニュー  \n[▶ ツールを開く](https://shigyou-ai-tools.streamlit.app)")
 st.caption("AI経営パートナー × データサイエンス | 入金遅延アラート v1.1")
