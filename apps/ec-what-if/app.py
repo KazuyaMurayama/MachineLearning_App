@@ -259,6 +259,18 @@ with st.sidebar:
     st.markdown("2. 「SHAP重要度」タブで各特徴量の影響を把握")
     st.markdown("3. 「What-Ifシミュレーター」でスライダー操作")
     st.markdown("4. 「シナリオ比較」で複数案を比較・CSVダウンロード")
+    st.markdown("---")
+    st.markdown("""
+💡 **L3 プレミアムパック 月額26万円の価値**
+
+GA4・Lookerでは不可能な仮説検証:
+- 広告費±30%で売上はどう変わる？
+- 価格を5%上げたら離脱率は？
+- 在庫切れが続いたときのROASへの影響は？
+
+LightGBM（3モデル）+ SHAPで定量的に回答。
+経営会議の「たぶん」を「予測値」に変える。
+""")
 
 
 # ──────────────────────────────────────────────
@@ -267,7 +279,8 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-section">
 <h1>🎯 EC What-If シミュレーター</h1>
-<p>広告費を変えたらROASはどうなる？ML予測で「次の一手」を可視化。L3プレミアムのキラー機能。</p>
+<p>広告費・価格・在庫を変えたら売上はどう変わる？LightGBM + SHAP で "次の一手" を科学的に可視化<br>
+<span style="font-size:0.95rem;opacity:0.9;"><strong>L3 プレミアムパック 月額26万円</strong> — GA4・Lookerでは見えない「仮説検証」をリアルタイム予測で即座に実行</span></p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -567,6 +580,47 @@ with tab3:
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+    # 経営インパクトサマリーカード
+    st.markdown("#### 💼 経営インパクト概算")
+    churn_rate_diff = sim_preds["離脱率"] - _baseline["離脱率"]
+    # 仮定: 顧客数500人、平均累計購入額120,000円、年間購入頻度2.5回
+    est_customers = 500
+    est_avg_ltv = 120_000
+    est_annual_freq = 2.5
+    churn_impact_annual = int(est_customers * churn_rate_diff * est_avg_ltv * est_annual_freq)
+    gi_annual = int(gross_impact * 12)
+    net_impact = gi_annual - max(0, churn_impact_annual)
+    net_sign = "+" if net_impact >= 0 else ""
+    net_cls = "diff-positive" if net_impact >= 0 else "diff-negative"
+    ci1, ci2, ci3 = st.columns(3)
+    with ci1:
+        gi_sign = "+" if gi_annual >= 0 else ""
+        gi_cls2 = "diff-positive" if gi_annual >= 0 else "diff-negative"
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value"><span class="{gi_cls2}">{gi_sign}{fmt_man(gi_annual)}</span></div>
+            <div class="kpi-label">粗利インパクト年換算（×12ヶ月）</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with ci2:
+        ca_sign = "+" if churn_impact_annual >= 0 else "-"
+        ca_cls = "diff-negative" if churn_impact_annual > 0 else "diff-positive"
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value"><span class="{ca_cls}">{ca_sign}{fmt_man(abs(churn_impact_annual))}</span></div>
+            <div class="kpi-label">離脱率変化による年間損失/益 試算</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with ci3:
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value"><span class="{net_cls}">{net_sign}{fmt_man(net_impact)}</span></div>
+            <div class="kpi-label">ネット年間インパクト（粗利－離脱損失）</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
     # SHAP TOP5 横棒グラフ
     st.markdown("#### この予測の主要要因（売上モデル SHAP TOP5）")
     sv_flat = sim_sv[0] if sim_sv.ndim > 1 else sim_sv
@@ -680,6 +734,21 @@ with tab4:
     st.pyplot(fig_sc)
     plt.close(fig_sc)
 
+    # 経営判断インサイト
+    st.markdown("#### 💼 経営判断インサイト")
+    best_res = scenario_results[best_name]
+    worst_name = min(scenario_results, key=lambda k: scenario_results[k]["粗利インパクト"])
+    worst_res = scenario_results[worst_name]
+    impact_diff = best_res["粗利インパクト"] - worst_res["粗利インパクト"]
+    st.info(f"""
+**推奨シナリオ「{best_name}」を選択した場合の経営判断ポイント:**
+- 最良案 vs 最悪案の粗利差分: **{fmt_man(impact_diff)}**
+- 予測ROAS: **{best_res['予測ROAS']:.2f}**（損益分岐点1.0を{'上回っています ✅' if best_res['予測ROAS'] > 1.0 else '下回っています ⚠️'}）
+- 予測離脱率: **{best_res['予測離脱率']*100:.1f}%**
+
+GA4・Lookerでは不可能なシナリオ定量比較を、月額26万円のL3プレミアムパックがリアルタイムで提供します。
+""")
+
     # CSVダウンロード
     st.markdown("#### データエクスポート")
     csv_data = compare_df.to_csv(index=False, encoding="utf-8-sig")
@@ -697,7 +766,8 @@ with tab4:
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("""
 <div style="text-align:center; color:#64748b; font-size:0.85rem; padding:1rem 0;">
-    🎯 EC What-If シミュレーター | LightGBM + SHAP | L3プレミアム機能<br>
-    <span style="color:#059669">広告費・価格・在庫・季節係数</span>を変えて、次の一手を科学的に判断
+    🎯 EC What-If シミュレーター | LightGBM + SHAP | <strong>L3 プレミアムパック 月額26万円</strong><br>
+    <span style="color:#059669">広告費・価格・在庫・季節係数</span>を変えて、次の一手を科学的に判断 —
+    GA4・Lookerでは見えない仮説検証をリアルタイム予測で即座に実行
 </div>
 """, unsafe_allow_html=True)

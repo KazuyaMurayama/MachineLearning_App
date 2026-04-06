@@ -163,7 +163,14 @@ with st.sidebar:
 4. タブ2「チャネル横断ROI」で広告効率を比較
 5. タブ4「アラート」でCSVダウンロード
 
-💡 **L3 月額26万円の価値**: 売上・広告・顧客・在庫を一元管理し、機会損失と離脱を未然に防ぎます。
+---
+💡 **L3 プレミアムパック 月額26万円の価値**
+
+GA4・Lookerでは見えない多軸分析を提供:
+- **RFM×チャネルROI** 横断ヒートマップ
+- **離脱放置コスト**を¥換算でリアルタイム表示
+- **在庫切迫 × 機会損失額**を即時把握
+- 月次CSVレポートをワンクリックで出力
 """)
 
 # =====================================================================
@@ -218,7 +225,8 @@ high_risk_count = len(high_risk_customers)
 st.markdown("""
 <div class="hero-section">
 <h1>📈 EC経営ダッシュボード</h1>
-<p>売上・広告・顧客・在庫を1画面で把握。月額26万円のプレミアムパックの中核。</p>
+<p>売上・広告・顧客・在庫を1画面で把握 — <strong>L3 プレミアムパック 月額26万円</strong>の中核機能<br>
+<span style="font-size:0.95rem;opacity:0.9;">GA4・Lookerでは見えない "次の一手" を統合ビューで即座に提示。機会損失・離脱リスクを¥換算でリアルタイム表示。</span></p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -354,7 +362,7 @@ with tab1:
     cross_table = summary_data.pivot_table(
         values="売上", index="チャネル", columns="カテゴリ", aggfunc="sum", fill_value=0
     )
-    cross_table_disp = cross_table.applymap(lambda x: f"¥{int(x/10000):,}万")
+    cross_table_disp = cross_table.map(lambda x: f"¥{int(x/10000):,}万")
     st.dataframe(cross_table_disp, use_container_width=True)
 
 # ------------------------------------------------------------------
@@ -385,7 +393,7 @@ with tab2:
     st.pyplot(fig)
     plt.close(fig)
 
-    st.markdown("### 🔥 横断分析")
+    st.markdown("### 🔥 横断分析 — GA4・Lookerでは見えない「RFM×チャネルROI」")
 
     col_c, col_d = st.columns(2)
 
@@ -542,13 +550,18 @@ with tab4:
         stockout_products = products[products["在庫数"] == 0]
         potential_loss = int((stockout_products["単価"] * 10).sum())  # 仮: 想定10個販売機会
         low_stock_count = len(products[products["在庫数"] < 20])
+        # 在庫切迫商品（1〜19個）の追加機会損失試算
+        low_stock_products = products[(products["在庫数"] > 0) & (products["在庫数"] < 20)]
+        low_stock_opp_loss = int((low_stock_products["単価"] * (20 - low_stock_products["在庫数"]).clip(0)).sum())
+        total_inv_risk = potential_loss + low_stock_opp_loss
         st.markdown(f"""
         <div class="alert-box">
-        <strong>📦 在庫切れ予想損失額（試算）</strong><br>
+        <strong>📦 在庫リスク 機会損失試算</strong><br>
         在庫切れ商品数: <strong>{len(stockout_products)} 商品</strong><br>
         在庫切迫（< 20）商品数: <strong>{low_stock_count} 商品</strong><br>
-        在庫切れによる想定機会損失（10個×単価）:<br>
-        <span style="font-size:1.5rem;font-weight:700;color:#DC2626;">¥{potential_loss:,}</span>
+        在庫切れ機会損失（10個×単価）:<br>
+        <span style="font-size:1.5rem;font-weight:700;color:#DC2626;">¥{potential_loss:,}</span><br>
+        <span style="font-size:0.9rem;color:#64748b;">切迫分含む合計機会損失: <strong style="color:#DC2626;">¥{total_inv_risk:,}</strong></span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -557,16 +570,21 @@ with tab4:
         if len(high_risk_customers) > 0:
             avg_purchase = int(high_risk_customers["累計購入額"].mean())
             churn_loss = int(avg_purchase * len(high_risk_customers) * 0.3)  # 仮: 30%が離脱
+            annual_purchase_freq = 2.5  # 年間購入頻度推定
+            annual_loss = int(churn_loss * annual_purchase_freq)
         else:
             avg_purchase = 0
             churn_loss = 0
+            annual_loss = 0
         st.markdown(f"""
         <div class="alert-box">
         <strong>👥 離脱放置コスト（試算）</strong><br>
         離脱リスク高顧客: <strong>{high_risk_count} 人</strong><br>
         平均累計購入額: <strong>¥{avg_purchase:,}</strong><br>
-        30%離脱した場合の想定損失額:<br>
-        <span style="font-size:1.5rem;font-weight:700;color:#DC2626;">¥{churn_loss:,}</span>
+        30%離脱した場合の想定損失額（月次）:<br>
+        <span style="font-size:1.5rem;font-weight:700;color:#DC2626;">¥{churn_loss:,}</span><br>
+        <span style="font-size:0.9rem;color:#64748b;">年間換算（購入頻度×2.5）: <strong style="color:#DC2626;">¥{annual_loss:,}</strong></span><br>
+        <span style="font-size:0.85rem;color:#64748b;">💡 L3プレミアム月額26万円で離脱を防止すれば投資回収比率 <strong>{annual_loss // 260000 if annual_loss > 0 else 0}倍</strong></span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -606,4 +624,9 @@ with tab4:
 # =====================================================================
 
 st.markdown("---")
-st.caption("EC経営ダッシュボード | ECデータサイエンス L3プレミアム | v1.0")
+st.markdown("""
+<div style="text-align:center; color:#64748b; font-size:0.85rem; padding:0.5rem 0;">
+    📈 EC経営ダッシュボード | <strong>L3 プレミアムパック 月額26万円</strong> | ECデータサイエンス v1.0<br>
+    GA4・Lookerでは見えない "次の一手" — 売上・広告・顧客・在庫を統合し、機会損失と離脱を¥換算で即時可視化
+</div>
+""", unsafe_allow_html=True)

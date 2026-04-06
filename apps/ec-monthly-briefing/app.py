@@ -114,6 +114,17 @@ with st.sidebar:
 1. 離脱リスクしきい値を調整
 2. 各タブで詳細データを確認
 3. アクションタブからレポートをダウンロード
+
+---
+💡 **L3 プレミアムパック 月額26万円の価値**
+
+- AIが自動生成するエグゼクティブサマリー
+- チャネル別AI診断コメント（ROAS改善提案付き）
+- 離脱放置による年間損失額を¥換算で試算
+- 翌月アクション3件をデータドリブンで自動生成
+- Markdownレポートをワンクリックでダウンロード
+
+GA4・Lookerでは見えない "次の一手" を5分で経営会議に提出。
 """)
 
 # ===== データ読み込み =====
@@ -158,7 +169,8 @@ high_risk_ratio = len(high_risk_customers) / len(customers) * 100
 st.markdown("""
 <div class="hero-section">
 <h1>📰 EC月次AIブリーフィング</h1>
-<p>月次経営会議の資料が5分で完成。月額26万円プレミアムパックの伴走支援を可視化。</p>
+<p>月次経営会議の資料が5分で完成 — <strong>L3 プレミアムパック 月額26万円</strong>の伴走支援を可視化<br>
+<span style="font-size:0.95rem;opacity:0.9;">GA4・Lookerでは見えない "次の一手" を、AI自動生成のエグゼクティブサマリーとアクション提案で即座に提示</span></p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -520,12 +532,19 @@ with tab3:
         avg_purchase = customers["累計購入額"].mean()
         avg_annual_rate = 2.5  # 年間購入頻度推定
         annual_loss_est = int(len(high_risk_customers) * avg_purchase * avg_annual_rate * 0.3)
+        roi_multiple = annual_loss_est // 260000 if annual_loss_est > 0 else 0
+        monthly_loss_est = int(annual_loss_est / 12)
         st.markdown(f"""
 <div class="highlight-box">
 <strong>💸 離脱放置による年間損失額試算</strong><br>
-離脱リスク高顧客 <strong>{len(high_risk_customers)}人</strong>が30%流出した場合、
-年間損失は <span style="color:#92400E;font-size:1.3rem;font-weight:700;">¥{annual_loss_est:,}</span> に相当します。<br>
-今月中の再エンゲージ施策が収益維持の鍵です。
+離脱リスク高顧客 <strong>{len(high_risk_customers)}人</strong>が30%流出した場合、<br>
+月次損失: <span style="color:#92400E;font-size:1.1rem;font-weight:700;">¥{monthly_loss_est:,}</span>
+／ 年間損失: <span style="color:#92400E;font-size:1.3rem;font-weight:700;">¥{annual_loss_est:,}</span><br>
+<span style="font-size:0.9rem;color:#64748b;">
+💡 <strong>L3プレミアムパック 月額26万円</strong>で離脱防止施策を実行すれば、
+投資回収比率 <strong style="color:#059669;">{roi_multiple}倍</strong>（年間換算）。
+GA4・Lookerでは顧客ごとの離脱リスクスコアは算出不可。
+</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -559,6 +578,22 @@ with tab3:
 # ===========================
 with tab4:
     st.subheader("次月重点アクション（AI自動生成）")
+    st.info("💼 **L3 プレミアムパック 月額26万円の伴走支援** — データドリブンな次月アクション3件をAIが自動生成。GA4・Lookerでは見えない「実行すべき施策」を即座に提示します。")
+
+    # 投資対効果サマリーカード
+    if len(high_risk_customers) > 0:
+        avg_p = customers["累計購入額"].mean()
+        annual_loss_for_tab4 = int(len(high_risk_customers) * avg_p * 2.5 * 0.3)
+        roi_x = annual_loss_for_tab4 // 260000 if annual_loss_for_tab4 > 0 else 0
+        st.markdown(f"""
+<div class="highlight-box">
+<strong>📊 月額26万円 投資対効果サマリー</strong><br>
+年間損失回避額: <span style="color:#92400E;font-size:1.2rem;font-weight:700;">¥{annual_loss_for_tab4:,}</span>
+／ 年間投資額: ¥3,120,000（月額26万×12）<br>
+<strong style="color:#059669;font-size:1.1rem;">投資回収比率: {roi_x}倍</strong>
+— 経営会議に提出できる定量根拠をワンクリックで生成。
+</div>
+""", unsafe_allow_html=True)
 
     cur_ads_for_action = ads_df[ads_df["年月"] == current_m].groupby("チャネル").agg(
         ROAS=("ROAS", "mean"),
