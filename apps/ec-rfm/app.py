@@ -96,6 +96,27 @@ with st.sidebar:
     st.markdown("---")
     st.caption("AI経営パートナー × データサイエンス")
     st.markdown("---")
+    st.markdown("## 🔄 遷移分析 期間設定")
+    _p_tmp = os.path.join(os.path.dirname(__file__), "sample_data", "purchase_history.csv")
+    if os.path.exists(_p_tmp):
+        _df_tmp = pd.read_csv(_p_tmp)
+        _df_tmp["注文日"] = pd.to_datetime(_df_tmp["注文日"])
+        _date_min = _df_tmp["注文日"].min().date()
+        _date_max = _df_tmp["注文日"].max().date()
+    else:
+        import datetime as _dt
+        _date_min = _dt.date(2022, 1, 1)
+        _date_max = _dt.date.today()
+    _date_mid_default = _date_min + (_date_max - _date_min) // 2
+    split_date = st.date_input(
+        "分析期間の分割点",
+        value=_date_mid_default,
+        min_value=_date_min,
+        max_value=_date_max,
+        key="split_date",
+        help="この日付を境に前半/後半に分けてセグメント遷移を計算します",
+    )
+    st.markdown("---")
     st.markdown("## 📊 施策シミュレーション設定")
     slider_vip = st.slider("VIP維持率向上 (%)", 1, 30, 10, key="sl_vip") / 100
     slider_good = st.slider("優良客単価向上 (%)", 1, 30, 15, key="sl_good") / 100
@@ -220,12 +241,59 @@ follow_up_count = (rfm["ステータス"] == "要フォロー").sum()
 follow_up_avg_ltv = rfm.loc[rfm["ステータス"] == "要フォロー", "累計金額"].mean() if follow_up_count > 0 else 0
 follow_up_expected = follow_up_count * follow_up_avg_ltv * slider_dormant
 
-k1, k2, k3, k4, k5 = st.columns(5)
+# ── セグメント遷移分析（前半/後半） ──
+SEGMENT_ORDER = ["VIP顧客", "優良顧客", "一般顧客", "休眠顧客", "離脱顧客"]
+SEGMENT_RANK = {s: i for i, s in enumerate(SEGMENT_ORDER)}
+
+def compute_rfm_for_period(period_df, ref_date):
+    """指定期間のDataFrameからRFMセグメントを計算して返す"""
+    if period_df.empty:
+        return pd.DataFrame(columns=["顧客ID", "セグメント"])
+    cols = {"顧客名": ("顧客名", "first")} if "顧客名" in period_df.columns else {}
+    agg_dict = {**cols,
+                "最終購買日": ("注文日", "max"),
+                "購買回数": ("注文日", "count"),
+                "累計金額": ("注文金額", "sum")}
+    p_rfm = period_df.groupby("顧客ID").agg(**agg_dict).reset_index()
+    p_rfm["Recency"] = (ref_date - p_rfm["最終購買日"]).dt.days
+    p_rfm["R"] = safe_qcut(p_rfm["Recency"], 5)
+    p_rfm["R"] = 6 - p_rfm["R"]
+    p_rfm["F"] = safe_qcut(p_rfm["購買回数"], 5)
+    p_rfm["M"] = safe_qcut(p_rfm["累計金額"], 5)
+    p_rfm["合計"] = p_rfm["R"] + p_rfm["F"] + p_rfm["M"]
+    p_rfm["セグメント"] = p_rfm["合計"].apply(assign_segment)
+    return p_rfm[["顧客ID", "セグメント"]]
+
+split_dt = pd.Timestamp(split_date)
+df_first = df[df["注文日"] < split_dt]
+df_second = df[df["注文日"] >= split_dt]
+
+rfm_first = compute_rfm_for_period(df_first, split_dt - pd.Timedelta(days=1))
+rfm_second = compute_rfm_for_period(df_second, reference_date)
+
+transition_df = rfm_first.merge(rfm_second, on="顧客ID", suffixes=("_前半", "_後半"))
+
+# セグメント悪化人数（ランクが下がった顧客）
+def count_degraded(trans_df):
+    if trans_df.empty:
+        return 0
+    cnt = 0
+    for _, row in trans_df.iterrows():
+        r_before = SEGMENT_RANK.get(row["セグメント_前半"], 99)
+        r_after = SEGMENT_RANK.get(row["セグメント_後半"], 99)
+        if r_after > r_before:
+            cnt += 1
+    return cnt
+
+degraded_count = count_degraded(transition_df)
+
+k1, k2, k3, k4, k5, k6 = st.columns(6)
 k1.markdown(f'<div class="kpi-card"><div class="kpi-value">{vip_count}人</div><div class="kpi-label">VIP顧客数</div><div class="kpi-label">{vip_pct:.0f}% / 全顧客</div></div>', unsafe_allow_html=True)
 k2.markdown(f'<div class="kpi-card"><div class="kpi-value">{dormant_count}人</div><div class="kpi-label">休眠+離脱顧客数</div><div class="kpi-label">{dormant_pct:.0f}% / 要フォロー</div></div>', unsafe_allow_html=True)
 k3.markdown(f'<div class="kpi-card"><div class="kpi-value">¥{avg_ltv:,.0f}</div><div class="kpi-label">全顧客平均LTV</div></div>', unsafe_allow_html=True)
 k4.markdown(f'<div class="kpi-card"><div class="kpi-value">{repeat_rate:.1f}%</div><div class="kpi-label">リピート率</div></div>', unsafe_allow_html=True)
 k5.markdown(f'<div class="kpi-card"><div class="kpi-value" style="color:#DC2626;">⚠️ {follow_up_count}人</div><div class="kpi-label">要フォロー顧客</div><div class="kpi-label">予測日超過</div></div>', unsafe_allow_html=True)
+k6.markdown(f'<div class="kpi-card"><div class="kpi-value" style="color:#DC2626;">📉 {degraded_count}人</div><div class="kpi-label">セグメント悪化</div><div class="kpi-label">前半比ランクダウン</div></div>', unsafe_allow_html=True)
 
 if follow_up_count > 0:
     st.warning(f"⚡ 要フォロー顧客 {follow_up_count}人に今すぐクーポン配信で ¥{follow_up_expected:,.0f} の増収見込み（復帰率 {slider_dormant:.0%} 想定）")
@@ -344,6 +412,110 @@ with tab2:
     fig_hist.tight_layout()
     st.pyplot(fig_hist)
     plt.close(fig_hist)
+
+    # ── セグメント遷移マトリクス ──
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.markdown("#### 🔄 セグメント遷移マトリクス（前半 → 後半）")
+    st.caption(f"分割点: {split_date}  |  前半期間: {df['注文日'].min().date()} ～ {(split_dt - pd.Timedelta(days=1)).date()}  |  後半期間: {split_dt.date()} ～ {reference_date.date()}")
+
+    if transition_df.empty:
+        st.info("遷移分析に必要なデータが不足しています（前半・後半どちらかに購買が存在しない）。サイドバーの分割点を調整してください。")
+    else:
+        # クロス集計
+        present_segs = [s for s in SEGMENT_ORDER if s in transition_df["セグメント_前半"].values or s in transition_df["セグメント_後半"].values]
+        matrix = pd.crosstab(
+            transition_df["セグメント_前半"],
+            transition_df["セグメント_後半"],
+        ).reindex(index=SEGMENT_ORDER, columns=SEGMENT_ORDER, fill_value=0)
+        matrix = matrix.loc[matrix.index.isin(present_segs), matrix.columns.isin(present_segs)]
+
+        n_segs = len(matrix)
+        fig_tr, ax_tr = plt.subplots(figsize=(max(7, n_segs * 1.4), max(5, n_segs * 1.1)))
+
+        # セルごとに色を決定: 対角=青、改善(上)=緑、悪化(下)=赤
+        color_matrix = np.zeros((n_segs, n_segs, 4))  # RGBA
+        row_labels = list(matrix.index)
+        col_labels = list(matrix.columns)
+        max_val = matrix.values.max() if matrix.values.max() > 0 else 1
+
+        for ri, rseg in enumerate(row_labels):
+            for ci, cseg in enumerate(col_labels):
+                val = matrix.loc[rseg, cseg]
+                alpha = 0.15 + 0.75 * (val / max_val)
+                r_rank = SEGMENT_RANK.get(rseg, 0)
+                c_rank = SEGMENT_RANK.get(cseg, 0)
+                if ri == ci:  # 対角: 維持 → 青
+                    color_matrix[ri, ci] = [0.34, 0.45, 0.94, alpha]
+                elif c_rank < r_rank:  # 改善（ランク上昇） → 緑
+                    color_matrix[ri, ci] = [0.13, 0.65, 0.40, alpha]
+                else:  # 悪化（ランク低下） → 赤
+                    color_matrix[ri, ci] = [0.86, 0.20, 0.18, alpha]
+
+        ax_tr.imshow(color_matrix, aspect="auto")
+        ax_tr.set_xticks(range(n_segs))
+        ax_tr.set_xticklabels(col_labels, rotation=30, ha="right", fontsize=10)
+        ax_tr.set_yticks(range(n_segs))
+        ax_tr.set_yticklabels(row_labels, fontsize=10)
+        ax_tr.set_xlabel("後半セグメント", fontsize=11)
+        ax_tr.set_ylabel("前半セグメント", fontsize=11)
+        ax_tr.set_title("セグメント遷移マトリクス（行: 前半 → 列: 後半）", fontsize=12, pad=12)
+
+        for ri in range(n_segs):
+            for ci in range(n_segs):
+                val = matrix.values[ri, ci]
+                if val > 0:
+                    ax_tr.text(ci, ri, str(val), ha="center", va="center",
+                               fontsize=11, fontweight="bold",
+                               color="white" if color_matrix[ri, ci, 3] > 0.55 else "#333333")
+
+        fig_tr.tight_layout()
+        st.pyplot(fig_tr)
+        plt.close(fig_tr)
+
+        # ── 悪化サマリー警告 ──
+        warn_lines = []
+        for rseg in row_labels:
+            r_rank = SEGMENT_RANK.get(rseg, 0)
+            for cseg in col_labels:
+                c_rank = SEGMENT_RANK.get(cseg, 0)
+                if c_rank > r_rank:
+                    n_move = int(matrix.loc[rseg, cseg])
+                    if n_move > 0:
+                        warn_lines.append(f"⚠️ {rseg} → {cseg}: {n_move}人")
+
+        if warn_lines:
+            st.warning("**セグメント悪化アラート**\n\n" + "\n\n".join(warn_lines))
+        else:
+            st.success("悪化したセグメント遷移はありません。")
+
+        # ── 改善施策の自動提示 ──
+        st.markdown("##### 💡 改善施策テンプレート")
+        TRANSITION_TACTICS = {
+            ("VIP顧客", "優良顧客"): "VIP限定クーポン配信（15%OFF）で購買頻度を維持し、VIPランクへの復帰を促進",
+            ("VIP顧客", "一般顧客"): "VIP専用リテンションプログラム（ポイント2倍 + 先行販売権）を即時展開",
+            ("VIP顧客", "休眠顧客"): "VIP向け特別オファー（専任スタッフによる個別フォロー）で緊急復帰を図る",
+            ("VIP顧客", "離脱顧客"): "VIP専用30%OFFオファーと離脱理由アンケートを実施し、ブランドロイヤルティ再構築",
+            ("優良顧客", "一般顧客"): "アップセル提案（関連商品セット割引）と購入金額ポイント強化で優良ランク維持",
+            ("優良顧客", "休眠顧客"): "再購入クーポン（20%OFF）＋リマインドメールで休眠からの早期復帰を促進",
+            ("優良顧客", "離脱顧客"): "特別割引＋パーソナライズドメールで優良顧客の離脱を防止",
+            ("一般顧客", "休眠顧客"): "リピート促進キャンペーン（初回リピートクーポン10%OFF）で定期購買習慣を形成",
+            ("一般顧客", "離脱顧客"): "低単価エントリー商品のご案内とリマインドメールで再エンゲージを図る",
+            ("休眠顧客", "離脱顧客"): "最終手段として期間限定30%OFFオファーを送付し、無反応の場合は広告除外リストへ",
+        }
+
+        shown_tactics = set()
+        for rseg in row_labels:
+            r_rank = SEGMENT_RANK.get(rseg, 0)
+            for cseg in col_labels:
+                c_rank = SEGMENT_RANK.get(cseg, 0)
+                if c_rank > r_rank:
+                    n_move = int(matrix.loc[rseg, cseg])
+                    if n_move > 0:
+                        key = (rseg, cseg)
+                        tactic = TRANSITION_TACTICS.get(key)
+                        if tactic and key not in shown_tactics:
+                            shown_tactics.add(key)
+                            st.info(f"**{rseg} → {cseg}（{n_move}人）**: {tactic}")
 
 # ── タブ3: 施策提案 ──
 with tab3:
