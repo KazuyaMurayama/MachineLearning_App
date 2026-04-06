@@ -257,7 +257,7 @@ st.markdown("""
 }
 .kpi-card .value {
     color: #1e293b;
-    font-size: 1.5rem;
+    font-size: 2.4rem;
     font-weight: bold;
 }
 .kpi-card .delta-pos { color: #16a34a; font-size: 0.9rem; }
@@ -343,11 +343,14 @@ st.sidebar.caption("月次レポート自動生成 v1.2")
 st.markdown("""
 <div class="hero-section">
 <h1>📊 月次レポート自動生成</h1>
-<p>freee/MFの試算表CSVをアップロードするだけで、<br>前月比・前年同月比・異常値検知を自動実行します。</p>
+<p>試算表CSVをアップロードするだけ。前月比・異常値・キャッシュフローを自動分析。</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.info("💡 **導入効果**: レポート作成時間 **3時間→15分**（年間約120時間の工数削減、約¥180万相当）")
+col_b, col_a, col_e = st.columns(3)
+col_b.markdown("### 😓 Before\n月3時間のExcel手作業")
+col_a.markdown("### ✅ After\n15分で月次レポート完成")
+col_e.markdown("### 💰 年間効果\n年間¥180万の工数削減")
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
