@@ -459,6 +459,115 @@ with tab1:
         c3.metric("🟡 中リスク", f"{n_m}社")
         c4.metric("🟢 低リスク", f"{n_l}社")
 
+        # =====================================================================
+        # 解約コスト試算バナー
+        # =====================================================================
+        # 年間顧問料の計算（月額 × 12）
+        if "月額顧問料" in df_s.columns:
+            df_s["年間顧問料"] = df_s["月額顧問料"] * 12
+        else:
+            df_s["年間顧問料"] = 0
+
+        total_annual_revenue = df_s["年間顧問料"].sum()
+
+        high_risk_df = df_s[df_s["予測残存月数"] <= RISK_HIGH]
+        med_risk_df  = df_s[(df_s["予測残存月数"] > RISK_HIGH) & (df_s["予測残存月数"] <= RISK_MED)]
+
+        high_loss = high_risk_df["年間顧問料"].sum()
+        high_med_loss = high_loss + med_risk_df["年間顧問料"].sum()
+
+        high_loss_man = high_loss / 10_000
+        high_med_loss_man = high_med_loss / 10_000
+        high_ratio = (high_loss / total_annual_revenue * 100) if total_annual_revenue > 0 else 0
+        high_med_ratio = (high_med_loss / total_annual_revenue * 100) if total_annual_revenue > 0 else 0
+
+        st.markdown("---")
+        st.subheader("💸 解約コスト試算")
+
+        st.error(
+            f"⚠️ 離反リスク高の顧問先 **{len(high_risk_df)}社** を放置した場合の年間損失額: "
+            f"**¥{high_loss_man:,.0f}万**　（全売上の **{high_ratio:.1f}%**）"
+        )
+        st.warning(
+            f"🟡 中リスクも含めた場合の年間損失額: "
+            f"**¥{high_med_loss_man:,.0f}万**　（全売上の **{high_med_ratio:.1f}%**）"
+        )
+
+        # 解約インパクト メトリクス（3列）
+        m1, m2, m3 = st.columns(3)
+        m1.metric(
+            "高リスク顧問先数",
+            f"{len(high_risk_df)}社",
+            delta=None,
+            help=f"予測残存月数が{RISK_HIGH}ヶ月以内の顧問先",
+        )
+        m2.metric(
+            "推定年間損失額（高リスク）",
+            f"¥{high_loss_man:,.0f}万",
+            delta=None,
+            help="高リスク顧問先の月額顧問料×12の合計",
+        )
+        m3.metric(
+            "売上に対する損失比率",
+            f"{high_ratio:.1f}%",
+            delta=None,
+            help="全顧問先年間売上に対する高リスク損失の割合",
+        )
+
+        # =====================================================================
+        # 今すぐ対応すべき顧問先 TOP3 カード
+        # =====================================================================
+        st.markdown("---")
+        st.subheader("🚨 今すぐ対応すべき顧問先 TOP3")
+        st.caption("離反リスクが最も高い3社。各カードの詳細を開くと逆SHAP改善要因も確認できます。")
+
+        top3 = df_s.head(3)
+        _model  = st.session_state.model
+        _le     = st.session_state.label_encoders
+        _feat   = st.session_state.feature_cols
+
+        for rank, (_, row) in enumerate(top3.iterrows(), start=1):
+            client_id = row.get("顧問先ID", f"顧問先{rank}")
+            pred_months = row["予測残存月数"]
+            annual_fee  = row.get("年間顧問料", 0)
+            risk_pct    = (pred_months / RISK_MED * 100) if RISK_MED > 0 else 0
+
+            # 逆SHAP 上位3要因（このクライアント行で算出）
+            try:
+                _row_feat = df.drop(columns=["顧問先ID", TARGET_COL, "予測残存月数", "リスクレベル", "年間顧問料"], errors="ignore")
+                _row_feat = _row_feat[df["顧問先ID"] == client_id].copy() if "顧問先ID" in df.columns else _row_feat.iloc[[rank - 1]]
+                _row_proc, _ = preprocess_data(_row_feat.copy(), target_col=None, label_encoders=_le, is_training=False)
+                _explainer = shap.TreeExplainer(_model)
+                _sv = _explainer.shap_values(_row_proc)
+                _sv_row = _sv[0] if len(_sv.shape) > 1 else _sv
+                # 離反リスクを高める要因（SHAP値が負 = 残存月数を短くする）
+                _factor_df = pd.DataFrame({
+                    "特徴量": _feat,
+                    "SHAP値": _sv_row,
+                }).sort_values("SHAP値").head(3)
+                top3_factors = [
+                    f"**{r['特徴量']}**（{r['SHAP値']:.1f}ヶ月）"
+                    for _, r in _factor_df.iterrows()
+                ]
+            except Exception:
+                top3_factors = ["（要因分析エラー）"]
+
+            badge_color = "#EF4444" if pred_months <= RISK_HIGH else "#F59E0B"
+            with st.expander(
+                f"{'🥇' if rank==1 else '🥈' if rank==2 else '🥉'} "
+                f"【{rank}位】{client_id}　"
+                f"予測残存: {pred_months:.1f}ヶ月　年間顧問料: ¥{annual_fee/10_000:,.0f}万",
+                expanded=(rank == 1),
+            ):
+                card_c1, card_c2, card_c3 = st.columns(3)
+                card_c1.metric("離反まで（予測）", f"{pred_months:.1f}ヶ月")
+                card_c2.metric("年間顧問料", f"¥{annual_fee/10_000:,.1f}万")
+                card_c3.metric("リスク達成率", f"{risk_pct:.0f}%", help="残存月数/中リスク閾値。低いほど危険")
+
+                st.markdown("**⚠️ 離反リスクを高める要因 TOP3（逆SHAP）**")
+                for fi, factor_txt in enumerate(top3_factors, 1):
+                    st.markdown(f"{fi}. {factor_txt}")
+
         st.markdown("---")
         st.subheader("🔴 要注意顧問先 TOP10")
         top10 = df_s.head(10)
