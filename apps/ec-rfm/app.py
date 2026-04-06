@@ -420,7 +420,8 @@ with tab2:
 
     # ── セグメント遷移マトリクス ──
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    st.markdown("#### 🔄 セグメント遷移マトリクス（前半 → 後半）")
+    st.markdown("### 📊 セグメント遷移分析（前半→後半）")
+    st.caption("顧客がどのセグメントからどのセグメントに移動したかを可視化します")
     st.caption(f"分割点: {split_date}  |  前半期間: {df['注文日'].min().date()} ～ {(split_dt - pd.Timedelta(days=1)).date()}  |  後半期間: {split_dt.date()} ～ {reference_date.date()}")
 
     if transition_df.empty:

@@ -298,6 +298,7 @@ if st.session_state.get("sales_target", 0) <= 1000000:
 # ---------------------------------------------------------------------------
 # 予測サマリーバナー（KPIカード直下）
 # ---------------------------------------------------------------------------
+st.markdown("### 📈 売上予測（AI推計）")
 if _next_month_pred is not None and _mom_forecast_pct is not None:
     _pred_man = _next_month_pred / 10000
     _margin_man = _confidence_margin / 10000
@@ -637,6 +638,7 @@ with tab1:
         _cf1, _cf2 = st.columns(2)
         _cf1.caption(f"予測方法: 直近6ヶ月移動平均 + 線形回帰（numpy.polyfit degree=1）")
         _cf2.caption(f"信頼区間: ±10%（簡易推定）")
+        st.info("💡 予測に基づく推奨アクション: 売上トレンドを踏まえ、広告予算配分・在庫補充・キャンペーン施策を今月中に見直しましょう。")
 
     # Year-over-year comparison table
     if prev_sales is not None:

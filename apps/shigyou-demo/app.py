@@ -482,6 +482,7 @@ with tab1:
         high_med_ratio = (high_med_loss / total_annual_revenue * 100) if total_annual_revenue > 0 else 0
 
         st.markdown("---")
+        st.markdown("### ⚠️ 解約コスト試算")
         st.subheader("💸 解約コスト試算")
 
         st.error(
@@ -528,6 +529,7 @@ with tab1:
         # 今すぐ対応すべき顧問先 TOP3 カード
         # =====================================================================
         st.markdown("---")
+        st.markdown("### 🎯 今すぐ対応すべき顧問先")
         st.subheader("🚨 今すぐ対応すべき顧問先 TOP3")
         st.caption("離反リスクが最も高い3社。各カードの詳細を開くと逆SHAP改善要因も確認できます。")
 

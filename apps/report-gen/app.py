@@ -493,7 +493,7 @@ if st.session_state.df_cur is not None:
             st.info(insight_msg)
 
     # タブ
-    tab1,tab2,tab3,tab4,tab5=st.tabs(["📋 レポートプレビュー","📈 月次推移グラフ","⚠️ 異常値アラート","📊 データプレビュー","💰 キャッシュフロー推計"])
+    tab1,tab2,tab3,tab4,tab5=st.tabs(["📋 レポートプレビュー","📈 月次推移グラフ","⚠️ 異常値アラート","📊 データプレビュー","💰 キャッシュフロー推計（簡易版）"])
 
     with tab1:
         st.markdown(report_md)
@@ -564,6 +564,7 @@ if st.session_state.df_cur is not None:
 
     with tab5:
         st.header("💰 キャッシュフロー推計（簡易・間接法）")
+        st.info("間接法による営業キャッシュフローの簡易推計です。減価償却費は業種プリセットまたは手動入力で設定できます。")
         st.markdown(f"""
 **推計式**: 営業CF ≈ 経常利益 ＋ 減価償却費（売上高の **{dep_rate:.1f}%** で推定）－ 運転資金増加（売上増加分の **{wc_rate:.0f}%**）
 
