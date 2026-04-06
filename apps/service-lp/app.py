@@ -117,16 +117,22 @@ st.markdown("""
 def render_hero():
     st.markdown("""
 <div class="hero-section">
-<h1>AI経営パートナー × データサイエンス</h1>
-<p>税理士・社労士・行政書士の経営判断を、データとAIで変革する</p>
-<p>Amazon Japan広告チーム出身のデータサイエンティストが、<br>
-貴社専用のAI予測モデルで「見えなかったリスク」を可視化します。</p>
+<h1>顧問先の離反、気づいてますか？</h1>
+<p>AIが離反リスクを数値化。顧問先の解約を未然に防ぎ、事務所収益を守ります。</p>
 </div>
 """,unsafe_allow_html=True)
     c1,c2,c3=st.columns(3)
-    c1.metric("独自技術","逆SHAPエンジン",help="「なぜリスクが高いか」ではなく「何を変えれば防げるか」を提案")
-    c2.metric("実績","新規売上 ¥7億",help="Amazon Japan広告チーム在籍時にROAS+30%改善を実現")
-    c3.metric("経営×DS","MBA取得",help="経営戦略とデータサイエンスの二刀流")
+    c1.metric("導入効果","年間¥150万削減",help="離反防止による顧問料収益の保全効果（試算）")
+    c2.metric("離反予防","解約率20%低減",help="AIによる早期シグナル検知で解約を未然に防止")
+    c3.metric("ROI","投資の15倍",help="月額サービス費用対比の収益保全効果")
+    st.markdown("---")
+    b1,b2,b3=st.columns(3)
+    with b1:
+        st.info("**Before**\n\n解約の連絡で初めて気づく")
+    with b2:
+        st.success("**After**\n\n3ヶ月前に離反シグナル検知")
+    with b3:
+        st.warning("**年間効果**\n\n顧問先1社あたり年50万円の収益保全")
 
 def render_service_tiers():
     st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
