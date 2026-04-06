@@ -672,8 +672,9 @@ with tab2:
 # === 相互リンク ===
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
+_card=lambda icon,title,url,desc,action: f'<div style="border:1px solid #E2E8F0;border-radius:12px;padding:20px;text-align:center;height:100%;"><div style="font-size:2rem;">{icon}</div><h4 style="margin:8px 0 4px;"><a href="{url}" target="_blank" style="text-decoration:none;color:#0891B2;">{title}</a></h4><p style="font-size:.85rem;color:#475569;margin:0 0 8px;">{desc}</p><small style="color:#059669;">▶ {action}</small></div>'
 fc1, fc2, fc3 = st.columns(3)
-fc1.markdown("🛡️ [安心パッケージ](https://compliance-pack.streamlit.app)  \n守秘義務契約・AI処理同意書")
-fc2.markdown("📝 [契約書ドラフトAI](https://contract-draft.streamlit.app)  \n顧問契約書を自動生成")
-fc3.markdown("🔴 [入金遅延アラート](https://payment-alert.streamlit.app)  \n入金遅延を早期発見")
+fc1.markdown(_card("🛡️","安心パッケージ","https://shigyou-compliance.streamlit.app","AI導入コンプライアンス対応","AI導入のコンプライアンス準備"),unsafe_allow_html=True)
+fc2.markdown(_card("📝","契約書ドラフトAI","https://shigyou-contract.streamlit.app","顧問契約書を自動生成","顧問契約書の自動生成"),unsafe_allow_html=True)
+fc3.markdown(_card("🏠","士業ポータル","https://shigyou-ai-tools.streamlit.app","全ツール一覧","全ツール一覧"),unsafe_allow_html=True)
 st.caption("AI経営パートナー × データサイエンス | 申請書類チェッカー v1.0")
