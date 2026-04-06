@@ -68,21 +68,108 @@ def calc_yoy(df_cur,df_prev):
         except: pass
     return result
 
+def estimate_cause_and_action(acct,direction,pct,mom):
+    """異常値に対する推定原因と推奨アクションを返す"""
+    pct_abs=abs(pct)
+    # 売上高の増減
+    if acct=="売上高":
+        if direction=="増加":
+            cost_data=mom.get("売上原価",{})
+            if cost_data and cost_data.get("pct",0)>0:
+                return ("売上原価も連動増加→取引量増加が主因",
+                        "利益率が維持されているか確認を推奨")
+            return ("売上増加の主因を特定してください",
+                    "価格改定・新規取引先・季節要因を確認")
+        else:
+            return ("売上減少→取引量減少または単価下落の可能性",
+                    "主要取引先別の売上内訳を確認を推奨")
+    # 売上原価
+    if acct=="売上原価":
+        sales_data=mom.get("売上高",{})
+        if direction=="増加":
+            if sales_data and sales_data.get("pct",0)>0:
+                return ("売上増加に伴う原価増",
+                        "粗利率が悪化していないか確認を推奨")
+            return ("売上横ばいで原価増→仕入単価上昇の可能性",
+                    "仕入先との価格交渉を検討")
+        else:
+            return ("原価減少→仕入量減少または単価改善",
+                    "売上への影響がないか確認を推奨")
+    # 売上総利益
+    if acct=="売上総利益":
+        if direction=="増加":
+            return ("粗利改善→売上増または原価率改善",
+                    "改善要因を特定し、継続施策を検討")
+        else:
+            return ("粗利悪化→原価率上昇の可能性",
+                    "原価内訳の精査と改善策の検討を推奨")
+    # 販売管理費計
+    if acct=="販売管理費計":
+        if direction=="増加":
+            return (f"前月比+{pct_abs:.0f}%増。一時的経費増の可能性",
+                    "一時的支出か恒常的増加か確認を推奨")
+        else:
+            return ("販管費減少→コスト削減効果の可能性",
+                    "必要な投資まで削減していないか確認")
+    # 営業利益
+    if acct=="営業利益":
+        if direction=="減少":
+            sg_data=mom.get("販売管理費計",{})
+            sales_data=mom.get("売上高",{})
+            if sg_data:
+                cur_sales=sales_data.get("current",1) if sales_data else 1
+                prev_sales=sales_data.get("previous",1) if sales_data else 1
+                sg_cur=sg_data.get("current",0)
+                sg_prev=sg_data.get("previous",0)
+                if prev_sales!=0 and cur_sales!=0:
+                    rate_cur=sg_cur/cur_sales*100
+                    rate_prev=sg_prev/prev_sales*100
+                    return (f"販管費率が{rate_prev:.1f}%→{rate_cur:.1f}%に悪化",
+                            "経費見直しを推奨")
+            return ("営業利益悪化→売上減少または経費増加",
+                    "PL科目別の増減分析を推奨")
+        else:
+            return ("営業利益改善→売上増加または経費削減効果",
+                    "改善要因の特定と継続性を確認")
+    # 経常利益
+    if acct=="経常利益":
+        if direction=="減少":
+            return ("経常利益悪化→営業外損益の影響を確認",
+                    "借入金利息・為替差損等の確認を推奨")
+        else:
+            return ("経常利益改善→本業収益力の向上",
+                    "営業利益との乖離がないか確認")
+    # 広告宣伝費などその他の経費科目
+    if "費" in acct or "経費" in acct:
+        if direction=="増加":
+            return (f"前月比+{pct_abs:.0f}%増。一時的キャンペーンか確認",
+                    "予算対比と費用対効果の確認を推奨")
+        else:
+            return (f"前月比{pct_abs:.0f}%減少",
+                    "削減が業務に影響していないか確認")
+    # デフォルト
+    return (f"前月比{pct_abs:.0f}%の{direction}",
+            "原因の特定と影響範囲の確認を推奨")
+
 def detect_anomalies(mom,yoy,threshold=ANOMALY_THRESHOLD):
     """異常値（前月比or前年同月比でthreshold以上変動）を検出"""
     anomalies=[]
     for acct,data in mom.items():
         if abs(data["pct"])>=threshold*100:
             direction="増加" if data["pct"]>0 else "減少"
+            cause,action=estimate_cause_and_action(acct,direction,data["pct"],mom)
             anomalies.append({"科目":acct,"種別":"前月比","変動率":f"{data['pct']:+.1f}%","方向":direction,
                 "当月":f"{data['current']:,.0f}万円","前月":f"{data['previous']:,.0f}万円",
-                "差額":f"{data['change']:+,.0f}万円","severity":"🔴" if abs(data["pct"])>=50 else "🟡"})
+                "差額":f"{data['change']:+,.0f}万円","severity":"🔴" if abs(data["pct"])>=50 else "🟡",
+                "推定原因":cause,"推奨アクション":action})
     for acct,data in yoy.items():
         if abs(data["pct"])>=threshold*100:
             direction="増加" if data["pct"]>0 else "減少"
+            cause,action=estimate_cause_and_action(acct,direction,data["pct"],mom)
             anomalies.append({"科目":acct,"種別":"前年同月比","変動率":f"{data['pct']:+.1f}%","方向":direction,
                 "当月":f"{data['current']:,.0f}万円","前年同月":f"{data['prev_year']:,.0f}万円",
-                "差額":f"{data['change']:+,.0f}万円","severity":"🔴" if abs(data["pct"])>=50 else "🟡"})
+                "差額":f"{data['change']:+,.0f}万円","severity":"🔴" if abs(data["pct"])>=50 else "🟡",
+                "推定原因":cause,"推奨アクション":action})
     return sorted(anomalies,key=lambda x:abs(float(x["変動率"].replace("%","").replace("+",""))),reverse=True)
 
 def generate_report_md(df_cur,df_prev,mom,yoy,anomalies,client_name,report_month):
@@ -277,6 +364,39 @@ if st.session_state.df_cur is not None:
                     delta=f"{delta_val:+.1f}%"
             col_widget.metric(acct,f"¥{val:,.0f}万",delta)
 
+    # === 利益率指標（粗利率・営業利益率・販管費率）===
+    def _safe_rate(numerator_acct, denominator_acct, r):
+        """安全に比率を算出（%単位）"""
+        if numerator_acct in df_cur.columns and denominator_acct in df_cur.columns:
+            denom=float(r[denominator_acct])
+            if denom!=0:
+                return float(r[numerator_acct])/denom*100
+        return None
+
+    gross_margin=_safe_rate("売上総利益","売上高",row)
+    op_margin=_safe_rate("営業利益","売上高",row)
+    sga_ratio=_safe_rate("販売管理費計","売上高",row)
+
+    gross_margin_prev=_safe_rate("売上総利益","売上高",prev_row) if prev_row is not None else None
+    op_margin_prev=_safe_rate("営業利益","売上高",prev_row) if prev_row is not None else None
+    sga_ratio_prev=_safe_rate("販売管理費計","売上高",prev_row) if prev_row is not None else None
+
+    rc1,rc2,rc3=st.columns(3)
+    for col_w,label,cur_val,prev_val in [
+        (rc1,"粗利率",gross_margin,gross_margin_prev),
+        (rc2,"営業利益率",op_margin,op_margin_prev),
+        (rc3,"販管費率",sga_ratio,sga_ratio_prev),
+    ]:
+        if cur_val is not None:
+            delta_str=None
+            if prev_val is not None:
+                diff=cur_val-prev_val
+                delta_str=f"{diff:+.1f}pp"
+            col_w.metric(label,f"{cur_val:.1f}%",delta_str,
+                         delta_color="inverse" if label=="販管費率" else "normal")
+        else:
+            col_w.metric(label,"N/A",None)
+
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     # 分析実行（選択月ベース）
@@ -287,6 +407,34 @@ if st.session_state.df_cur is not None:
     # 異常値科目セットを作成（グラフハイライト用）
     anomaly_accounts=set(a["科目"] for a in anomalies)
     report_md=generate_report_md(df_cur_to,df_prev,mom,yoy,anomalies,client_name,report_month)
+
+    # === 冒頭インサイト1行 ===
+    insight_parts=[]
+    if op_margin is not None:
+        if op_margin_prev is not None and op_margin>op_margin_prev:
+            insight_parts.append(f"営業利益率が{op_margin:.1f}%に改善")
+        elif op_margin_prev is not None and op_margin<op_margin_prev:
+            insight_parts.append(f"営業利益率が{op_margin:.1f}%に悪化")
+        else:
+            insight_parts.append(f"営業利益率は{op_margin:.1f}%")
+    sales_mom=mom.get("売上高",{})
+    if sales_mom:
+        sales_pct=sales_mom.get("pct",0)
+        if sales_pct>0:
+            # 売上原価が連動増加しているか確認
+            cost_mom=mom.get("売上原価",{})
+            if cost_mom and cost_mom.get("pct",0)>0:
+                insight_parts.append(f"売上成長+{sales_pct:.1f}%を牽引したのは取引量増加")
+            else:
+                insight_parts.append(f"売上は前月比+{sales_pct:.1f}%の成長")
+        elif sales_pct<0:
+            insight_parts.append(f"売上は前月比{sales_pct:.1f}%")
+    if insight_parts:
+        insight_msg="📊 今月の注目: "+"。".join(insight_parts)
+        if op_margin is not None and op_margin_prev is not None and op_margin<op_margin_prev:
+            st.warning(insight_msg)
+        else:
+            st.info(insight_msg)
 
     # タブ
     tab1,tab2,tab3,tab4=st.tabs(["📋 レポートプレビュー","📈 月次推移グラフ","⚠️ 異常値アラート","📊 データプレビュー"])
@@ -335,7 +483,7 @@ if st.session_state.df_cur is not None:
         if anomalies:
             st.warning(f"**{len(anomalies)}件**の異常値が検出されました。")
             adf=pd.DataFrame(anomalies)
-            show_cols=[c for c in ["severity","科目","種別","変動率","方向","当月","前月","前年同月","差額"] if c in adf.columns]
+            show_cols=[c for c in ["severity","科目","種別","変動率","方向","当月","前月","前年同月","差額","推定原因","推奨アクション"] if c in adf.columns]
             st.dataframe(adf[show_cols],use_container_width=True,hide_index=True)
             # 異常値CSVダウンロード
             anomaly_csv=adf[show_cols].to_csv(index=False).encode("utf-8-sig")
