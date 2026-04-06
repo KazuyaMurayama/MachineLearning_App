@@ -478,11 +478,26 @@ if submitted:
     st.info("💡 このドラフトは雛形です。実際の契約締結前に、必ず内容をご確認ください。")
     st.warning("📌 **AI処理を行う場合**は、「安心パッケージ」のAI処理同意書も合わせてご利用ください。契約書第5条の守秘義務条項と連動しています。")
 
-# Footer — 関連ツール（外部URLなし）
+# Footer — 関連ツール（カード形式）
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
-fc1,fc2,fc3=st.columns(3)
-fc1.markdown("🛡️ **安心パッケージ**  \n守秘義務契約・AI処理同意書")
-fc2.markdown("📊 **月次レポート自動生成**  \n試算表CSV→レポート自動作成")
-fc3.markdown("🏢 **離反予測デモ**  \n顧問先の離反リスク予測")
+_fc1,_fc2,_fc3=st.columns(3)
+with _fc1:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-value">🛡️ 安心パッケージ</div>
+<div class="kpi-label">AI処理同意書も一緒に準備</div>
+</div>""",unsafe_allow_html=True)
+    st.link_button("安心パッケージを開く","https://shigyou-compliance.streamlit.app",use_container_width=True)
+with _fc2:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-value">🔴 入金遅延アラート</div>
+<div class="kpi-label">契約後の入金管理</div>
+</div>""",unsafe_allow_html=True)
+    st.link_button("入金遅延アラートを開く","https://shigyou-payment.streamlit.app",use_container_width=True)
+with _fc3:
+    st.markdown("""<div class="kpi-card">
+<div class="kpi-value">🏢 士業ポータル</div>
+<div class="kpi-label">全ツール一覧</div>
+</div>""",unsafe_allow_html=True)
+    st.link_button("士業ポータルを開く","https://shigyou-ai-tools.streamlit.app",use_container_width=True)
 st.caption("AI経営パートナー × データサイエンス | 契約書ドラフトAI v1.2")
