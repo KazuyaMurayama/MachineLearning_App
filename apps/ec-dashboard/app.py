@@ -113,6 +113,26 @@ with st.sidebar:
             st.error(f"読み込みエラー: {e}")
 
     st.markdown("---")
+
+    # --- 月間売上目標トラッカー (データ読み込み後に表示) ---
+    if st.session_state.loaded and st.session_state.df is not None:
+        st.markdown("### 🎯 月間売上目標")
+        # 当月実績の120%をデフォルト目標にする（後でdf/monthly確定後に使用）
+        # デフォルト値はセッションで保持
+        if "sales_target" not in st.session_state:
+            st.session_state.sales_target = 0  # 仮; データ確定後に更新
+
+        _target_input = st.number_input(
+            "月間売上目標 (¥)",
+            min_value=0,
+            value=st.session_state.sales_target if st.session_state.sales_target > 0 else 1000000,
+            step=100000,
+            format="%d",
+            key="sales_target_input",
+        )
+        st.session_state.sales_target = _target_input
+        st.markdown("---")
+
     st.markdown("### 📖 使い方")
     st.markdown("1. CSVをアップロード（任意）\n2. 表示月を選択\n3. 3つのタブで分析")
     st.markdown("---")
@@ -212,6 +232,121 @@ else:
     _kpi(k2, "前年同月比", "—（前年データなし）")
 _kpi(k3, "当月平均客単価", f"¥{cur_aov:,.0f}")
 _kpi(k4, "当月注文件数", f"{cur_orders:,}")
+
+st.markdown("")
+
+# ---------------------------------------------------------------------------
+# 売上予測ロジック（移動平均 + 線形回帰）
+# ---------------------------------------------------------------------------
+
+def _forecast_next_months(monthly_df: pd.DataFrame, n_forecast: int = 3, window: int = 6):
+    """
+    直近 window ヶ月の移動平均 + numpy.polyfit(degree=1) で翌 n_forecast ヶ月を予測する。
+    Returns:
+        forecast_vals (list[float]): 予測値リスト (長さ n_forecast)
+        forecast_labels (list[str]): 予測月ラベル "YYYY-MM"
+        ma_series (np.ndarray): 全月の移動平均（len == len(monthly_df)）
+        slope (float): 傾き（線形回帰）
+    """
+    ms = monthly_df.sort_values("年月").reset_index(drop=True)
+    sales = ms["売上金額"].values.astype(float)
+    n = len(sales)
+
+    # 移動平均
+    ma = np.array([
+        sales[max(0, i - window + 1): i + 1].mean() for i in range(n)
+    ])
+
+    # 線形回帰: 直近 window ヶ月のみ使用
+    fit_start = max(0, n - window)
+    x_fit = np.arange(fit_start, n)
+    y_fit = sales[fit_start:]
+    coeffs = np.polyfit(x_fit, y_fit, deg=1)  # [slope, intercept]
+    slope, intercept = coeffs
+
+    # 予測値 = 線形回帰の外挿
+    forecast_vals = [slope * (n + i) + intercept for i in range(n_forecast)]
+
+    # 予測月ラベル
+    last_ym = ms["年月"].iloc[-1]
+    y, m = int(last_ym[:4]), int(last_ym[5:7])
+    forecast_labels = []
+    for _ in range(n_forecast):
+        m += 1
+        if m > 12:
+            m = 1
+            y += 1
+        forecast_labels.append(f"{y:04d}-{m:02d}")
+
+    return forecast_vals, forecast_labels, ma, slope
+
+
+forecast_vals, forecast_labels, ma_series, forecast_slope = _forecast_next_months(monthly, n_forecast=3, window=6)
+
+# 来月予測 & 前月比
+_next_month_pred = forecast_vals[0] if forecast_vals else None
+_monthly_sorted_for_fc = monthly.sort_values("年月")
+_last_actual_sales = _monthly_sorted_for_fc["売上金額"].iloc[-1] if len(_monthly_sorted_for_fc) else 0
+_mom_forecast_pct = ((_next_month_pred / _last_actual_sales - 1) * 100) if (_next_month_pred and _last_actual_sales) else None
+_confidence_margin = _next_month_pred * 0.10 if _next_month_pred else 0  # ±10%
+
+# サイドバー: 月間目標のデフォルト値を当月実績の120%に設定
+if st.session_state.get("sales_target", 0) <= 1000000:
+    _default_target = int(cur_sales * 1.2) if cur_sales > 0 else 1000000
+    st.session_state.sales_target = _default_target
+
+# ---------------------------------------------------------------------------
+# 予測サマリーバナー（KPIカード直下）
+# ---------------------------------------------------------------------------
+if _next_month_pred is not None and _mom_forecast_pct is not None:
+    _pred_man = _next_month_pred / 10000
+    _margin_man = _confidence_margin / 10000
+    _pred_label = f"来月予測: ¥{_pred_man:,.0f}万（±{_margin_man:,.0f}万）"
+    if _mom_forecast_pct >= 0:
+        st.success(
+            f"📈 {_pred_label}。前月比 **{_mom_forecast_pct:+.1f}%** — 成長トレンド継続中"
+        )
+    else:
+        st.warning(
+            f"📉 {_pred_label}。前月比 **{_mom_forecast_pct:+.1f}%** — 売上減少が予測されます。施策を検討してください"
+        )
+
+# ---------------------------------------------------------------------------
+# 目標達成率トラッカー
+# ---------------------------------------------------------------------------
+_sales_target = st.session_state.get("sales_target", 0)
+if _sales_target > 0 and cur_sales >= 0:
+    _progress_ratio = min(cur_sales / _sales_target, 1.0)
+    st.markdown("#### 🎯 月間目標達成状況")
+    _pc1, _pc2 = st.columns([3, 1])
+    with _pc1:
+        st.progress(_progress_ratio)
+    with _pc2:
+        st.write(f"**{_progress_ratio * 100:.1f}%**")
+
+    if cur_sales >= _sales_target:
+        st.success("🎉 目標達成済み！素晴らしい結果です。")
+    else:
+        _remaining = _sales_target - cur_sales
+        _remaining_man = _remaining / 10000
+        st.info(f"目標達成まであと **¥{_remaining_man:,.0f}万**")
+
+        # 残日数から必要日次売上を計算
+        import datetime as _dt
+        _today = _dt.date.today()
+        _sel_year_t = int(selected_month.split("-")[0])
+        _sel_month_t = int(selected_month.split("-")[1])
+        # 当月最終日
+        if _sel_month_t == 12:
+            _last_day = _dt.date(_sel_year_t + 1, 1, 1) - _dt.timedelta(days=1)
+        else:
+            _last_day = _dt.date(_sel_year_t, _sel_month_t + 1, 1) - _dt.timedelta(days=1)
+        _days_left = (_last_day - _today).days
+        if _days_left > 0:
+            _daily_needed = _remaining / _days_left / 10000
+            st.caption(f"残 {_days_left} 日 → 必要な日次売上: **¥{_daily_needed:,.1f}万/日**")
+        elif _days_left == 0:
+            st.caption("本日が月末です。最終日の売上に注目！")
 
 st.markdown("")
 
@@ -428,19 +563,75 @@ with tab1:
                         f"客単価が **{_aov_chg:+.0f}%**。商品単価・セット販売の見直しを推奨"
                     )
 
-    # Monthly bar chart — highlight selected month
-    st.subheader("月別売上推移（全期間）")
+    # Monthly bar chart — highlight selected month + forecast line
+    st.subheader("月別売上推移（全期間）＋売上予測")
     monthly_sorted = monthly.sort_values("年月")
     colors_bar = [THEME_COLOR if ym == selected_month else "#BFDBFE" for ym in monthly_sorted["年月"]]
 
-    fig2, ax2 = plt.subplots(figsize=(12, 4))
-    ax2.bar(monthly_sorted["年月"], monthly_sorted["売上金額"], color=colors_bar)
+    # 予測ラベル・値
+    _fc_vals_tab = forecast_vals
+    _fc_labels_tab = forecast_labels
+    _ma_tab = ma_series
+
+    # すべてのラベル（実績 + 予測）
+    _all_labels = list(monthly_sorted["年月"]) + _fc_labels_tab
+    _n_actual = len(monthly_sorted)
+    _x_actual = list(range(_n_actual))
+    _x_forecast = list(range(_n_actual, _n_actual + len(_fc_labels_tab)))
+    _all_x = _x_actual + _x_forecast
+
+    fig2, ax2 = plt.subplots(figsize=(13, 5))
+
+    # 棒グラフ（実績）
+    ax2.bar(_x_actual, monthly_sorted["売上金額"].values, color=colors_bar, zorder=2, label="実績")
+
+    # 移動平均ライン（実績期間）
+    ax2.plot(_x_actual, _ma_tab, color="#F59E0B", linewidth=1.5, linestyle="-", marker="", zorder=3, label="移動平均（6ヶ月）")
+
+    # 予測ライン（点線）
+    if _fc_vals_tab:
+        # 実績最後の点から予測へ接続
+        _connect_x = [_x_actual[-1]] + _x_forecast
+        _connect_y = [monthly_sorted["売上金額"].values[-1]] + _fc_vals_tab
+        ax2.plot(_connect_x, _connect_y, color="#DC2626", linewidth=2, linestyle="--", marker="o",
+                 markersize=5, zorder=4, label="予測（線形回帰）")
+
+        # 信頼区間 ±10%
+        _fc_arr = np.array(_fc_vals_tab)
+        _fc_upper = _fc_arr * 1.10
+        _fc_lower = _fc_arr * 0.90
+        # 接続点を含む fill_between
+        _fill_x = [_x_actual[-1]] + _x_forecast
+        _fill_upper = [monthly_sorted["売上金額"].values[-1] * 1.10] + list(_fc_upper)
+        _fill_lower = [monthly_sorted["売上金額"].values[-1] * 0.90] + list(_fc_lower)
+        ax2.fill_between(_fill_x, _fill_lower, _fill_upper, color="#FCA5A5", alpha=0.3, zorder=1, label="信頼区間（±10%）")
+
+    # X軸ラベル
+    ax2.set_xticks(_all_x)
+    ax2.set_xticklabels(_all_labels, rotation=45, ha="right")
     ax2.set_ylabel("売上金額 (¥)")
-    ax2.set_title("月別売上（選択月をハイライト）", fontsize=13)
-    ax2.tick_params(axis="x", rotation=45)
+    ax2.set_title("月別売上（選択月ハイライト）＋翌3ヶ月予測", fontsize=13)
+    ax2.legend(fontsize=8, loc="upper left")
     fig2.tight_layout()
     st.pyplot(fig2)
     plt.close(fig2)
+
+    # 予測値の詳細を metric で表示
+    if _fc_vals_tab and len(_fc_labels_tab) >= 1:
+        st.markdown("#### 📊 売上予測サマリー")
+        _mc_list = st.columns(min(3, len(_fc_labels_tab)))
+        for _i, (_lbl, _val) in enumerate(zip(_fc_labels_tab[:3], _fc_vals_tab[:3])):
+            _man = _val / 10000
+            _margin_man_tab = _val * 0.10 / 10000
+            _delta_val = ((_val / _last_actual_sales - 1) * 100) if _last_actual_sales else 0
+            _mc_list[_i].metric(
+                label=f"{_lbl} 予測",
+                value=f"¥{_man:,.0f}万",
+                delta=f"{_delta_val:+.1f}% vs 直近実績",
+            )
+        _cf1, _cf2 = st.columns(2)
+        _cf1.caption(f"予測方法: 直近6ヶ月移動平均 + 線形回帰（numpy.polyfit degree=1）")
+        _cf2.caption(f"信頼区間: ±10%（簡易推定）")
 
     # Year-over-year comparison table
     if prev_sales is not None:
