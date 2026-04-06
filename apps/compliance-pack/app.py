@@ -417,8 +417,9 @@ st.download_button("📥 安心パッケージ一括ダウンロード（3点セ
 # 相互リンク
 st.markdown('<hr class="section-divider">',unsafe_allow_html=True)
 st.markdown("### 🔗 関連ツール")
+_card=lambda icon,title,url,desc,action: f'<div style="border:1px solid #E2E8F0;border-radius:12px;padding:20px;text-align:center;height:100%;"><div style="font-size:2rem;">{icon}</div><h4 style="margin:8px 0 4px;"><a href="{url}" target="_blank" style="text-decoration:none;color:#059669;">{title}</a></h4><p style="font-size:.85rem;color:#475569;margin:0 0 8px;">{desc}</p><small style="color:#0891B2;">▶ {action}</small></div>'
 fc1,fc2,fc3=st.columns(3)
-fc1.markdown("📝 **契約書ドラフトAI**  \n顧問契約書を自動生成")
-fc2.markdown("📊 **月次レポート自動生成**  \n試算表CSV→レポート自動作成")
-fc3.markdown("🏢 **離反予測デモ**  \n顧問先の離反リスク予測")
+fc1.markdown(_card("📝","契約書ドラフトAI","https://shigyou-contract.streamlit.app","顧問契約書を自動生成","契約書を自動生成して安心パッケージと一括で準備"),unsafe_allow_html=True)
+fc2.markdown(_card("✅","書類チェッカー","https://shigyou-doc-check.streamlit.app","申請書類の不備をチェック","必要書類の不備をチェック"),unsafe_allow_html=True)
+fc3.markdown(_card("🏠","士業ポータル","https://shigyou-ai-tools.streamlit.app","全ツール一覧","全ツール一覧"),unsafe_allow_html=True)
 st.caption("AI経営パートナー × データサイエンス | 安心パッケージ v1.1")
