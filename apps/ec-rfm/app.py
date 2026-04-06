@@ -119,10 +119,15 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("## 📊 施策シミュレーション設定")
     slider_vip = st.slider("VIP維持率向上 (%)", 1, 30, 10, key="sl_vip") / 100
+    st.caption("→ タブ3「施策提案」の期待売上（VIP維持）に反映")
     slider_good = st.slider("優良客単価向上 (%)", 1, 30, 15, key="sl_good") / 100
+    st.caption("→ タブ3「施策提案」の期待売上（優良客）に反映")
     slider_normal = st.slider("一般リピート率向上 (%)", 1, 30, 10, key="sl_normal") / 100
+    st.caption("→ タブ3「施策提案」の期待売上（一般客）に反映")
     slider_dormant = st.slider("休眠復帰率 (%)", 1, 20, 5, key="sl_dormant") / 100
+    st.caption("→ タブ3「施策提案」の期待売上（休眠復帰）に反映")
     slider_churn = st.slider("離脱復帰率 (%)", 1, 20, 3, key="sl_churn") / 100
+    st.caption("→ タブ3「施策提案」の期待売上（離脱復帰）に反映")
 
 # ── サンプルデータ自動読み込み ──
 if not st.session_state.loaded:
@@ -473,6 +478,7 @@ with tab2:
         plt.close(fig_tr)
 
         # ── 悪化サマリー警告 ──
+        seg_avg_ltv = rfm.groupby("セグメント")["累計金額"].mean().to_dict()
         warn_lines = []
         for rseg in row_labels:
             r_rank = SEGMENT_RANK.get(rseg, 0)
@@ -481,7 +487,9 @@ with tab2:
                 if c_rank > r_rank:
                     n_move = int(matrix.loc[rseg, cseg])
                     if n_move > 0:
-                        warn_lines.append(f"⚠️ {rseg} → {cseg}: {n_move}人")
+                        ltv = seg_avg_ltv.get(rseg, avg_ltv)
+                        recovery = n_move * ltv * slider_dormant
+                        warn_lines.append(f"⚠️ {rseg}→{cseg} {n_move}人: 今すぐ{rseg}限定クーポン配信で¥{recovery/10000:.1f}万の復帰効果（復帰率{slider_dormant:.0%}想定）")
 
         if warn_lines:
             st.warning("**セグメント悪化アラート**\n\n" + "\n\n".join(warn_lines))
