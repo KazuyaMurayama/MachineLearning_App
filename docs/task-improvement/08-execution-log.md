@@ -29,3 +29,11 @@
 - Hero テキスト: 6つの専用ツール → 7つの専用ツール
 - KPIカード: 6 → 7
 - サイドバーバージョン: v2.0 → v3.0（フッターv3.0と統一）
+
+## P1-D: スモークテストスクリプト追加 ✅
+- ファイル: `scripts/smoke_test.py` 新規作成
+- 検証項目: 構文 / 必須ファイル / サンプルデータ生成 / import健全性
+- 初回実行結果: 18/18 アプリが PASS
+- 失敗アプリ: なし（全アプリ通過）
+- sample_data スキップ（create_sample_data.py 未存在）: compliance-pack, contract-draft, doc-checker, service-lp（4アプリ）
+- 出力: `docs/task-improvement/smoke-test-result.json`
