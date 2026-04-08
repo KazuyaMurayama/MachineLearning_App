@@ -154,6 +154,7 @@ EC_URLS = {
     "ec-rfm": "https://ec-rfm-analysis.streamlit.app",
     "ec-dashboard": "https://ec-sales-dashboard.streamlit.app",
     "ec-ad-roi": "https://ec-ad-roi.streamlit.app",
+    "ec-demo": "https://ec-demo.streamlit.app",
 }
 
 # === L3 プレミアムパック ===
@@ -200,8 +201,8 @@ with l3:
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # === 3ツールの連携フロー（モバイル対応: 縦並び） ===
-st.markdown("### 🔄 L1/L2 コアツール — 3ツール連携でEC経営を最適化")
-st.markdown("**RFM → ダッシュボード → 広告ROI** の順に活用し、分析→把握→最適化を実現")
+st.markdown("### 🔄 L1/L2 コアツール — 4ツール連携でEC経営を最適化")
+st.markdown("**RFM → ダッシュボード → 広告ROI → 離脱予測** の順に活用し、分析→把握→最適化→予防を実現")
 st.markdown("")
 
 c1, c2, c3 = st.columns(3)
@@ -236,6 +237,20 @@ with c3:
 <div class="card-desc">Google/Meta/LINE等チャネル別ROAS分析。ROAS加重の最適予算配分をシミュレーション。</div>
 <div class="card-effect">✨ 広告効率30%改善</div>
 <div class="card-features">ROAS分析 / 予算配分 / 月次トレンド</div>
+</div>
+</a>""", unsafe_allow_html=True)
+
+st.markdown("")
+d1, d2, d3 = st.columns(3)
+with d1:
+    st.markdown(f"""<a href="{EC_URLS['ec-demo']}" target="_blank" style="text-decoration:none;color:inherit;">
+<div class="app-card">
+<span class="step-badge">Step 4</span>
+<div class="card-icon">🔮</div>
+<div class="card-title">顧客離脱予測＋需要予測デモ</div>
+<div class="card-desc">LightGBM+SHAPで顧客の離脱リスクを予測し、逆SHAPで改善アクションを提示。需要予測も同時実行。</div>
+<div class="card-effect">✨ 離脱率を最大40%削減</div>
+<div class="card-features">LightGBM分類 / SHAP解釈 / 需要予測</div>
 </div>
 </a>""", unsafe_allow_html=True)
 
