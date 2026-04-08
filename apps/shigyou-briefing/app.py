@@ -84,7 +84,11 @@ def load_data():
     master = os.path.join(base_dir, "sample_data", "briefing_master.csv")
     history = os.path.join(base_dir, "sample_data", "monthly_history.csv")
     if not os.path.exists(master):
-        subprocess.run([sys.executable, os.path.join(base_dir, "create_sample_data.py")])
+        try:
+            subprocess.run([sys.executable, os.path.join(base_dir, "create_sample_data.py")], check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"サンプルデータ生成に失敗しました: {e.stderr}")
+            st.stop()
     df = pd.read_csv(master)
     hist = pd.read_csv(history)
     return df, hist
@@ -118,7 +122,11 @@ with st.sidebar:
     # データ再生成ボタン
     if st.button("🔄 データ再生成"):
         base_dir = os.path.dirname(__file__) if "__file__" in dir() else "."
-        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "create_sample_data.py")])
+        try:
+            subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "create_sample_data.py")], check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"サンプルデータ生成に失敗しました: {e.stderr}")
+            st.stop()
         st.cache_data.clear()
         st.rerun()
 

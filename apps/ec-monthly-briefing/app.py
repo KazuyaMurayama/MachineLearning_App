@@ -80,7 +80,11 @@ def load_data():
     ads_path = os.path.join(base_dir, "sample_data", "ads.csv")
 
     if not os.path.exists(products_path):
-        subprocess.run([sys.executable, os.path.join(base_dir, "create_sample_data.py")])
+        try:
+            subprocess.run([sys.executable, os.path.join(base_dir, "create_sample_data.py")], check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"サンプルデータ生成に失敗しました: {e.stderr}")
+            st.stop()
 
     products = pd.read_csv(products_path, encoding="utf-8-sig")
     customers = pd.read_csv(customers_path, encoding="utf-8-sig")
@@ -104,7 +108,11 @@ with st.sidebar:
     )
 
     if st.button("🔄 データ再生成"):
-        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "create_sample_data.py")])
+        try:
+            subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "create_sample_data.py")], check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"サンプルデータ生成に失敗しました: {e.stderr}")
+            st.stop()
         st.cache_data.clear()
         st.rerun()
 

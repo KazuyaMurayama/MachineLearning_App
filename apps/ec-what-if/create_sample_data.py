@@ -84,7 +84,7 @@ for m_idx, m in enumerate(months):
             base_rev = ad_budget * np.random.uniform(1.5, 4.0) * season_factor * price_index
             revenue = int(base_rev)
             roas = round(revenue / ad_budget, 2)
-            churn_rate = round(np.random.uniform(0.05, 0.30) / (champions_ratio + 0.1), 3)
+            churn_rate = round(np.clip(np.random.uniform(0.05, 0.30) / (champions_ratio + 0.1), 0.0, 0.95), 3)
 
             training_records.append({
                 "年月": m, "チャネル": ch, "カテゴリ": cat,

@@ -366,6 +366,11 @@ with tab1:
     metrics_df = pd.DataFrame(metrics_data)
     st.dataframe(metrics_df, use_container_width=True, hide_index=True)
 
+    # 離脱率モデル品質警告バナー
+    churn_r2 = cache["metrics"]["離脱率"]["R²"]
+    if churn_r2 < 0.3:
+        st.warning(f"⚠️ 離脱率モデルのR²={churn_r2:.3f}は基準値0.3を下回っています。デモ前にデータ生成スクリプトを再実行してください。")
+
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     # 特徴量重要度
