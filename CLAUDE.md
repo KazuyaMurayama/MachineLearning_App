@@ -1,5 +1,9 @@
 # ML Prediction App - Claude Code Project Guide
 
+## ファイルインデックス
+
+作業開始前に **`_file_index.md`** を参照してください。全ブランチのファイル概要・目的別クイックリファレンスを記載しています（`claude/check-repo-file-lists-desRY` ブランチ以降に存在）。詳細な全ファイル一覧は **`docs/file-index.md`**（`claude/integrate-business-plan-IBKFu` ブランチ以降）も参照してください。
+
 ## プロジェクト概要
 Streamlitを使用した機械学習（LightGBM）回帰予測アプリケーション
 
@@ -21,6 +25,7 @@ ml-prediction-app/
 │   ├── model.py           # LightGBMモデル処理
 │   ├── evaluation.py      # 評価指標算出
 │   └── shap_analysis.py   # SHAP解析処理
+├── _file_index.md         # ファイルインデックス（ブランチ横断ナビゲーション）
 ├── CLAUDE.md              # このファイル
 ├── ISSUES.md              # 開発Issue一覧
 └── README.md              # 使用方法
