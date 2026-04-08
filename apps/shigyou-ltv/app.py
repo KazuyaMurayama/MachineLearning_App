@@ -214,22 +214,10 @@ def fmt_yen(value: float) -> str:
 
 
 # ──────────────────────────────────────────────
-# セッション状態の初期化
+# セッション状態の初期化（データフレームのみ）
 # ──────────────────────────────────────────────
 if "df" not in st.session_state:
     st.session_state.df = load_data()
-if "model" not in st.session_state:
-    st.session_state.model = None
-if "shap_values" not in st.session_state:
-    st.session_state.shap_values = None
-if "X_test" not in st.session_state:
-    st.session_state.X_test = None
-if "pred_ltv" not in st.session_state:
-    st.session_state.pred_ltv = None
-if "le" not in st.session_state:
-    st.session_state.le = None
-if "feature_cols" not in st.session_state:
-    st.session_state.feature_cols = None
 
 
 # ──────────────────────────────────────────────
@@ -266,9 +254,6 @@ with st.sidebar:
         import random
         new_seed = random.randint(0, 9999)
         st.session_state.df = generate_sample_data(seed=new_seed)
-        st.session_state.model = None
-        st.session_state.shap_values = None
-        st.session_state.pred_ltv = None
         st.success(f"データを再生成しました（seed={new_seed}）")
         st.rerun()
 
@@ -371,8 +356,10 @@ FEATURE_COLS = [
 TARGET_COL = "LTV_5年"
 
 
-def train_model(df_full: pd.DataFrame):
-    """LightGBMモデルを学習し、(model, le, X_test, y_test, pred, shap_values) を返す。"""
+@st.cache_resource
+def train_ltv_model(_df_hash):
+    """LightGBM LTV予測モデルを学習。@st.cache_resource により全セッション共有"""
+    df_full = st.session_state.df.copy()
     df_m = df_full.copy()
     le = LabelEncoder()
     df_m["業種_encoded"] = le.fit_transform(df_m["業種"])
@@ -395,44 +382,57 @@ def train_model(df_full: pd.DataFrame):
 
     pred = model.predict(X_test)
 
-    # SHAP
-    explainer = shap.TreeExplainer(model)
+    mae = mean_absolute_error(y_test, pred)
+    rmse = float(np.sqrt(np.mean((y_test - pred) ** 2)))
+    r2 = float(r2_score(y_test, pred))
+
+    importance = model.feature_importances_
+
+    return {
+        "model": model,
+        "le": le,
+        "X_train": X_train,
+        "X_test": X_test,
+        "y_test": y_test,
+        "pred_test": pred,
+        "metrics": {"mae": mae, "rmse": rmse, "r2": r2},
+        "feature_importance": importance,
+    }
+
+
+@st.cache_data
+def compute_shap_values(_model, _df_hash):
+    """SHAP値を計算。@st.cache_data でDataFrame結果をキャッシュ"""
+    model_data = train_ltv_model(_df_hash)
+    X_test = model_data["X_test"]
     sample_size = min(100, len(X_test))
     X_shap = X_test.iloc[:sample_size]
+    explainer = shap.TreeExplainer(_model)
     shap_vals = explainer.shap_values(X_shap)
+    return shap_vals, X_shap
 
-    return model, le, X_test, y_test, pred, shap_vals, X_shap
 
+# データフレームの安定したハッシュを生成
+_df_source = st.session_state.df
+df_hash = pd.util.hash_pandas_object(_df_source).sum()
 
-# 未学習なら自動学習
-if st.session_state.model is None:
-    with st.spinner("モデルを学習中..."):
-        df_full = st.session_state.df.copy()
-        (
-            st.session_state.model,
-            st.session_state.le,
-            st.session_state.X_test,
-            st.session_state.y_test,
-            st.session_state.pred_test,
-            st.session_state.shap_values,
-            st.session_state.X_shap,
-        ) = train_model(df_full)
-        # 全件予測
-        df_full["業種_encoded"] = st.session_state.le.transform(df_full["業種"])
-        st.session_state.pred_ltv = st.session_state.model.predict(df_full[FEATURE_COLS])
-        st.session_state.feature_cols = FEATURE_COLS
+# モデル取得（全セッション共有キャッシュ）
+with st.spinner("モデルを学習中..."):
+    model_data = train_ltv_model(df_hash)
 
+# SHAP値取得（キャッシュ）
+shap_values, X_shap = compute_shap_values(model_data["model"], df_hash)
 
 # 全件予測値をdfに付与
 df_full_with_pred = st.session_state.df.copy()
-df_full_with_pred["業種_encoded"] = st.session_state.le.transform(df_full_with_pred["業種"])
-df_full_with_pred["予測LTV_5年"] = st.session_state.model.predict(
+df_full_with_pred["業種_encoded"] = model_data["le"].transform(df_full_with_pred["業種"])
+df_full_with_pred["予測LTV_5年"] = model_data["model"].predict(
     df_full_with_pred[FEATURE_COLS]
 ).round(0).astype(int)
 
 # フィルタ後のデータにも予測LTVを付与
-df["業種_encoded"] = st.session_state.le.transform(df["業種"])
-df["予測LTV_5年"] = st.session_state.model.predict(df[FEATURE_COLS]).round(0).astype(int)
+df["業種_encoded"] = model_data["le"].transform(df["業種"])
+df["予測LTV_5年"] = model_data["model"].predict(df[FEATURE_COLS]).round(0).astype(int)
 
 # 年率ROI（予測LTVベース）
 df["予測年率ROI"] = df["予測LTV_5年"] / np.maximum(df["継続月数"], 1) / np.maximum(df["月額顧問料"], 1)
@@ -466,12 +466,9 @@ with tab1:
     st.subheader("🤖 LightGBM モデル学習結果")
     st.success("✅ モデル学習完了")
 
-    y_test = st.session_state.y_test
-    pred_test = st.session_state.pred_test
-
-    mae = mean_absolute_error(y_test, pred_test)
-    rmse = np.sqrt(np.mean((y_test - pred_test) ** 2))
-    r2 = r2_score(y_test, pred_test)
+    mae = model_data["metrics"]["mae"]
+    rmse = model_data["metrics"]["rmse"]
+    r2 = model_data["metrics"]["r2"]
 
     m1, m2, m3 = st.columns(3)
     m1.metric("MAE", f"¥{mae:,.0f}")
@@ -482,11 +479,9 @@ with tab1:
 
     # 特徴量重要度
     st.subheader("特徴量重要度")
-    model = st.session_state.model
-    importance = model.feature_importances_
     feat_imp_df = pd.DataFrame({
         "特徴量": FEATURE_COLS,
-        "重要度": importance
+        "重要度": model_data["feature_importance"]
     }).sort_values("重要度", ascending=True)
 
     fig_imp, ax_imp = plt.subplots(figsize=(8, 4))
@@ -502,8 +497,6 @@ with tab1:
 
     # SHAP Summary Plot
     st.subheader("SHAP Summary Plot（beeswarm）")
-    shap_values = st.session_state.shap_values
-    X_shap = st.session_state.X_shap
 
     fig_shap, ax_shap = plt.subplots(figsize=(8, 5))
     shap.summary_plot(shap_values, X_shap, plot_type="dot", show=False)
@@ -689,8 +682,8 @@ with tab4:
 
     # 選択した顧問先の詳細
     df_all_with_pred = df_full_with_pred.copy()
-    df_all_with_pred["業種_encoded_tmp"] = st.session_state.le.transform(df_all_with_pred["業種"])
-    df_all_with_pred["予測LTV_5年"] = st.session_state.model.predict(
+    df_all_with_pred["業種_encoded_tmp"] = model_data["le"].transform(df_all_with_pred["業種"])
+    df_all_with_pred["予測LTV_5年"] = model_data["model"].predict(
         df_all_with_pred[FEATURE_COLS]
     ).round(0).astype(int)
     df_all_with_pred["予測年率ROI"] = (
