@@ -1,7 +1,7 @@
 """
 EC向け AI経営パートナー
 ========================
-EC事業者向けAIツール3アプリの専用ポータル
+EC事業者向けAIツール7アプリの専用ポータル
 """
 import streamlit as st
 
@@ -81,7 +81,7 @@ with st.sidebar:
     st.markdown("## 🛒 EC AIマーケティング")
     st.markdown("EC事業者 専用")
     st.markdown("---")
-    st.markdown("### 📋 ツール一覧（6アプリ）")
+    st.markdown("### 📋 ツール一覧（7アプリ）")
     st.markdown("""
 **🚀 L3 プレミアムパック（月額26万円）**
 1. 📊 EC経営ダッシュボード
@@ -92,6 +92,7 @@ with st.sidebar:
 4. 👥 顧客RFM分析
 5. 📈 売上ダッシュボード
 6. 📣 広告ROI分析
+7. 🔮 顧客離脱予測＋需要予測デモ
 """)
     st.markdown("---")
     st.markdown("### 💡 このツールの対象者")
@@ -102,13 +103,13 @@ with st.sidebar:
 - 顧客分析を始めたい方
 """)
     st.markdown("---")
-    st.caption("EC AIマーケティングパートナー v2.0")
+    st.caption("EC AIマーケティングパートナー v3.0")
 
 # === Hero ===
 st.markdown("""
 <div class="hero-section">
 <h1>🛒 EC AIマーケティングパートナー</h1>
-<p>EC事業の売上・顧客・広告を<br>AIで可視化・最適化する 6つの専用ツール</p>
+<p>EC事業の売上・顧客・広告を<br>AIで可視化・最適化する 7つの専用ツール</p>
 <div class="hero-sub">顧客分析から広告最適化まで、データドリブン経営を実現</div>
 </div>
 """, unsafe_allow_html=True)
@@ -116,7 +117,7 @@ st.markdown("""
 # === 導入効果 KPI ===
 k1, k2, k3, k4 = st.columns(4)
 with k1:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">6</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">7</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
 with k2:
     st.markdown('<div class="kpi-card"><div class="kpi-value">LTV</div><div class="kpi-label">最大化を支援</div></div>', unsafe_allow_html=True)
 with k3:

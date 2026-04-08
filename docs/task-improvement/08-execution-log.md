@@ -12,3 +12,15 @@
 ## P1-B: subprocess エラーハンドリング修正 ✅
 - ec-monthly-briefing/app.py: 2箇所確認済み（L 84, L 112）— check=True, capture_output=True, text=True 適用済み
 - shigyou-briefing/app.py: 2箇所確認済み（L 88, L 126）— check=True, capture_output=True, text=True 適用済み
+
+## P0-B: 「L3実装完了」誇大表現の訂正 ✅
+- shigyou-business-alignment.md: 3箇所修正（✅実装完了（3本）→ ✅プロトタイプ完成（3本）— パイロット検証前、L3実装結果→L3プロトタイプ完成結果、フッター注記更新）
+- ec-business-alignment.md: 3箇所修正（L3水準に到達→L3プロトタイプ水準に到達（パイロット検証前）、L3実装完了→L3プロトタイプ完成・パイロット検証前、フッター注記更新）
+- 両ファイル末尾にL3水準到達の定義注記を追加
+
+## P0-C: ec_app.py アプリ数表示訂正 ✅
+- docstring: 3アプリ → 7アプリ
+- サイドバー: 6アプリ → 7アプリ（ec-demoを7番目として追加）
+- Hero テキスト: 6つの専用ツール → 7つの専用ツール
+- KPIカード: 6 → 7
+- サイドバーバージョン: v2.0 → v3.0（フッターv3.0と統一）
