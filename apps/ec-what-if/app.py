@@ -223,8 +223,16 @@ if not os.path.exists(data_path):
 # ──────────────────────────────────────────────
 # モデルキャッシュ読み込み
 # ──────────────────────────────────────────────
-with st.spinner("モデルを学習中...（初回のみ）"):
-    cache = train_models()
+if "models_loaded" not in st.session_state:
+    with st.status("🤖 初回モデル学習中（30秒〜1分かかります）...", expanded=True) as status:
+        st.write("📥 サンプルデータを読込中...")
+        st.write("🌲 LightGBM 3モデル（売上/ROAS/離脱率）を学習中...")
+        st.write("📊 SHAP値を計算中...")
+        cache = train_models()
+        st.session_state.models_loaded = True
+        status.update(label="✅ モデル学習完了", state="complete", expanded=False)
+else:
+    cache = train_models()  # キャッシュから即時取得
 
 
 # ──────────────────────────────────────────────

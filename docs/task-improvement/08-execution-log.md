@@ -37,3 +37,8 @@
 - 失敗アプリ: なし（全アプリ通過）
 - sample_data スキップ（create_sample_data.py 未存在）: compliance-pack, contract-draft, doc-checker, service-lp（4アプリ）
 - 出力: `docs/task-improvement/smoke-test-result.json`
+
+## P1-C: ec-what-if コールドスタートプログレス表示 ✅
+- ファイル: `apps/ec-what-if/app.py`
+- 追加内容: `st.status` で4段階のプログレス表示
+- 効果: 初回起動時の沈黙問題を解消、デモ中の信頼感向上
