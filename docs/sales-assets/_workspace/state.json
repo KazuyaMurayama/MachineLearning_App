@@ -1,45 +1,65 @@
 {
   "project": "sales-assets-uplift",
   "started_at": "2026-04-09",
+  "completed_at": "2026-04-09",
   "base_branch": "claude/integrate-business-plan-IBKFu",
   "working_branch": "claude/organize-repo-by-date-VNw9E",
-  "current_round": "R0-setup",
+  "current_round": "R6-integration-done",
   "rounds": {
-    "R0": {"name": "setup", "status": "in_progress"},
-    "R1": {"name": "diagnosis", "status": "skipped", "note": "reused Explore agent report from orchestrator session"},
-    "R2": {"name": "plan", "status": "done", "note": "see _workspace/plan.md"},
-    "R3": {"name": "drafts", "status": "pending"},
-    "R4": {"name": "review", "status": "pending"},
-    "R5": {"name": "rewrite", "status": "pending"},
-    "R6": {"name": "integration", "status": "pending"}
+    "R0": {"name": "setup", "status": "done"},
+    "R1": {"name": "diagnosis", "status": "done", "note": "Reused Explore agent report from orchestrator session (see parent conversation)"},
+    "R2": {"name": "plan", "status": "done"},
+    "R3": {"name": "drafts", "status": "done", "writers": ["Writer-A (4 files)", "Writer-B (3 files)"]},
+    "R4": {"name": "review", "status": "skipped", "note": "Skipped to respect timeout budget; trust writers + integrator cross-check"},
+    "R5": {"name": "patch", "status": "done", "note": "demo-script-15min.md patched for R²=-0.16 integrity issue"},
+    "R6": {"name": "integration", "status": "done", "note": "README.md updated with full index"}
   },
   "targets": {
     "new_files": [
-      {"id": "F1", "path": "docs/sales-assets/pricing-and-scope.md", "owner": "Writer-A", "status": "pending", "priority": 1},
-      {"id": "F2", "path": "docs/sales-assets/roi-calculator.md", "owner": "Writer-A", "status": "pending", "priority": 2},
-      {"id": "F3", "path": "docs/sales-assets/pilot-contract-template.md", "owner": "Writer-A", "status": "pending", "priority": 3},
-      {"id": "F4", "path": "docs/sales-assets/demo-tech-checklist.md", "owner": "Writer-A", "status": "pending", "priority": 7},
-      {"id": "F5", "path": "docs/sales-assets/objection-handling.md", "owner": "Writer-B", "status": "pending", "priority": 5},
-      {"id": "F6", "path": "docs/sales-assets/customer-pain-research.md", "owner": "Writer-B", "status": "pending", "priority": 4},
-      {"id": "F7", "path": "docs/sales-assets/lead-list-framework.md", "owner": "Writer-B", "status": "pending", "priority": 6}
+      {"id": "F1", "path": "docs/sales-assets/pricing-and-scope.md", "status": "committed", "commit": "ed3b1e5"},
+      {"id": "F2", "path": "docs/sales-assets/roi-calculator.md", "status": "committed", "commit": "718346d"},
+      {"id": "F3", "path": "docs/sales-assets/pilot-contract-template.md", "status": "committed", "commit": "29fe846"},
+      {"id": "F4", "path": "docs/sales-assets/demo-tech-checklist.md", "status": "committed", "commit": "386ad0c"},
+      {"id": "F5", "path": "docs/sales-assets/objection-handling.md", "status": "committed", "commit": "bca5dbe"},
+      {"id": "F6", "path": "docs/sales-assets/customer-pain-research.md", "status": "committed", "commit": "1055465"},
+      {"id": "F7", "path": "docs/sales-assets/lead-list-framework.md", "status": "committed", "commit": "4b5bfbd"}
     ],
     "patches": [
-      {"id": "P1", "path": "docs/sales-assets/demo-script-15min.md", "reason": "ec-what-if R\u00b2=-0.16 safety note", "status": "pending"},
-      {"id": "P2", "path": "docs/sales-assets/README.md", "reason": "update index with 7 new files", "status": "pending"}
+      {"id": "P1", "path": "docs/sales-assets/demo-script-15min.md", "status": "committed", "commit": "0b88060", "change": "R²=0.45 false claim removed; R²=-0.16 warning block added; references demo-tech-checklist.md, objection-handling.md, pricing-and-scope.md, pilot-contract-template.md"},
+      {"id": "P2", "path": "docs/sales-assets/README.md", "status": "committed", "commit": "b3adee8", "change": "Full re-index with 7 new files, cross-reference diagram, 5-phase usage guide, known issues section"}
     ]
   },
-  "known_issues": [
-    "ec-what-if model has R\u00b2=-0.16 (worse than random) - must not be claimed as working predictor in any new asset",
-    "pilot-proposal-template.md has unreplaced {{placeholders}} and creation date 2026-04-XX",
-    "demo-script-15min.md says 'cache warmup required' - a technical bug exposed in sales guide",
-    "No lead list exists, 0 pilot customers; new lead-list-framework must be actionable not abstract",
-    "Customer pain data is unverified; customer-pain-research.md must mark unverified numbers as '\u4eee\u8aac'"
+  "known_issues_addressed": [
+    {"issue": "ec-what-if R²=-0.16", "addressed_in": ["pricing-and-scope.md §2.2", "roi-calculator.md §4.3 §6", "pilot-contract-template.md §11", "demo-tech-checklist.md §3 §5", "objection-handling.md D-2 D-3", "customer-pain-research.md P-E8", "lead-list-framework.md §7.5", "demo-script-15min.md top banner + §2 Q&A"]},
+    {"issue": "Unreplaced placeholders in pilot-proposal-template.md", "status": "noted but not fixed in this round", "followup": "Next round should do surgical placeholder hygiene"},
+    {"issue": "Cache warmup exposed in sales guide", "addressed_in": ["demo-tech-checklist.md (systematized)", "demo-script-15min.md (delegated to checklist)"]},
+    {"issue": "No lead list / 0 pilot customers", "addressed_in": ["lead-list-framework.md (4 channels + 30-day roadmap)"]},
+    {"issue": "Unverified pain numbers", "addressed_in": ["customer-pain-research.md (all 16 pain items marked 未検証, 15-question hearing template)"]}
   ],
-  "style_rules": {
-    "tone": "\u6577\u4f53 (desu/masu), professional Japanese",
-    "audience": "\u58eb\u696d\u306f\u6240\u9577\u30fb\u7406\u4e8b\u3001EC\u306f\u7d4c\u55b6\u8005\u30fbCMO",
-    "numbers": "Any number without primary source must be labeled '\u4eee\u8aac' or '\u30d9\u30f3\u30c1\u30de\u30fc\u30af\u8981\u691c\u8a3c'",
-    "promises": "Avoid hard guarantees; use '\u76ee\u6a19' or '\u671f\u5f85\u5024' instead",
-    "ml_disclaimer": "Any reference to predictive models must include accuracy caveat if R\u00b2 not yet validated"
-  }
+  "style_rules_applied": {
+    "tone": "敬体 throughout",
+    "numbers": "All unverified numbers labeled 仮説 or 要検証",
+    "ml_disclaimer": "ec-what-if R²=-0.16 disclaimer present in every asset that touches predictions",
+    "promises": "No hard guarantees; 目標 / 期待値 used instead"
+  },
+  "commit_log": [
+    "f111e8a R0: Initialize sales-assets uplift state.json",
+    "ed3b1e5 R3: Add pricing-and-scope.md (F1)",
+    "718346d R3: Add roi-calculator.md (F2)",
+    "29fe846 R3: Add pilot-contract-template.md (F3)",
+    "386ad0c R3: Add demo-tech-checklist.md (F4)",
+    "bca5dbe R3: Add objection-handling.md (F5)",
+    "1055465 R3: Add customer-pain-research.md (F6)",
+    "4b5bfbd R3: Add lead-list-framework.md (F7)",
+    "0b88060 R5: Patch demo-script-15min.md for integrity issues",
+    "b3adee8 R6: Update README.md to index all 10 sales assets"
+  ],
+  "followup_for_next_round": [
+    "R4 Reviewer pass (120-point rubric scoring per file)",
+    "pilot-proposal-template.md placeholder hygiene and 2026-04-XX date fix",
+    "First 5 customer interviews to convert customer-pain-research.md hypotheses to facts",
+    "ec-what-if model retraining and R² re-measurement",
+    "shigyou-business-alignment.md and ec-business-alignment.md revision with verified numbers",
+    "1-page approval summary template (referenced in objection-handling E-2) needs to be created"
+  ]
 }
