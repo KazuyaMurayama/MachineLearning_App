@@ -1,0 +1,45 @@
+{
+  "project": "sales-assets-uplift",
+  "started_at": "2026-04-09",
+  "base_branch": "claude/integrate-business-plan-IBKFu",
+  "working_branch": "claude/organize-repo-by-date-VNw9E",
+  "current_round": "R0-setup",
+  "rounds": {
+    "R0": {"name": "setup", "status": "in_progress"},
+    "R1": {"name": "diagnosis", "status": "skipped", "note": "reused Explore agent report from orchestrator session"},
+    "R2": {"name": "plan", "status": "done", "note": "see _workspace/plan.md"},
+    "R3": {"name": "drafts", "status": "pending"},
+    "R4": {"name": "review", "status": "pending"},
+    "R5": {"name": "rewrite", "status": "pending"},
+    "R6": {"name": "integration", "status": "pending"}
+  },
+  "targets": {
+    "new_files": [
+      {"id": "F1", "path": "docs/sales-assets/pricing-and-scope.md", "owner": "Writer-A", "status": "pending", "priority": 1},
+      {"id": "F2", "path": "docs/sales-assets/roi-calculator.md", "owner": "Writer-A", "status": "pending", "priority": 2},
+      {"id": "F3", "path": "docs/sales-assets/pilot-contract-template.md", "owner": "Writer-A", "status": "pending", "priority": 3},
+      {"id": "F4", "path": "docs/sales-assets/demo-tech-checklist.md", "owner": "Writer-A", "status": "pending", "priority": 7},
+      {"id": "F5", "path": "docs/sales-assets/objection-handling.md", "owner": "Writer-B", "status": "pending", "priority": 5},
+      {"id": "F6", "path": "docs/sales-assets/customer-pain-research.md", "owner": "Writer-B", "status": "pending", "priority": 4},
+      {"id": "F7", "path": "docs/sales-assets/lead-list-framework.md", "owner": "Writer-B", "status": "pending", "priority": 6}
+    ],
+    "patches": [
+      {"id": "P1", "path": "docs/sales-assets/demo-script-15min.md", "reason": "ec-what-if R\u00b2=-0.16 safety note", "status": "pending"},
+      {"id": "P2", "path": "docs/sales-assets/README.md", "reason": "update index with 7 new files", "status": "pending"}
+    ]
+  },
+  "known_issues": [
+    "ec-what-if model has R\u00b2=-0.16 (worse than random) - must not be claimed as working predictor in any new asset",
+    "pilot-proposal-template.md has unreplaced {{placeholders}} and creation date 2026-04-XX",
+    "demo-script-15min.md says 'cache warmup required' - a technical bug exposed in sales guide",
+    "No lead list exists, 0 pilot customers; new lead-list-framework must be actionable not abstract",
+    "Customer pain data is unverified; customer-pain-research.md must mark unverified numbers as '\u4eee\u8aac'"
+  ],
+  "style_rules": {
+    "tone": "\u6577\u4f53 (desu/masu), professional Japanese",
+    "audience": "\u58eb\u696d\u306f\u6240\u9577\u30fb\u7406\u4e8b\u3001EC\u306f\u7d4c\u55b6\u8005\u30fbCMO",
+    "numbers": "Any number without primary source must be labeled '\u4eee\u8aac' or '\u30d9\u30f3\u30c1\u30de\u30fc\u30af\u8981\u691c\u8a3c'",
+    "promises": "Avoid hard guarantees; use '\u76ee\u6a19' or '\u671f\u5f85\u5024' instead",
+    "ml_disclaimer": "Any reference to predictive models must include accuracy caveat if R\u00b2 not yet validated"
+  }
+}
