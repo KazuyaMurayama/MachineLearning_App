@@ -54,3 +54,9 @@
 - ファイル: `pilot-proposal-template.md` (士業版・EC版)
 - ファイル: `README.md`
 - 効果: Go-to-Market アセット 0 → 1 へ
+
+## P1-G: 15分デモスクリプト作成 ✅
+- ファイル: `docs/sales-assets/demo-script-15min.md`
+- 構成: 5セクション（ポータル/What-If/LTV/ブリーフィング/パイロット提案）
+- 重要: ec-what-if のコールドスタート対策を明記
+- 効果: Go-to-Market アセット 1 → 2 へ
