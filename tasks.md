@@ -1,40 +1,110 @@
 # タスク（セッション間引継ぎ用ランニングリスト）
 
 > 最終更新: 2026-04-16
-> 現行ブランチ: `main`（PR #2, #3 マージ完了）
-> 次の作業ブランチ: 必要に応じて `claude/<topic>-<id>` を作成
+> ベースブランチ: `main`（PR #2, #3 マージ完了）
+> 作業ブランチ: `claude/review-repo-docs-2nBuQ`
+> 関連リポ: `kazuyamurayama/freelance-compass`（上流＝事業戦略）
 
-## 起動時チェックリスト（新しいセッションで最初にやる）
+## 起動時チェックリスト
 
-1. `docs/file-index.md` を読む（リポジトリ全ファイルの索引）
-2. `docs/context-handoff.md` を読む（現行状況・不変条件・エージェントパターン）
-3. `docs/sessions/` の最新要約を読む
-4. 本ファイルの「次にやる」を確認
+1. `docs/file-index.md` を読む
+2. `docs/context-handoff.md` を読む（不変条件・エージェントパターン）
+3. 本ファイルの「次にやる」を確認
+4. `docs/sessions/2026-04-08-session-summary.md`（前セッション要約）を確認
+5. **`freelance-compass/tasks.md`（戦略側の現在地）も必ず確認**
+
+---
+
+## 🚨 戦略整合性アラート（最重要）
+
+本リポは `freelance-compass` で決まった事業戦略の**実装側**。両者にズレが生じている。
+
+| 項目 | freelance-compass v29.0 | 本リポ実装 | 状態 |
+|---|---|---|---|
+| 初期ターゲット | **EC + クリニック** | **士業 + EC** | ❌ |
+| リテイナー価格 | ¥180k/月 | 士業 ¥300k / EC ¥260k | ❌ |
+| Full Go 条件 | Month 3 以内に有償診断 ¥30k × 2件 | 未設定 | ❌ |
+
+→ 士業アプリ 11本は戦略転換で用途再定義が必要かもしれない。クリニック向けアプリは 0 本。
+→ **この決定なしに他のタスクは進めない**（P0）。
+
+---
 
 ## 次にやる（優先度順）
 
-- [ ] **最初の 5 社ヒアリング実行**: `docs/sales-assets/` 一式を活用し、ユーザー負荷を最小化するため初期連絡メール・事前調査・当日質問票を Claude で自動生成する。
-- [ ] **ゼロ接点アウトリーチ戦略策定・実行**: `docs/sales-assets/lead-list-framework.md` は既存人脈 60% 前提のため、接点 0 段階の認知獲得チャネル（freee/MF/Shopify アプリストア、税務通信/ECzine、税理士会連合会、Web 広告、PR TIMES 等）を設計。成果物は `docs/sales-assets/zero-to-one-outreach-playbook.md` として保存予定。
-- [ ] **`pilot-contract-template.md` 法務レビュー**: 弁護士レビュー前に社内チェック 1 周。
-- [ ] **ec-what-if の R²=-0.16 精度再検証**: 特徴量エンジニアリングまたは問題設定を見直す。
+### 🔴 P0: 戦略整合性の決定（ブロッキング）
+
+- [ ] **「士業 vs クリニック」ターゲット方針を確定**
+  - A: v29.0 に従い士業アプリを凍結 → クリニック向け新規実装
+  - B: recommendation v29.1 として「士業 + EC」に戦略修正
+  - C: 両方並走（リソース配分を定義）
+- [ ] **パイロット価格の確定**（v29.0 ¥180k/月 vs 本リポ ¥260-300k/月）
+  - 料金 SSOT: `docs/sales-assets/pricing-and-scope.md`
+
+### 🟠 P1: Go-to-Market 実行（戦略確定後すぐ）
+
+freelance-compass の P0 アクション（2026-04-02頃策定）を本リポのパイロット獲得チャネルとして統合。
+
+- [ ] **有償診断 ¥30k × 2件成約**（= Full Go 条件 = 本リポの存在意義の検証）
+- [ ] **最初の 5社ヒアリング**（`docs/sales-assets/` 一式を活用、初期連絡メール・事前調査・当日質問票を Claude で自動生成）
+- [ ] **ゼロ接点アウトリーチ チャネル立ち上げ**
+  - [ ] ビザスクエキスパート登録
+  - [ ] ココナラ出品（¥5,000 診断レポート）
+  - [ ] Shopify Partner 申請（審査 1-3ヶ月）
+  - [ ] note / X 記事 3本公開
+  - 成果物: `docs/sales-assets/zero-to-one-outreach-playbook.md`（新規）
+- [ ] **A1 診断ツール**（freelance-compass `tools/a1_diagnostic/` プロトタイプ）の本リポ統合可否を検討
+
+### 🟡 P2: プロトタイプの商業化準備
+
+- [ ] **Streamlit Cloud デプロイ状況の確認** — 2026-04-08 セッション P0 だが進捗追跡漏れ。L3 6本がデプロイ済みか確認
+- [ ] **ec-what-if モデルの本質的精度改善** — 現状は `np.clip(0.0, 0.95)` 応急処置 + 警告バナーのみ。R²=-0.16 は未解決。特徴量エンジニアリング or 問題設定の見直しが必要
+- [ ] **`pilot-contract-template.md` 法務レビュー**（社内 1 周 → 弁護士）
+
+### 🟢 P3: 技術負債・運用基盤（パイロット獲得後）
+
+2026-04-08 P2 だったが tasks.md から消失していた項目を再登録。
+
+- [ ] **改善バックログ消化**（`docs/improvement-backlog.md` 🔴最優先残）— ec-dashboard へ ML予測+SHAP 追加
+- [ ] **CI/CD 構築** — GitHub Actions で `scripts/smoke_test.py` 自動実行 + pytest 導入
+- [ ] **共通ライブラリ化検討** — `setup_japanese_font()` 等 18アプリで重複
+- [ ] **EC 3アプリの共通マスター seed 統合**
+
+---
 
 ## 進行中
 
 - なし
 
+---
+
 ## 完了（直近）
 
-- 2026-04-16: **main への 2 段階マージ完了**
-  - PR #2 (`claude/organize-repo-by-date-VNw9E` → `claude/integrate-business-plan-IBKFu`) マージ
-  - PR #3 (`claude/integrate-business-plan-IBKFu` → `main`) マージ
-  - 重要ファイル（`CLAUDE.md`、`docs/file-index.md`、`tasks.md`、`docs/context-handoff.md`、`docs/sales-assets/` 一式）が main に到達
-- 2026-04-16: `tasks.md`・`docs/context-handoff.md` 新規作成、`CLAUDE.md` 最小化（6135B → 2347B）、`docs/file-index.md` を sales-assets 等反映版に更新
-- 2026-04-09: 営業アセット改善ラウンド（新規 7 ファイル + 既存 2 ファイル改善 + 5 批評者レビュー）
-- 2026-04-08: L3 キラー機能実装（士業 3 app + EC 3 app）、マルチエージェント品質改善プロセス実施
+- 2026-04-16: **tasks.md / context-handoff.md を戦略整合性ベースで再構成**
+  - freelance-compass v29.0（EC + クリニック）と本リポ（士業 + EC）の不整合を可視化
+  - 2026-04-08 P0/P2 の追跡漏れ項目（デプロイ確認・CI/CD・改善バックログ）を再登録
+  - freelance-compass P0（ビザスク・ココナラ・Shopify Partner・note）をパイロット獲得チャネルとして統合
+- 2026-04-16: **main への 2 段階マージ完了**（PR #2, #3）
+- 2026-04-16: `tasks.md`・`docs/context-handoff.md` 新規作成、`CLAUDE.md` 最小化、`docs/file-index.md` 更新
+- 2026-04-09: 営業アセット改善ラウンド（新規 7 + 改善 2 + 5 批評者レビュー）
+- 2026-04-08: L3 キラー機能実装（士業 3 + EC 3）、マルチエージェント品質改善
+  - **要注意**: このセッションの P0「Streamlit Cloud デプロイ」「初回ヒアリング」進捗は不明
 
-## 既知のリスク（詳細は `docs/context-handoff.md`）
+---
 
-- `ec-what-if` 予測精度 R²=-0.16
-- パイロット実績 0 社
-- `pilot-contract-template.md` 法務レビュー未完了
-- 既存人脈 0 の段階でのリード獲得戦略が未確立
+## 既知のリスク
+
+- 🚨 戦略 vs 実装のターゲット不整合（士業 vs クリニック）— P0 で要決定
+- 🔴 `ec-what-if` 予測精度 R²=-0.16（応急処置のみ、本質未解決）
+- 🔴 パイロット実績 0 社 — freelance-compass の Full Go 条件未達成
+- 🟠 `pilot-contract-template.md` 法務レビュー未完了
+- 🟠 既存人脈 0 段階のリード獲得戦略が未確立
+- 🟠 2026-04-08 P0 項目（デプロイ・初回ヒアリング）の追跡漏れ
+
+---
+
+## 次セッションへの申し送り
+
+1. **まず戦略整合性（士業 vs クリニック）を確定**。これが決まらないと他タスクの価値が変動する
+2. freelance-compass と本リポの双方向参照が必要。片方だけ見ると戦略ドリフトを見逃す
+3. 「技術 100点 でも 顧客 0社 なら MRR ¥0」（2026-04-08 セッションの学び）を再確認
