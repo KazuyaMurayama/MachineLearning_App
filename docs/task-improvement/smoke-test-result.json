@@ -1,0 +1,368 @@
+{
+  "timestamp": "2026-04-08T23:53:56.329878",
+  "total": 18,
+  "passed": 18,
+  "failed": 0,
+  "results": [
+    {
+      "app": "compliance-pack",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": null,
+        "msg": "create_sample_data.py not found (skipped)"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "contract-draft",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": null,
+        "msg": "create_sample_data.py not found (skipped)"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "crosssell",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "1 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "doc-checker",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": null,
+        "msg": "create_sample_data.py not found (skipped)"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-ad-roi",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "1 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-dashboard",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "1 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-demo",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "4 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-executive-dashboard",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "5 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-monthly-briefing",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "4 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-rfm",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "1 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "ec-what-if",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "5 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "payment-alert",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "1 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "report-gen",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "2 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "service-lp",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": null,
+        "msg": "create_sample_data.py not found (skipped)"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "shigyou-briefing",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "2 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "shigyou-demo",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "2 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "shigyou-ltv",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "1 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    },
+    {
+      "app": "shigyou-office-dashboard",
+      "passed": true,
+      "syntax": {
+        "ok": true,
+        "error": null
+      },
+      "files": {
+        "ok": true,
+        "missing": []
+      },
+      "sample_data": {
+        "ok": true,
+        "msg": "2 CSV files"
+      },
+      "imports": {
+        "ok": true,
+        "details": "all imports OK"
+      }
+    }
+  ]
+}
