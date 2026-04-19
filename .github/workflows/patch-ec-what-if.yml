@@ -1,0 +1,58 @@
+name: Patch ec-what-if app.py
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-ec-what-if.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if patch already applied
+        id: check
+        run: |
+          if grep -q "import create_sample_data" apps/ec-what-if/app.py; then
+            echo "patched=true" >> $GITHUB_OUTPUT
+          else
+            echo "patched=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply patch
+        if: steps.check.outputs.patched == 'false'
+        run: |
+          cd apps/ec-what-if
+          # 1. Add "import create_sample_data" inside train_models()
+          sed -i '/"""LightGBMモデルを3つ学習し、SHAP値を含む辞書を返す。"""/a\    import create_sample_data' app.py
+          # 2. Replace 月額26万円 → 月額25万円
+          sed -i 's/月額26万円/月額25万円/g' app.py
+          # Verify
+          echo "=== Verification ==="
+          grep -n "import create_sample_data" app.py
+          grep -c "月額25万円" app.py
+          echo "月額26万円 remaining: $(grep -c '月額26万円' app.py || echo 0)"
+
+      - name: Commit and push
+        if: steps.check.outputs.patched == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/ec-what-if/app.py
+          git diff --cached --quiet && echo "No changes" || {
+            git commit -m "ec-what-if app.py: import create_sample_data + 月額25万円 [automated]
+
+          - train_models() に import create_sample_data を追加（R²≥0.7 データ自動再生成）
+          - 月額26万円 → 月額25万円（pricing-and-scope v0.3 整合）
+          - Applied by GitHub Actions workflow"
+            git push
+          }
+
+      - name: Skip (already patched)
+        if: steps.check.outputs.patched == 'true'
+        run: echo "app.py is already patched. No changes needed."
