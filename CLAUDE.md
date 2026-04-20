@@ -4,6 +4,7 @@
 
 ## セッション開始時に必ず読むファイル
 
+0. **`progress.md`** — 中断タスクの進捗確認（未完了があれば続きから再開）
 1. **`docs/file-index.md`** — リポジトリ全ファイルの索引
 2. **`docs/context-handoff.md`** — 現行状況・不変条件・戦略整合・撤退基準
 3. **`tasks.md`** — セッション間引継ぎタスク（次にやること）
@@ -19,7 +20,7 @@
 | 04 | `docs/rules/04-git-rules.md` | **ブランチ作成禁止**・main 直接コミット |
 | 05 | `docs/rules/05-model-usage.md` | Opus=計画/分析、Sonnet=実行/サブタスク |
 | 06 | `docs/rules/06-deliverable-rules.md` | 成果物は GitHub ハイパーリンクで報告 |
-| 07 | `docs/rules/07-execution-timeout.md` | タイムアウト対策・チェックポイント設計 |
+| 07 | `docs/rules/07-execution-timeout.md` | タイムアウト対策・progress.md チェックポイント・リカバリ |
 
 ## プロジェクト概要
 
@@ -37,6 +38,6 @@ streamlit run ec_app.py         # EC
 
 ## 不変条件（詳細は `docs/context-handoff.md`）
 
-- `pricing-and-scope.md` が料金 SSOT（⚠️ L3 ¥30万は v2 上限 ¥25万 を超過、要確定）
-- ec-what-if R²=-0.16（精度再検証中）
+- `pricing-and-scope.md` が料金 SSOT（L3 士業 ¥20万 / EC ¥25万、v0.3 確定）
+- ec-what-if R²=0.74（2026-04-19 改善済み）
 - パイロット実績 0 社
