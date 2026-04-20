@@ -49,19 +49,6 @@
 
 ## 次にやる（優先度順）
 
-### 🔴 P0: 価格変更の全ファイル波及監査（v0.3 反映必須）
-
-`pricing-and-scope.md` v0.3 で L3 価格を変更。他ファイルに旧価格が残存の可能性:
-
-- [ ] `docs/sales-assets/pilot-proposal-template.md`
-- [ ] `docs/sales-assets/demo-script-15min.md`
-- [ ] `docs/sales-assets/roi-calculator.md`
-- [ ] `docs/sales-assets/ringi-summary-template.md`
-- [ ] `docs/sales-assets/outreach-email-templates.md`
-- [ ] `docs/sales-assets/objection-handling.md`
-- [ ] `docs/shigyou-business-alignment.md` — v2 ベースに更新
-- [ ] `docs/ec-business-alignment.md` — v2 ベースに更新
-
 ### 🟠 P1: Go-to-Market 実行（v2 Phase 0 = M1=2026年5月）
 
 - [ ] **最初の 5社ヒアリング**（士業 3 + EC 2）
@@ -98,6 +85,7 @@
 
 ## 完了（直近）
 
+- 2026-04-20: **P0 価格変更の全ファイル波及監査完了** — 全8ファイルがv0.3価格に整合済みを確認
 - 2026-04-20: **Streamlit Cloud デプロイ完了** — L3 6本 + ポータル 2本、URL 確定
 - 2026-04-20: **リカバリプロトコル導入** — progress.md + CLAUDE.md + 07-execution-timeout.md
 - 2026-04-19: **ec-what-if R² 改善** — サンプルデータ再設計 R²=-0.16→0.74
@@ -111,7 +99,6 @@
 ## 既知のリスク
 
 - 🔴 パイロット実績 0 社 — v2 Phase 0 完了条件（M3末有料契約 1社）未達成
-- 🟠 価格変更の他ファイル波及未監査（P0）
 - 🟠 `pilot-contract-template.md` 法務レビュー未完了
 - 🟠 既存人脈 0 段階のリード獲得戦略が未確立
 
