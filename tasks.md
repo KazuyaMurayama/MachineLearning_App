@@ -1,12 +1,13 @@
 # タスク（セッション間引継ぎ用ランニングリスト）
 
-> 最終更新: 2026-04-19
+> 最終更新: 2026-04-20
 > ブランチ: `main`（ブランチ作成は禁止、`docs/rules/04-git-rules.md` 参照）
 > 関連リポ: `kazuyamurayama/freelance-compass`（上流＝事業戦略）
 > 最新戦略: [freelance-compass/outputs/integrated-business-plan-v2.md](https://github.com/KazuyaMurayama/freelance-compass/blob/claude/review-repo-docs-2nBuQ/outputs/integrated-business-plan-v2.md)（2026-03-25）
 
 ## 起動時チェックリスト
 
+0. `progress.md` を読む（中断タスクの有無を確認）
 1. `CLAUDE.md` を読む（ルール参照テーブル）
 2. `docs/file-index.md` を読む（全ファイル索引）
 3. `docs/context-handoff.md` を読む（不変条件・戦略整合）
@@ -28,6 +29,21 @@
 | パイロット EC | — | ¥12.5万/6週間（v0.3） | ✅ |
 
 > 戦略バージョン: v9.0（旧）→ v29.0（中間）→ **v2 = 最新**
+
+---
+
+## デプロイ済みアプリ URL（2026-04-20 確定）
+
+| # | アプリ名 | URL |
+|---|---|---|
+| 1 | 士業ポータル | https://km-shigyou-apps.streamlit.app |
+| 2 | 事務所経営ダッシュボード (L3) | https://km-shigyou-dashboard.streamlit.app |
+| 3 | LTV予測＋不採算フラグ (L3) | https://km-shigyou-ltv.streamlit.app |
+| 4 | 月次AIブリーフィング・士業 (L3) | https://km-shigyou-briefing.streamlit.app |
+| 5 | ECポータル | https://km-ec-apps.streamlit.app |
+| 6 | EC経営ダッシュボード (L3) | https://km-ec-dashboard.streamlit.app |
+| 7 | What-Ifシミュレーター (L3) | https://km-ec-what-if.streamlit.app |
+| 8 | EC月次AIブリーフィング (L3) | https://km-ec-briefing.streamlit.app |
 
 ---
 
@@ -60,8 +76,8 @@
 
 ### 🟡 P2: プロトタイプの商業化準備
 
-- [ ] Streamlit Cloud デプロイ状況確認（L3 6本）
-- [ ] ec-what-if R²=-0.16 の本質的精度改善
+- [x] Streamlit Cloud デプロイ 8本完了（2026-04-20）
+- [x] ec-what-if R² 改善済み（-0.16 → 0.74、2026-04-19）
 - [ ] `pilot-contract-template.md` 法務レビュー
 - [ ] 稼働時間記録運用開始（v2 時給 KPI 用）
 
@@ -82,7 +98,10 @@
 
 ## 完了（直近）
 
-- 2026-04-19: **リポジトリルール整備** — `docs/rules/` 7本作成、CLAUDE.md をルール参照構造に再構築、tasks.md / file-index.md を新ルール反映版に更新。全ブランチ→main 集約確認済み
+- 2026-04-20: **Streamlit Cloud デプロイ完了** — L3 6本 + ポータル 2本、URL 確定
+- 2026-04-20: **リカバリプロトコル導入** — progress.md + CLAUDE.md + 07-execution-timeout.md
+- 2026-04-19: **ec-what-if R² 改善** — サンプルデータ再設計 R²=-0.16→0.74
+- 2026-04-19: **リポジトリルール整備** — `docs/rules/` 7本作成、CLAUDE.md をルール参照構造に再構築
 - 2026-04-16: `pricing-and-scope.md` v0.3 更新、戦略整合性確認完了、main への 2段階マージ完了
 - 2026-04-09: 営業アセット改善ラウンド（新規 7 + 改善 2 + 5 批評者レビュー）
 - 2026-04-08: L3 キラー機能実装（士業 3 + EC 3）
@@ -91,8 +110,7 @@
 
 ## 既知のリスク
 
-- 🔴 `ec-what-if` R²=-0.16（応急処置のみ、本質未解決）
-- 🔴 パイロット実績 0 社 — v2 Phase 0 完了条件（M3末有料契約1社）未達成
+- 🔴 パイロット実績 0 社 — v2 Phase 0 完了条件（M3末有料契約 1社）未達成
 - 🟠 価格変更の他ファイル波及未監査（P0）
 - 🟠 `pilot-contract-template.md` 法務レビュー未完了
 - 🟠 既存人脈 0 段階のリード獲得戦略が未確立
