@@ -158,39 +158,25 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # === アプリURL定義 ===
 APP_URLS = {
-    "shigyou-office-dashboard": "https://shigyou-office-dashboard.streamlit.app",
-    "shigyou-ltv": "https://shigyou-ltv.streamlit.app",
-    "shigyou-briefing": "https://shigyou-briefing.streamlit.app",
-    "shigyou-demo": "https://shigyou-churn.streamlit.app",
-    "service-lp": "https://shigyou-service-lp.streamlit.app",
-    "crosssell": "https://shigyou-crosssell.streamlit.app",
-    "report-gen": "https://shigyou-report.streamlit.app",
-    "contract-draft": "https://shigyou-contract.streamlit.app",
-    "payment-alert": "https://shigyou-payment.streamlit.app",
-    "compliance-pack": "https://shigyou-compliance.streamlit.app",
-    "doc-checker": "https://shigyou-doc-check.streamlit.app",
+    "shigyou-office-dashboard": "https://km-shigyou-dashboard.streamlit.app",
+    "shigyou-ltv": "https://km-shigyou-ltv.streamlit.app",
+    "shigyou-briefing": "https://km-shigyou-briefing.streamlit.app",
+    "shigyou-demo": "https://km-shigyou-churn.streamlit.app",
+    "service-lp": "https://km-shigyou-apps.streamlit.app",
 }
 
 # === アプリカード定義 ===
 APPS = {
-    "🚀 L3 AI経営パートナー（月額30万円）": [
-        {"icon": "🏛️", "name": "事務所経営ダッシュボード", "desc": "8アプリのデータを1画面に集約。全顧問先の離反リスク・入金状況・クロスセル機会を俯瞰し、月次コンサル資料を5分で出力。", "dir": "shigyou-office-dashboard", "effect": "月次経営会議の資料が5分で完成", "tag": "L3新機能", "tag_class": "tag-recommend"},
-        {"icon": "💎", "name": "顧問先LTV予測+不採算フラグ", "desc": "LightGBM+SHAPで顧問先1社ごとの5年間LTVを予測。VIP/成長/不採算クラスタに自動分類し、改善アクションを提示。", "dir": "shigyou-ltv", "effect": "不採算先特定→利益率5%改善", "tag": "L3新機能", "tag_class": "tag-recommend"},
-        {"icon": "📋", "name": "月次AIブリーフィング", "desc": "離反リスクTOP5・入金遅延対応・クロスセル機会・翌月アクションを自動生成。月額30万円のコンサル価値を可視化。", "dir": "shigyou-briefing", "effect": "30分→5分で月次経営レポート完成", "tag": "L3新機能", "tag_class": "tag-recommend"},
+    "🚀 L3 AI経営パートナー（月額20万円）": [
+        {"icon": "🏛️", "name": "事務所経営ダッシュボード", "desc": "全顧問先の離反リスク・入金状況・クロスセル機会を1画面で俯瞰し、月次コンサル資料を5分で出力。", "dir": "shigyou-office-dashboard", "effect": "月次経営会議の資料が5分で完成", "tag": "L3コア", "tag_class": "tag-l3"},
+        {"icon": "💎", "name": "顧問先LTV予測+不採算フラグ", "desc": "LightGBM+SHAPで顧問先1社ごとの5年間LTVを予測。VIP/成長/不採算クラスタに自動分類し、改善アクションを提示。", "dir": "shigyou-ltv", "effect": "不採算先特定→利益率改善", "tag": "L3コア", "tag_class": "tag-l3"},
+        {"icon": "📋", "name": "月次AIブリーフィング", "desc": "離反リスクTOP5・入金遅延対応・クロスセル機会・翌月アクションを自動生成。月次経営レポートを5分で完成。", "dir": "shigyou-briefing", "effect": "30分→5分で月次レポート完成", "tag": "L3コア", "tag_class": "tag-l3"},
     ],
-    "📊 経営分析・予測": [
-        {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反率15%→5%に改善", "tag": "おすすめ", "tag_class": "tag-recommend"},
-        {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "サービス紹介LPとAI経営診断ツールを統合。初回商談のインパクトを最大化。", "dir": "service-lp", "effect": "成約率30%向上", "tag": "おすすめ", "tag_class": "tag-recommend"},
-        {"icon": "🔄", "name": "クロスセル分析", "desc": "顧問先カルテ・優先度ランク・トークスクリプトで追加提案を支援。", "dir": "crosssell", "effect": "顧問単価20%UP", "tag": "分析", "tag_class": "tag-efficiency"},
+    "📊 L2 経営分析（デモ版）": [
+        {"icon": "🏢", "name": "顧問先離反予測", "desc": "LightGBM+SHAPで離反リスクを予測。逆SHAP提案で具体的な改善アクションを提示。", "dir": "shigyou-demo", "effect": "離反リスクをAIが早期検知", "tag": "デモ版", "tag_class": "tag-efficiency"},
     ],
-    "⚡ 業務効率化": [
-        {"icon": "📊", "name": "月次レポート自動生成", "desc": "freee/MF試算表CSVから前月比・前年同月比・異常値検知を自動実行。", "dir": "report-gen", "effect": "利益率分析+異常値原因を自動表示", "tag": "効率化", "tag_class": "tag-efficiency"},
-        {"icon": "📝", "name": "契約書ドラフトAI", "desc": "税理士・社労士・行政書士向け契約書テンプレートを自動生成。", "dir": "contract-draft", "effect": "条項解説+契約総額を自動試算", "tag": "効率化", "tag_class": "tag-efficiency"},
-        {"icon": "💰", "name": "入金遅延アラート", "desc": "遅延検知・悪化傾向分析・督促テンプレート生成で未入金リスクを管理。", "dir": "payment-alert", "effect": "優先度スコアで催促を最適化", "tag": "効率化", "tag_class": "tag-efficiency"},
-    ],
-    "🛡️ コンプライアンス": [
-        {"icon": "🛡️", "name": "安心パッケージ", "desc": "守秘義務契約・データ取扱い規程・AI処理同意書の3点セットを自動生成。", "dir": "compliance-pack", "effect": "AI導入リスク診断付き", "tag": "安心", "tag_class": "tag-compliance"},
-        {"icon": "📋", "name": "申請書類チェッカー", "desc": "必要書類チェックリスト・費用/期間表示・アクションプラン提示。", "dir": "doc-checker", "effect": "審査リスク予測+解決方法を提示", "tag": "安心", "tag_class": "tag-compliance"},
+    "🌐 無料ツール": [
+        {"icon": "🌐", "name": "サービスLP+AI経営診断", "desc": "10問のAI経営診断で事務所のDX成熟度を判定。最適なプランを提案。", "dir": "service-lp", "effect": "3分でDX成熟度を診断", "tag": "無料", "tag_class": "tag-compliance"},
     ],
 }
 
