@@ -1,6 +1,6 @@
 # タスク（セッション間引継ぎ用ランニングリスト）
 
-> 最終更新: 2026-04-20
+> 最終更新: 2026-04-24
 > ブランチ: `main`（ブランチ作成は禁止、`docs/rules/04-git-rules.md` 参照）
 > 関連リポ: `kazuyamurayama/freelance-compass`（上流＝事業戦略）
 > 最新戦略: [freelance-compass/outputs/integrated-business-plan-v2.md](https://github.com/KazuyaMurayama/freelance-compass/blob/claude/review-repo-docs-2nBuQ/outputs/integrated-business-plan-v2.md)（2026-03-25）
@@ -49,6 +49,28 @@
 
 ## 次にやる（優先度順）
 
+### 🔴 P0: ポートフォリオ整備 → GTM準備（GTMの前提条件）
+
+> 根拠: [app-portfolio-analysis.md v2](https://github.com/KazuyaMurayama/MachineLearning_App/blob/claude/review-repo-docs-2nBuQ/docs/app-portfolio-analysis.md)
+
+**Step 1: ポータル修正**（壊れたリンク修正 + L3コア表示）
+- [ ] 士業ポータル（`streamlit_app.py`）: L3コア3本のURL→km-*修正 + T4(デモ版) + T5(無料) のみ表示。他8本のリンク削除
+- [ ] ECポータル（`ec_app.py`）: L3コア3本のURL→km-*修正 + E6(デモ版) のみ表示。他3本のリンク削除
+
+**Step 2: E6（広告ROI分析）にML+SHAP追加**
+- [ ] E2(ec-what-if)のLightGBM+SHAPパイプラインをE6に流用実装
+- [ ] 広告チャネル別ROAS予測 + SHAP要因分析を追加
+
+**Step 3: T4・E6をStreamlit Cloudにデプロイ**
+- [ ] T4（離反予測）デプロイ — URL: km-shigyou-churn.streamlit.app（仮）
+- [ ] E6（広告ROI）デプロイ — URL: km-ec-ad-roi.streamlit.app（仮）
+- [ ] ポータルのURL更新
+
+**Step 4: GTM実行開始**（→ P1に合流）
+- [ ] ゼロイチアウトリーチ戦術書作成
+- [ ] ビザスク・ココナラ登録
+- [ ] コールド開始
+
 ### 🟠 P1: Go-to-Market 実行（v2 Phase 0 = M1=2026年5月）
 
 - [ ] **最初の 5社ヒアリング**（士業 3 + EC 2）
@@ -85,6 +107,7 @@
 
 ## 完了（直近）
 
+- 2026-04-24: **アプリポートフォリオ分析 v2完了** — 全18アプリ棚卸し、3批評者レビュー40件対応、バンドルWTP再計算
 - 2026-04-20: **P0 価格変更の全ファイル波及監査完了** — 全8ファイルがv0.3価格に整合済みを確認
 - 2026-04-20: **Streamlit Cloud デプロイ完了** — L3 6本 + ポータル 2本、URL 確定
 - 2026-04-20: **リカバリプロトコル導入** — progress.md + CLAUDE.md + 07-execution-timeout.md
