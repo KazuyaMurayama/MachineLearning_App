@@ -10,6 +10,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import os
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error, r2_score
+import lightgbm as lgb
+import shap
 
 # === 日本語フォント ===
 def setup_japanese_font():
@@ -236,7 +241,7 @@ def investment_judgment(roas, trend):
         return "🟡 要注意", f"ROAS {roas:.2f}x / トレンド{trend} — 改善検討"
 
 # === タブ ===
-tab1, tab2, tab3 = st.tabs(["📊 チャネル別ROAS", "💰 予算配分シミュレーション", "📈 トレンド分析"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 チャネル別ROAS", "💰 予算配分シミュレーション", "📈 トレンド分析", "🤖 ML予測+SHAP分析"])
 
 # ------------------------------------------------------------------
 # タブ1: チャネル別ROAS
@@ -809,9 +814,104 @@ fc2.markdown(
 )
 fc3.markdown(
     '<div class="tool-card">'
-    '<a href="https://ec-ai-tools.streamlit.app" target="_blank">🛒 ECポータル</a>'
+    '<a href="https://km-ec-apps.streamlit.app" target="_blank">🛒 ECポータル</a>'
     '<div class="tool-desc">全ツール一覧に戻る</div>'
     '</div>',
     unsafe_allow_html=True,
 )
-st.caption("AI経営パートナー × データサイエンス | 広告ROI分析 v1.0")
+st.caption("AI経営パートナー × データサイエンス | 広告ROI分析 v2.0 — ML予測+SHAP対応")
+
+# ------------------------------------------------------------------
+# タブ4: ML予測 + SHAP分析
+# ------------------------------------------------------------------
+with tab4:
+    st.markdown("### 🤖 広告ROAS予測 + SHAP要因分析")
+    st.info("LightGBMでチャネル別ROASを予測し、SHAPで要因分解します。どの変数がROASに最も影響するかを可視化。")
+
+    if st.session_state.df is not None:
+        df_ml = st.session_state.df.copy()
+
+        le_ch = LabelEncoder()
+        df_ml["チャネル_enc"] = le_ch.fit_transform(df_ml["チャネル"])
+
+        feature_cols = ["チャネル_enc", "広告費", "インプレッション数", "クリック数", "CV数"]
+        feature_display = ["チャネル", "広告費", "インプレッション数", "クリック数", "CV数"]
+        target_col = "ROAS"
+
+        X = df_ml[feature_cols].copy()
+        y = df_ml[target_col].copy()
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        model = lgb.LGBMRegressor(
+            n_estimators=300, learning_rate=0.05, num_leaves=31,
+            random_state=42, verbose=-1
+        )
+        model.fit(X_train, y_train)
+        pred = model.predict(X_test)
+
+        r2 = r2_score(y_test, pred)
+        mae = mean_absolute_error(y_test, pred)
+
+        st.markdown("#### モデル精度")
+        m1, m2 = st.columns(2)
+        m1.metric("R²スコア", f"{r2:.3f}")
+        m2.metric("MAE", f"{mae:,.0f}")
+
+        if r2 < 0.3:
+            st.warning(f"R²={r2:.2f} — モデル精度が低いため、予測値は参考値として扱ってください。")
+
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+        st.markdown("#### SHAP要因分析")
+        explainer = shap.TreeExplainer(model)
+        sample_size = min(200, len(X_test))
+        X_shap = X_test.iloc[:sample_size].copy()
+        sv = explainer.shap_values(X_shap)
+
+        X_shap_display = X_shap.copy()
+        X_shap_display.columns = feature_display
+
+        fig_shap, ax_shap = plt.subplots(figsize=(10, 5))
+        shap.summary_plot(sv, X_shap_display, plot_type="bar", show=False)
+        plt.title("SHAP特徴量重要度（ROASへの影響度）", fontsize=14)
+        plt.tight_layout()
+        st.pyplot(fig_shap)
+        plt.close(fig_shap)
+
+        fig_bee, ax_bee = plt.subplots(figsize=(10, 5))
+        shap.summary_plot(sv, X_shap_display, show=False)
+        plt.title("SHAP Beeswarm（各特徴量の影響方向）", fontsize=14)
+        plt.tight_layout()
+        st.pyplot(fig_bee)
+        plt.close(fig_bee)
+
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+        st.markdown("#### チャネル別ROAS予測")
+        channels = sorted(df_ml["チャネル"].unique())
+        channel_preds = []
+        for ch in channels:
+            ch_enc = le_ch.transform([ch])[0]
+            ch_data = df_ml[df_ml["チャネル"] == ch]
+            avg_row = pd.DataFrame({
+                "チャネル_enc": [ch_enc],
+                "広告費": [ch_data["広告費"].mean()],
+                "インプレッション数": [ch_data["インプレッション数"].mean()],
+                "クリック数": [ch_data["クリック数"].mean()],
+                "CV数": [ch_data["CV数"].mean()],
+            })
+            pred_roas = model.predict(avg_row)[0]
+            actual_roas = ch_data["ROAS"].mean()
+            channel_preds.append({
+                "チャネル": ch,
+                "実績ROAS（平均）": round(actual_roas, 2),
+                "予測ROAS": round(pred_roas, 2),
+                "差分": round(pred_roas - actual_roas, 2),
+            })
+
+        pred_df = pd.DataFrame(channel_preds)
+        st.dataframe(pred_df, use_container_width=True, hide_index=True)
+
+    else:
+        st.warning("データが読み込まれていません。サイドバーからCSVを読み込んでください。")
