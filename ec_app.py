@@ -149,17 +149,14 @@ with b3:
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 EC_URLS = {
-    "ec-executive-dashboard": "https://ec-executive-dashboard.streamlit.app",
-    "ec-what-if": "https://ec-what-if.streamlit.app",
-    "ec-monthly-briefing": "https://ec-monthly-briefing.streamlit.app",
-    "ec-rfm": "https://ec-rfm-analysis.streamlit.app",
-    "ec-dashboard": "https://ec-sales-dashboard.streamlit.app",
-    "ec-ad-roi": "https://ec-ad-roi.streamlit.app",
-    "ec-demo": "https://ec-demo.streamlit.app",
+    "ec-executive-dashboard": "https://km-ec-dashboard.streamlit.app",
+    "ec-what-if": "https://km-ec-what-if.streamlit.app",
+    "ec-monthly-briefing": "https://km-ec-briefing.streamlit.app",
+    "ec-ad-roi": "https://km-ec-ad-roi.streamlit.app",
 }
 
 # === L3 プレミアムパック ===
-st.markdown("### 🚀 L3 プレミアムパック（月額26万円）")
+st.markdown("### 🚀 L3 プレミアムパック（月額25万円）")
 st.markdown("""<div style="background: linear-gradient(135deg, #064E3B 0%, #0369A1 100%); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1rem; font-size: 0.9rem;">
 <strong>🎯 GA4・Lookerでは見えない"次の一手"を提示</strong> — DataRobot（月100万円）より安く、横断分析+SHAP+逆SHAPの空白地帯を占める3つのキラー機能。
 </div>""", unsafe_allow_html=True)
@@ -201,57 +198,19 @@ with l3:
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-# === 3ツールの連携フロー（モバイル対応: 縦並び） ===
-st.markdown("### 🔄 L1/L2 コアツール — 4ツール連携でEC経営を最適化")
-st.markdown("**RFM → ダッシュボード → 広告ROI → 離脱予測** の順に活用し、分析→把握→最適化→予防を実現")
-st.markdown("")
+# === L2 デモ版 ===
+st.markdown("### 📊 L2 経営分析（デモ版）")
 
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown(f"""<a href="{EC_URLS['ec-rfm']}" target="_blank" style="text-decoration:none;color:inherit;">
-<div class="app-card">
-<span class="step-badge">Step 1</span>
-<div class="card-icon">👥</div>
-<div class="card-title">顧客RFM分析</div>
-<div class="card-desc">購買データから顧客をVIP/優良/一般/休眠/離脱の5セグメントに自動分類。セグメント別の施策提案まで。</div>
-<div class="card-effect">✨ リピート率15%向上</div>
-<div class="card-features">R(最終購入日) × F(購入回数) × M(購入金額)</div>
-</div>
-</a>""", unsafe_allow_html=True)
-with c2:
-    st.markdown(f"""<a href="{EC_URLS['ec-dashboard']}" target="_blank" style="text-decoration:none;color:inherit;">
-<div class="app-card">
-<span class="step-badge">Step 2</span>
-<div class="card-icon">📈</div>
-<div class="card-title">売上ダッシュボード</div>
-<div class="card-desc">日次・月次売上を一画面で把握。±2σの異常値を自動検知し、カテゴリ別・YoY比較で深掘り。</div>
-<div class="card-effect">✨ 異常値の即日検知</div>
-<div class="card-features">日次推移 / カテゴリ分析 / 前年比較</div>
-</div>
-</a>""", unsafe_allow_html=True)
-with c3:
+e6_col, _, _ = st.columns(3)
+with e6_col:
     st.markdown(f"""<a href="{EC_URLS['ec-ad-roi']}" target="_blank" style="text-decoration:none;color:inherit;">
 <div class="app-card">
-<span class="step-badge">Step 3</span>
+<span class="step-badge" style="background:#D97706;">デモ版</span>
 <div class="card-icon">📣</div>
 <div class="card-title">広告ROI分析</div>
 <div class="card-desc">Google/Meta/LINE等チャネル別ROAS分析。ROAS加重の最適予算配分をシミュレーション。</div>
-<div class="card-effect">✨ 広告効率30%改善</div>
+<div class="card-effect">✨ 広告効率の可視化+最適化</div>
 <div class="card-features">ROAS分析 / 予算配分 / 月次トレンド</div>
-</div>
-</a>""", unsafe_allow_html=True)
-
-st.markdown("")
-d1, d2, d3 = st.columns(3)
-with d1:
-    st.markdown(f"""<a href="{EC_URLS['ec-demo']}" target="_blank" style="text-decoration:none;color:inherit;">
-<div class="app-card">
-<span class="step-badge">Step 4</span>
-<div class="card-icon">🔮</div>
-<div class="card-title">顧客離脱予測＋需要予測デモ</div>
-<div class="card-desc">LightGBM+SHAPで顧客の離脱リスクを予測し、逆SHAPで改善アクションを提示。需要予測も同時実行。</div>
-<div class="card-effect">✨ 離脱率を最大40%削減</div>
-<div class="card-features">LightGBM分類 / SHAP解釈 / 需要予測</div>
 </div>
 </a>""", unsafe_allow_html=True)
 
@@ -270,4 +229,4 @@ with s3:
 
 # Footer
 st.markdown("---")
-st.caption("EC AIマーケティングパートナー × データサイエンス | v3.0 — L3プレミアムパック（月額26万円）対応")
+st.caption("EC AIマーケティングパートナー × データサイエンス | v4.0 — L3プレミアムパック（月額25万円）対応")
