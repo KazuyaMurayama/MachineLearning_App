@@ -21,6 +21,7 @@
 | 05 | `docs/rules/05-model-usage.md` | Opus=計画/分析、Sonnet=実行/サブタスク |
 | 06 | `docs/rules/06-deliverable-rules.md` | 成果物は GitHub ハイパーリンクで報告 |
 | 07 | `docs/rules/07-execution-timeout.md` | タイムアウト対策・progress.md チェックポイント・リカバリ |
+| 08 | `docs/rules/08-ec-app-roles.md` | EC L3コア3本（E1/E2/E3）の機能境界・重複禁止ルール |
 
 ## プロジェクト概要
 
