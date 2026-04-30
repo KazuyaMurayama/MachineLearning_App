@@ -11,16 +11,53 @@
 | 原因 | 対策 | 検証方法 |
 |------|------|---------|
 | MCP 切断 | 書き込み前に **軽量 read でプロービング** | SHA 取得成功を確認 |
-| 大ファイル push | 1 ファイル **≤ 4KB 目標、最大 8KB** | ファイルサイズを事前計算 |
+| 大ファイル push | 1 ファイル **≤ 250行 / ≤ 2,500トークン** に分割 | 行数を事前計算 |
 | 複数ファイル並列 | `create_or_update_file` で **1 ファイルずつ** 直列処理 | 各コミット SHA を確認 |
 | 書き込み確認 | push 後に **read verify** で SHA 変化を確認 | 旧 SHA ≠ 新 SHA |
 | 失敗時の即再送 | 失敗 → **待機 → 再 probe → 再送** の段階的対応 | probe 成功後に再送 |
 
+## ファイル分割パターン（MCP push タイムアウト根本解決策）
+
+### 根本原因
+
+`create_or_update_file` はファイル内容をツール引数として LLM がリアルタイム生成する。
+生成速度 ≈ 150 トークン/秒、MCP SSE ストリーム idle timeout ≈ 98 秒。
+
+```
+800行 ≈ 7,000トークン ÷ 150tok/sec ≈ 70秒 → タイムアウト境界に到達
+250行 ≈ 2,500トークン ÷ 150tok/sec ≈ 17秒 → 余裕 76 秒（安全）
+```
+
+サブエージェント委譲では解決しない（同じ LLM 生成速度のため）。
+
+### helpers.py + app.py パターン
+
+大きな Streamlit アプリを分割する標準構成:
+
+```
+apps/<app-name>/
+  helpers.py   # タブ render 関数群（≤250行）
+  app.py       # 設定・データ読込・タブ呼び出し（≤250行）
+```
+
+- `helpers.py`: `render_tab1()` 〜 `render_tab4()` などタブ描画ロジック
+- `app.py`: データ読込・集計・`st.tabs()` → 各 render 関数に委譲
+- push 順序: 依存関係のない `helpers.py` を先にコミット → `app.py`
+
+### 実績（2026-04-30 検証済み）
+
+| ファイル | 行数 | 結果 |
+|---------|------|------|
+| `apps/ec-monthly-briefing/helpers.py` | ~200行 | 成功 |
+| `apps/ec-monthly-briefing/app.py` | ~160行 | 成功 |
+| `apps/ec-executive-dashboard/helpers.py` | ~180行 | 成功 |
+| `apps/ec-executive-dashboard/app.py` | ~230行 | 成功 |
+
 ## push_files 使用時の上限
 
 - 同時に含めるファイル数: **最大 3 ファイル**
-- 合計サイズ: **≤ 10KB**
-- 超える場合は複数回に分割
+- 合計トークン数: **≤ 2,500トークン（≤250行相当）**
+- 超える場合は `create_or_update_file` で 1 ファイルずつ直列処理
 
 ## タイムアウト発生時のフォールバック
 
