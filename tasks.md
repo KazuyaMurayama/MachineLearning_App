@@ -1,6 +1,6 @@
 # タスク（セッション間引継ぎ用ランニングリスト）
 
-> 最終更新: 2026-04-24
+> 最終更新: 2026-04-30
 > ブランチ: `main`（ブランチ作成は禁止、`docs/rules/04-git-rules.md` 参照）
 > 関連リポ: `kazuyamurayama/freelance-compass`（上流＝事業戦略）
 > 最新戦略: [freelance-compass/outputs/integrated-business-plan-v2.md](https://github.com/KazuyaMurayama/freelance-compass/blob/claude/review-repo-docs-2nBuQ/outputs/integrated-business-plan-v2.md)（2026-03-25）
@@ -11,7 +11,7 @@
 1. `CLAUDE.md` を読む（ルール参照テーブル）
 2. `docs/file-index.md` を読む（全ファイル索引）
 3. `docs/context-handoff.md` を読む（不変条件・戦略整合）
-4. `docs/rules/` を全て読む（行動ルール 7 本）
+4. `docs/rules/` を全て読む（行動ルール 8 本）
 5. 本ファイルの「次にやる」を確認
 6. `docs/sessions/` の最新要約を確認
 7. `freelance-compass/tasks.md` と突き合わせ（戦略ドリフト検出）
@@ -61,7 +61,7 @@
 - [ ] E2(ec-what-if)のLightGBM+SHAPパイプラインをE6に流用実装
 - [ ] 広告チャネル別ROAS予測 + SHAP要因分析を追加
 
-**Step 3: T4・E6をStreamlit Cloudにデプロイ**
+**Step 3: T4・E6をStreamlit Cloudにデプロイ**（Step 1 より先行可）
 - [ ] T4（離反予測）デプロイ — URL: km-shigyou-churn.streamlit.app（仮）
 - [ ] E6（広告ROI）デプロイ — URL: km-ec-ad-roi.streamlit.app（仮）
 - [ ] ポータルのURL更新
@@ -107,6 +107,8 @@
 
 ## 完了（直近）
 
+- 2026-04-30: **E1/E3 重複コード除去完了** — `08-ec-app-roles.md` 準拠。E3: matplotlib削除→E1参照、E1: 高リスク顧客リスト削除→E3参照。helpers.py+app.py分割パターン確立
+- 2026-04-30: **タイムアウト知見文書化** — `07-execution-timeout.md` に MCP push ファイル分割パターン（≤250行/≤2,500トークン）追加、CLAUDE.md 更新
 - 2026-04-24: **アプリポートフォリオ分析 v2完了** — 全18アプリ棚卸し、3批評者レビュー40件対応、バンドルWTP再計算
 - 2026-04-20: **P0 価格変更の全ファイル波及監査完了** — 全8ファイルがv0.3価格に整合済みを確認
 - 2026-04-20: **Streamlit Cloud デプロイ完了** — L3 6本 + ポータル 2本、URL 確定
