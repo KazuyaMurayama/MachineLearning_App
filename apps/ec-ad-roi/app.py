@@ -102,6 +102,38 @@ def load_csv(path_or_file):
         except Exception:
             return None
 
+# === トレンド判定ユーティリティ（Tab1・Tab2・KPIで共用） ===
+def compute_channel_trend(df, channel):
+    ch_data = df[df["チャネル"] == channel].sort_values("月")
+    roas_values = ch_data["ROAS"].values if "ROAS" in ch_data.columns else (ch_data["売上"] / ch_data["広告費"]).values
+    n = len(roas_values)
+    if n >= 9:
+        first_half = roas_values[:6].mean()
+        last_three = roas_values[-3:].mean()
+    elif n >= 3:
+        split = max(1, n - 3)
+        first_half = roas_values[:split].mean()
+        last_three = roas_values[-3:].mean()
+    else:
+        return "安定"
+    change_pct = ((last_three - first_half) / first_half * 100) if first_half > 0 else 0
+    if change_pct > 5:
+        return "改善"
+    elif change_pct < -5:
+        return "悪化"
+    return "安定"
+
+
+def investment_judgment(roas, trend):
+    if roas >= 2.0 and trend == "改善":
+        return "🟢 増額推奨", f"ROAS {roas:.2f}x（≥2.0）& トレンド改善"
+    elif roas >= 1.5 and trend in ("安定", "改善"):
+        return "🔵 維持", f"ROAS {roas:.2f}x（≥1.5）& トレンド{trend}"
+    elif roas < 1.0:
+        return "🔴 減額推奨", f"ROAS {roas:.2f}x（<1.0）— 赤字チャネル"
+    else:
+        return "🟡 要注意", f"ROAS {roas:.2f}x / トレンド{trend} — 改善検討"
+
 # === Auto-load サンプルデータ ===
 if not st.session_state.loaded:
     p = os.path.join(os.path.dirname(__file__), "sample_data", "ad_performance.csv")
@@ -173,7 +205,6 @@ best_ch = ch_roas.loc[ch_roas["ROAS"].idxmax()]
 
 k1, k2, k3, k4, k5 = st.columns(5)
 
-# 減額推奨チャネルを事前計算（投資判定ロジック活用）
 _ch_trends = {ch: compute_channel_trend(df, ch) for ch in ch_roas["チャネル"]}
 _danger_channels = []
 for _, r in ch_roas.iterrows():
@@ -196,7 +227,6 @@ for col, label, value in [
     </div>
     """, unsafe_allow_html=True)
 
-# 冒頭アラート: 問題チャネル全件 or 全チャネル黒字
 if _danger_channels:
     _sorted_danger = sorted(_danger_channels, key=lambda x: x["roas"])
     _alert_parts = [f"🔴 {c['name']}: ROAS {c['roas']:.1f}x, 月¥{abs(c['loss']):,}赤字" if c["roas"] < 1.0 else f"🟡 {c['name']}: ROAS {c['roas']:.1f}x, 要注意" for c in _sorted_danger]
@@ -205,40 +235,6 @@ else:
     st.success("✅ 全チャネル黒字。現状維持で問題ありません")
 
 st.markdown("<br>", unsafe_allow_html=True)
-
-# === トレンド判定ユーティリティ（Tab1・Tab2で共用） ===
-def compute_channel_trend(df, channel):
-    """チャネルのROASトレンドを判定する。改善/安定/悪化を返す。"""
-    ch_data = df[df["チャネル"] == channel].sort_values("月")
-    roas_values = ch_data["ROAS"].values if "ROAS" in ch_data.columns else (ch_data["売上"] / ch_data["広告費"]).values
-    n = len(roas_values)
-    if n >= 9:
-        first_half = roas_values[:6].mean()
-        last_three = roas_values[-3:].mean()
-    elif n >= 3:
-        split = max(1, n - 3)
-        first_half = roas_values[:split].mean()
-        last_three = roas_values[-3:].mean()
-    else:
-        return "安定"
-    change_pct = ((last_three - first_half) / first_half * 100) if first_half > 0 else 0
-    if change_pct > 5:
-        return "改善"
-    elif change_pct < -5:
-        return "悪化"
-    return "安定"
-
-
-def investment_judgment(roas, trend):
-    """ROAS値とトレンドから投資判定ラベルと理由を返す。"""
-    if roas >= 2.0 and trend == "改善":
-        return "🟢 増額推奨", f"ROAS {roas:.2f}x（≥2.0）& トレンド改善"
-    elif roas >= 1.5 and trend in ("安定", "改善"):
-        return "🔵 維持", f"ROAS {roas:.2f}x（≥1.5）& トレンド{trend}"
-    elif roas < 1.0:
-        return "🔴 減額推奨", f"ROAS {roas:.2f}x（<1.0）— 赤字チャネル"
-    else:
-        return "🟡 要注意", f"ROAS {roas:.2f}x / トレンド{trend} — 改善検討"
 
 # === タブ ===
 tab1, tab2, tab3, tab4 = st.tabs(["📊 チャネル別ROAS", "💰 予算配分シミュレーション", "📈 トレンド分析", "🤖 ML予測+SHAP分析"])
@@ -249,7 +245,6 @@ tab1, tab2, tab3, tab4 = st.tabs(["📊 チャネル別ROAS", "💰 予算配分
 with tab1:
     st.markdown("### チャネル別ROAS（年間平均）")
 
-    # パフォーマンステーブル作成
     perf = df.groupby("チャネル").agg(
         広告費合計=("広告費", "sum"),
         売上合計=("売上", "sum"),
@@ -259,12 +254,10 @@ with tab1:
     perf["CPA"] = (perf["広告費合計"] / perf["CV数"]).astype(int)
     perf = perf.sort_values("ROAS", ascending=False).reset_index(drop=True)
 
-    # チャネルフィルター
     all_channels = perf["チャネル"].tolist()
     selected_channels = st.multiselect("チャネルを絞込", all_channels, default=all_channels)
     perf_filtered = perf[perf["チャネル"].isin(selected_channels)]
 
-    # 棒グラフ
     fig, ax = plt.subplots(figsize=(10, 5))
     colors = ["#059669" if r >= perf_filtered["ROAS"].median() else "#6EE7B7" for r in perf_filtered["ROAS"]]
     bars = ax.bar(perf_filtered["チャネル"], perf_filtered["ROAS"], color=colors, edgecolor="white", linewidth=0.8)
@@ -281,7 +274,6 @@ with tab1:
     st.pyplot(fig)
     plt.close(fig)
 
-    # 投資判定・CPA目標達成を計算
     perf_filtered = perf_filtered.copy()
     perf_filtered["トレンド"] = perf_filtered["チャネル"].apply(lambda ch: compute_channel_trend(df, ch))
     perf_filtered["投資判定"] = perf_filtered.apply(
@@ -291,7 +283,6 @@ with tab1:
     perf_filtered["目標CPA達成"] = perf_filtered["CPA"].apply(
         lambda x: "✅ 達成" if x <= target_cpa else "❌ 未達成")
 
-    # テーブル（上位ハイライト）
     st.markdown("### チャネル別パフォーマンス")
     display_perf = perf_filtered.copy()
     display_perf["広告費合計"] = display_perf["広告費合計"].apply(lambda x: f"¥{x:,.0f}")
@@ -300,15 +291,12 @@ with tab1:
     display_perf["CPA_raw"] = display_perf["CPA"]
     display_perf["CPA"] = display_perf["CPA"].apply(lambda x: f"¥{x:,.0f}")
     display_perf["ROAS"] = display_perf["ROAS"].apply(lambda x: f"{x:.2f}x")
-
-    # ハイライト: ROAS上位をマーク
     display_perf.insert(0, "🏆", ["⭐" if i < 2 else "" for i in range(len(display_perf))])
 
     display_cols = ["🏆", "チャネル", "広告費合計", "売上合計", "CV数", "ROAS", "CPA",
                     "投資判定", "判定理由", "目標CPA達成"]
     st.dataframe(display_perf[display_cols], use_container_width=True, hide_index=True)
 
-    # 目標CPA未達成チャネルの改善試算
     missed = perf_filtered[perf_filtered["CPA"] > target_cpa].copy()
     if len(missed) > 0:
         st.markdown("#### 🎯 目標CPA未達成チャネルの改善試算")
@@ -316,13 +304,10 @@ with tab1:
         for _, row in missed.iterrows():
             current_cpa = int(row["CPA"])
             gap = current_cpa - target_cpa
-            # 必要CVR改善: CPA = 広告費/CV数, CV数 = クリック数*CVR
-            # 目標CV数 = 広告費合計 / 目標CPA
             cost = row["広告費合計"]
             current_cv = int(row["CV数"].replace(",", "")) if isinstance(row["CV数"], str) else int(row["CV数"])
             target_cv = cost / target_cpa
             if current_cv > 0:
-                current_cvr_approx = current_cv / cost * target_cpa  # ratio
                 needed_cv_increase = target_cv - current_cv
                 needed_cv_increase_pct = (needed_cv_increase / current_cv * 100) if current_cv > 0 else 0
                 st.info(
@@ -331,7 +316,6 @@ with tab1:
                     f"(+{needed_cv_increase_pct:.1f}% 改善が必要)"
                 )
 
-    # CSVダウンロード
     csv_data = perf_filtered.drop(columns=["トレンド"]).to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 パフォーマンスデータをCSVダウンロード", csv_data,
                        "channel_performance.csv", "text/csv")
@@ -348,13 +332,11 @@ with tab2:
         value=1000000, step=100000, format="%d"
     )
 
-    # 現在の配分比率
     monthly_avg = df.groupby("チャネル")["広告費"].mean().reset_index()
     monthly_avg.columns = ["チャネル", "月平均広告費"]
     monthly_total = monthly_avg["月平均広告費"].sum()
     monthly_avg["現在比率"] = monthly_avg["月平均広告費"] / monthly_total
 
-    # ROAS加重最適配分（制約なし）
     ch_roas_map = perf.set_index("チャネル")["ROAS"].astype(float).to_dict()
     monthly_avg["ROAS"] = monthly_avg["チャネル"].map(ch_roas_map)
     roas_total = monthly_avg["ROAS"].sum()
@@ -364,7 +346,6 @@ with tab2:
     monthly_avg["提案予算_制約なし"] = (monthly_avg["最適比率"] * total_budget).astype(int)
     monthly_avg["期待売上_制約なし"] = (monthly_avg["提案予算_制約なし"] * monthly_avg["ROAS"]).astype(int)
 
-    # --- チャネル別予算制約 ---
     st.markdown("#### チャネル別 予算上下限制約")
     st.caption("各チャネルの最低予算・最大予算を設定してください。制約付きで残り予算をROAS比例配分します。")
 
@@ -387,22 +368,17 @@ with tab2:
             )
             budget_constraints[ch_name] = {"min": ch_min, "max": ch_max}
 
-    # 制約付き配分計算
     def calc_constrained_allocation(monthly_avg_df, total_bgt, constraints):
-        """最低予算を確保した上で、残りをROAS比例配分（最大予算でキャップ）"""
         result = monthly_avg_df[["チャネル", "ROAS"]].copy()
-        # まず最低予算を確保
         result["配分"] = result["チャネル"].map(lambda ch: constraints[ch]["min"])
         remaining = total_bgt - result["配分"].sum()
         if remaining < 0:
-            # 最低予算の合計が総予算を超える場合は比例で縮小
             ratio = total_bgt / result["配分"].sum() if result["配分"].sum() > 0 else 1
             result["配分"] = (result["配分"] * ratio).astype(int)
             remaining = 0
 
-        # 残りをROAS比例で配分（キャップ考慮で反復）
         unfixed = result["チャネル"].tolist()
-        for _ in range(10):  # 最大10回反復で収束
+        for _ in range(10):
             if remaining <= 0 or len(unfixed) == 0:
                 break
             roas_sum = result.loc[result["チャネル"].isin(unfixed), "ROAS"].sum()
@@ -434,7 +410,6 @@ with tab2:
     monthly_avg["差分"] = monthly_avg["提案予算"] - monthly_avg["現在予算"]
     monthly_avg["期待売上"] = constrained["期待売上"].values
 
-    # シミュレーション結論ハイライト
     _sim_current = (monthly_avg["現在予算"] * monthly_avg["ROAS"]).sum()
     _sim_proposed = (constrained["配分"] * constrained["ROAS"]).sum()
     _sim_diff = _sim_proposed - _sim_current
@@ -447,15 +422,12 @@ with tab2:
         st.info("📊 最適配分と現在配分の期待売上は同等です")
 
     col_pie1, col_pie2 = st.columns(2)
-
     with col_pie1:
         st.markdown("#### 現在の配分")
         fig1, ax1 = plt.subplots(figsize=(6, 6))
-        wedges, texts, autotexts = ax1.pie(
-            monthly_avg["現在比率"], labels=monthly_avg["チャネル"],
-            autopct="%1.1f%%", startangle=90,
-            colors=["#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0"]
-        )
+        ax1.pie(monthly_avg["現在比率"], labels=monthly_avg["チャネル"],
+                autopct="%1.1f%%", startangle=90,
+                colors=["#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0"])
         ax1.set_title("現在の予算配分")
         plt.tight_layout()
         st.pyplot(fig1)
@@ -465,21 +437,17 @@ with tab2:
         st.markdown("#### ROAS加重 最適配分（制約付き提案）")
         proposed_ratios = monthly_avg["提案予算"] / monthly_avg["提案予算"].sum() if monthly_avg["提案予算"].sum() > 0 else monthly_avg["最適比率"]
         fig2, ax2 = plt.subplots(figsize=(6, 6))
-        wedges2, texts2, autotexts2 = ax2.pie(
-            proposed_ratios, labels=monthly_avg["チャネル"],
-            autopct="%1.1f%%", startangle=90,
-            colors=["#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0"]
-        )
+        ax2.pie(proposed_ratios, labels=monthly_avg["チャネル"],
+                autopct="%1.1f%%", startangle=90,
+                colors=["#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0"])
         ax2.set_title("ROAS加重 最適配分（制約付き）")
         plt.tight_layout()
         st.pyplot(fig2)
         plt.close(fig2)
 
-    # 結果テーブル
     st.markdown("#### 最適配分の詳細（制約付き）")
     display_alloc = monthly_avg[["チャネル", "現在予算", "提案予算", "差分", "期待売上", "ROAS"]].copy()
     display_alloc = display_alloc.sort_values("期待売上", ascending=False).reset_index(drop=True)
-
     display_fmt = display_alloc.copy()
     display_fmt["現在予算"] = display_fmt["現在予算"].apply(lambda x: f"¥{x:,.0f}")
     display_fmt["提案予算"] = display_fmt["提案予算"].apply(lambda x: f"¥{x:,.0f}")
@@ -491,7 +459,6 @@ with tab2:
     csv_alloc = monthly_avg[["チャネル", "現在予算", "提案予算", "差分", "期待売上", "ROAS"]].to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 予算配分データをCSVダウンロード", csv_alloc, "budget_allocation.csv", "text/csv")
 
-    # 現在 vs 制約なし vs 制約付き の期待売上比較
     st.markdown("#### 期待売上比較")
     current_expected = (monthly_avg["現在予算"] * monthly_avg["ROAS"]).sum()
     unconstrained_expected = monthly_avg["期待売上_制約なし"].sum()
@@ -504,17 +471,12 @@ with tab2:
     mc2.metric("制約なし最適配分", f"¥{unconstrained_expected:,.0f}")
     mc3.metric("制約付き最適配分", f"¥{proposed_expected:,.0f}")
     diff_uc = proposed_expected - unconstrained_expected
-    mc4.metric("制約による影響", f"¥{diff_uc:,.0f}",
-               f"現在比 {diff_pct:+.1f}%")
+    mc4.metric("制約による影響", f"¥{diff_uc:,.0f}", f"現在比 {diff_pct:+.1f}%")
 
-    # ------------------------------------------------------------------
-    # 予算移動シミュレーター
-    # ------------------------------------------------------------------
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     st.markdown("### 🔄 予算移動シミュレーター")
     st.info("💡 「Google広告から¥50万をMeta広告に移したらROASはどう変わる？」をリアルタイムで試算します。")
 
-    # 移動元・移動先の選択
     sim_channels = monthly_avg["チャネル"].tolist()
     mv_col1, mv_col2 = st.columns(2)
     with mv_col1:
@@ -523,22 +485,15 @@ with tab2:
         move_to_options = [ch for ch in sim_channels if ch != move_from]
         move_to = st.selectbox("予算移動先チャネル", move_to_options, key="move_to")
 
-    # 移動元の現在予算を取得
     from_budget_row = monthly_avg[monthly_avg["チャネル"] == move_from]
     from_current_budget = int(from_budget_row["現在予算"].values[0]) if len(from_budget_row) > 0 else 0
 
-    # 移動額スライダー（¥0〜移動元の現在予算）
     move_amount = st.slider(
-        "移動額（円）",
-        min_value=0,
-        max_value=max(from_current_budget, 1),
-        value=min(100000, max(from_current_budget, 1)),
-        step=10000,
-        format="¥%d",
-        key="move_amount"
+        "移動額（円）", min_value=0, max_value=max(from_current_budget, 1),
+        value=min(100000, max(from_current_budget, 1)), step=10000,
+        format="¥%d", key="move_amount"
     )
 
-    # 移動後の各チャネル予算・期待売上を計算
     move_result_rows = []
     total_before_sales = 0.0
     total_after_sales = 0.0
@@ -547,44 +502,30 @@ with tab2:
         ch = row["チャネル"]
         current_bgt = int(row["現在予算"])
         roas_val = float(row["ROAS"])
-
         if ch == move_from:
             after_bgt = current_bgt - move_amount
         elif ch == move_to:
             after_bgt = current_bgt + move_amount
         else:
             after_bgt = current_bgt
-
         current_sales = current_bgt * roas_val
         after_sales = after_bgt * roas_val
         diff_sales = after_sales - current_sales
-
         total_before_sales += current_sales
         total_after_sales += after_sales
-
         move_result_rows.append({
-            "チャネル": ch,
-            "現在予算": current_bgt,
-            "移動後予算": after_bgt,
-            "現在期待売上": int(current_sales),
-            "移動後期待売上": int(after_sales),
-            "差分": int(diff_sales),
+            "チャネル": ch, "現在予算": current_bgt, "移動後予算": after_bgt,
+            "現在期待売上": int(current_sales), "移動後期待売上": int(after_sales), "差分": int(diff_sales),
         })
 
     move_result_df = pd.DataFrame(move_result_rows)
     total_effect = total_after_sales - total_before_sales
-    total_effect_man = total_effect / 10000  # 万円単位
-
-    # 合計効果メトリクス表示
+    total_effect_man = total_effect / 10000
     effect_sign = "+" if total_effect >= 0 else ""
-    st.metric(
-        label="💰 移動効果（月間期待売上変動）",
-        value=f"¥{total_effect:+,.0f}",
-        delta=f"{effect_sign}{total_effect_man:.1f}万円/月"
-    )
+    st.metric(label="💰 移動効果（月間期待売上変動）", value=f"¥{total_effect:+,.0f}",
+              delta=f"{effect_sign}{total_effect_man:.1f}万円/月")
 
-    # 効果別メッセージ
-    threshold = total_before_sales * 0.005  # 0.5%を「軽微」の閾値
+    threshold = total_before_sales * 0.005
     if total_effect > threshold:
         st.success(f"この予算移動で月+¥{int(total_effect):,}（+{total_effect_man:.1f}万円）の売上増が期待できます")
     elif total_effect < -threshold:
@@ -592,7 +533,6 @@ with tab2:
     else:
         st.info("売上への影響は軽微です（±0.5%以内）")
 
-    # Before/After 比較テーブル
     st.markdown("#### Before / After 比較")
     display_move = move_result_df.copy()
     display_move["現在予算"] = display_move["現在予算"].apply(lambda x: f"¥{x:,.0f}")
@@ -602,9 +542,6 @@ with tab2:
     display_move["差分"] = display_move["差分"].apply(lambda x: f"+¥{x:,.0f}" if x >= 0 else f"-¥{abs(x):,.0f}")
     st.dataframe(display_move, use_container_width=True, hide_index=True)
 
-    # ------------------------------------------------------------------
-    # ワンクリック最適移動提案
-    # ------------------------------------------------------------------
     st.markdown("#### 💡 ワンクリック最適提案")
     st.caption("全チャネルペアの移動パターン（現在予算の10%刻み）を試算し、最も効果的な移動を自動提案します。")
 
@@ -617,26 +554,19 @@ with tab2:
         from_ch = from_row["チャネル"]
         from_bgt = int(from_row["現在予算"])
         from_roas = float(from_row["ROAS"])
-
         if from_bgt <= 0:
             continue
-
         for j, to_row in monthly_avg.iterrows():
             to_ch = to_row["チャネル"]
             if from_ch == to_ch:
                 continue
             to_roas = float(to_row["ROAS"])
-
-            # ROASが移動先の方が高い場合のみ効果あり
             roas_diff = to_roas - from_roas
-
-            # 試算: 移動先ROASが高いほど効果が高い。
-            # 最大移動額 = 移動元現在予算 の範囲で10%刻みで試算
             for pct in range(10, 110, 10):
                 trial_amount = int(from_bgt * pct / 100)
                 if trial_amount > from_bgt:
                     trial_amount = from_bgt
-                effect = trial_amount * roas_diff  # 移動額 × ROAS差 = 売上変動
+                effect = trial_amount * roas_diff
                 if effect > best_effect:
                     best_effect = effect
                     best_from = from_ch
@@ -663,7 +593,6 @@ with tab3:
     channels = df["チャネル"].unique()
     sorted_months = sorted(df["月"].unique())
 
-    # 月次ROAS推移（折れ線）
     st.markdown("#### チャネル別 月次ROAS推移")
     fig3, ax3 = plt.subplots(figsize=(12, 5))
     color_map = {"Google広告": "#059669", "Meta広告": "#3B82F6", "楽天広告": "#F59E0B",
@@ -683,10 +612,8 @@ with tab3:
     st.pyplot(fig3)
     plt.close(fig3)
 
-    # 月次広告費推移（積み上げ棒グラフ）
     st.markdown("#### チャネル別 月次広告費推移（積み上げ）")
     pivot_cost = df.pivot_table(index="月", columns="チャネル", values="広告費", aggfunc="sum").fillna(0)
-    # 月の順序を保証（文字列ソート: "2024年01月" < "2024年02月" ... で正しく動作）
     pivot_cost = pivot_cost.reindex(sorted_months)
 
     fig4, ax4 = plt.subplots(figsize=(12, 5))
@@ -708,11 +635,9 @@ with tab3:
     st.pyplot(fig4)
     plt.close(fig4)
 
-    # ROAS改善/悪化トレンドサマリー
     st.markdown("#### ROAS トレンドサマリー")
     st.caption("直近3ヶ月平均 vs 前半6ヶ月平均の比較")
 
-    month_list = list(sorted_months)
     trend_records = []
     for ch in channels:
         ch_data = df[df["チャネル"] == ch].sort_values("月")
@@ -862,7 +787,6 @@ with tab4:
             st.warning(f"R²={r2:.2f} — モデル精度が低いため、予測値は参考値として扱ってください。")
 
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-
         st.markdown("#### SHAP要因分析")
         explainer = shap.TreeExplainer(model)
         sample_size = min(200, len(X_test))
@@ -887,11 +811,10 @@ with tab4:
         plt.close(fig_bee)
 
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-
         st.markdown("#### チャネル別ROAS予測")
-        channels = sorted(df_ml["チャネル"].unique())
+        channels_ml = sorted(df_ml["チャネル"].unique())
         channel_preds = []
-        for ch in channels:
+        for ch in channels_ml:
             ch_enc = le_ch.transform([ch])[0]
             ch_data = df_ml[df_ml["チャネル"] == ch]
             avg_row = pd.DataFrame({
