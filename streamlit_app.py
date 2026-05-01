@@ -81,26 +81,16 @@ with st.sidebar:
     st.markdown("## 🏛️ 士業AI経営パートナー")
     st.markdown("税理士・社労士・行政書士 専用")
     st.markdown("---")
-    st.markdown("### 📋 ツール一覧（11アプリ）")
+    st.markdown("### 📋 ツール一覧（5アプリ）")
     st.markdown("""
-**🚀 L3 AI経営パートナー（月額30万円）**
+**🚀 L3 AI経営パートナー（月額20万円）**
 1. 🏛️ 事務所経営ダッシュボード
 2. 💎 顧問先LTV予測+不採算フラグ
 3. 📋 月次AIブリーフィング
 
-**経営分析・予測（L1/L2）**
-4. 🏢 顧問先離反予測
+**🆓 無料体験**
+4. 🏢 顧問先離反予測（デモ）
 5. 🌐 サービスLP+AI経営診断
-6. 🔄 クロスセル分析
-
-**業務効率化**
-7. 📊 月次レポート自動生成
-8. 📝 契約書ドラフトAI
-9. 💰 入金遅延アラート
-
-**コンプライアンス**
-10. 🛡️ 安心パッケージ
-11. 📋 申請書類チェッカー
 """)
     st.markdown("---")
     st.markdown("### 💡 このツールの対象者")
@@ -117,7 +107,7 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-section">
 <h1>🏛️ 士業AI経営パートナー</h1>
-<p>税理士・社労士・行政書士の業務を<br>AIで変革する 11の専用ツール</p>
+<p>税理士・社労士・行政書士の業務を<br>AIで変革する 5つの専用ツール</p>
 <div class="hero-sub">顧問先の離反予測から契約書作成、月次レポートまでワンストップ</div>
 </div>
 """, unsafe_allow_html=True)
@@ -125,7 +115,7 @@ st.markdown("""
 # === 導入効果 KPI ===
 k1, k2, k3, k4 = st.columns(4)
 with k1:
-    st.markdown('<div class="kpi-card"><div class="kpi-value">11</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-value">5</div><div class="kpi-label">専用AIツール</div></div>', unsafe_allow_html=True)
 with k2:
     st.markdown('<div class="kpi-card"><div class="kpi-value">80%</div><div class="kpi-label">業務時間削減</div></div>', unsafe_allow_html=True)
 with k3:
@@ -223,4 +213,4 @@ with s3:
 
 # Footer
 st.markdown("---")
-st.caption("士業AI経営パートナー × データサイエンス | v3.0 — L3（月額30万円）プラン対応")
+st.caption("士業AI経営パートナー × データサイエンス | v3.0 — L3（月額20万円）プラン対応")
