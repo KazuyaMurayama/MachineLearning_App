@@ -1,6 +1,6 @@
 # リポジトリ ファイルインデックス
 
-> 最終更新: 2026-04-19
+> 最終更新: 2026-04-30
 > 対象: `main` ブランチ（全ファイルを main に集約。ブランチ作成は `docs/rules/04-git-rules.md` で禁止）
 > 新規ファイル作成・大幅変更時は本ファイルを必ず更新する（`docs/rules/03-file-index-rules.md` 参照）
 
@@ -28,7 +28,8 @@
 | `docs/rules/04-git-rules.md` | Git 操作ルール（ブランチ禁止） |
 | `docs/rules/05-model-usage.md` | モデル使い分け（Opus/Sonnet） |
 | `docs/rules/06-deliverable-rules.md` | 成果物報告ルール |
-| `docs/rules/07-execution-timeout.md` | 実行計画・タイムアウト対策 |
+| `docs/rules/07-execution-timeout.md` | 実行計画・タイムアウト対策・MCP push ファイル分割（≤250行） |
+| `docs/rules/08-ec-app-roles.md` | EC L3コア3本（E1/E2/E3）の機能境界・重複禁止ルール |
 
 ---
 
@@ -66,9 +67,11 @@
 | `apps/ec-dashboard/app.py` | 売上ダッシュボード |
 | `apps/ec-rfm/app.py` | RFM 分析＋セグメンテーション |
 | `apps/ec-ad-roi/app.py` | 広告 ROI 分析 |
-| `apps/ec-executive-dashboard/app.py` | EC 経営ダッシュボード（L3） |
-| `apps/ec-what-if/app.py` | What-If シミュレーター（L3、**⚠️ R²=-0.16**） |
-| `apps/ec-monthly-briefing/app.py` | 月次 AI ブリーフィング（L3） |
+| `apps/ec-executive-dashboard/app.py` | EC 経営ダッシュボード（L3、E1）|
+| `apps/ec-executive-dashboard/helpers.py` | E1 タブ render 関数群（helpers.py+app.py 分割パターン） |
+| `apps/ec-what-if/app.py` | What-If シミュレーター（L3、**⚠️ R²=0.74**） |
+| `apps/ec-monthly-briefing/app.py` | 月次 AI ブリーフィング（L3、E3） |
+| `apps/ec-monthly-briefing/helpers.py` | E3 タブ render 関数群（helpers.py+app.py 分割パターン） |
 
 ---
 
@@ -161,6 +164,7 @@
 | ファイル | 概要 |
 |---------|------|
 | `2026-04-08-session-summary.md` | L3 実装・品質改善セッション |
+| `2026-04-30-session-summary.md` | E1/E3 リファクタ・タイムアウト知見文書化 |
 
 ---
 
