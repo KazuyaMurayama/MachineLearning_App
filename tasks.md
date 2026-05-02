@@ -1,6 +1,6 @@
 # タスク（セッション間引継ぎ用ランニングリスト）
 
-> 最終更新: 2026-04-30
+> 最終更新: 2026-05-02
 > ブランチ: `main`（ブランチ作成は禁止、`docs/rules/04-git-rules.md` 参照）
 > 関連リポ: `kazuyamurayama/freelance-compass`（上流＝事業戦略）
 > 最新戦略: [freelance-compass/outputs/integrated-business-plan-v2.md](https://github.com/KazuyaMurayama/freelance-compass/blob/claude/review-repo-docs-2nBuQ/outputs/integrated-business-plan-v2.md)（2026-03-25）
@@ -32,7 +32,7 @@
 
 ---
 
-## デプロイ済みアプリ URL（2026-04-20 確定）
+## デプロイ済みアプリ URL（2026-05-02 確定）
 
 | # | アプリ名 | URL |
 |---|---|---|
@@ -40,10 +40,12 @@
 | 2 | 事務所経営ダッシュボード (L3) | https://km-shigyou-dashboard.streamlit.app |
 | 3 | LTV予測＋不採算フラグ (L3) | https://km-shigyou-ltv.streamlit.app |
 | 4 | 月次AIブリーフィング・士業 (L3) | https://km-shigyou-briefing.streamlit.app |
-| 5 | ECポータル | https://km-ec-apps.streamlit.app |
-| 6 | EC経営ダッシュボード (L3) | https://km-ec-dashboard.streamlit.app |
-| 7 | What-Ifシミュレーター (L3) | https://km-ec-what-if.streamlit.app |
-| 8 | EC月次AIブリーフィング (L3) | https://km-ec-briefing.streamlit.app |
+| 5 | 離反予測デモ T4 (L2デモ) | https://km-shigyou-churn.streamlit.app |
+| 6 | ECポータル | https://km-ec-apps.streamlit.app |
+| 7 | EC経営ダッシュボード (L3) | https://km-ec-dashboard.streamlit.app |
+| 8 | What-Ifシミュレーター (L3) | https://km-ec-what-if.streamlit.app |
+| 9 | EC月次AIブリーフィング (L3) | https://km-ec-briefing.streamlit.app |
+| 10 | 広告ROI分析 E6 (L2デモ+ML) | https://km-ec-ad-roi.streamlit.app |
 
 ---
 
@@ -53,25 +55,24 @@
 
 > 根拠: [app-portfolio-analysis.md v2](https://github.com/KazuyaMurayama/MachineLearning_App/blob/claude/review-repo-docs-2nBuQ/docs/app-portfolio-analysis.md)
 
-**Step 1: ポータル修正**（壊れたリンク修正 + L3コア表示）
-- [ ] 士業ポータル（`streamlit_app.py`）: L3コア3本のURL→km-*修正 + T4(デモ版) + T5(無料) のみ表示。他8本のリンク削除
-- [ ] ECポータル（`ec_app.py`）: L3コア3本のURL→km-*修正 + E6(デモ版) のみ表示。他3本のリンク削除
+**Step 1: ポータル修正** ✅ 完了（2026-05-02）
+- [x] 士業ポータル（`streamlit_app.py`）: L3コア3本 + T4(デモ版) のみ表示、5アプリ・¥20万
+- [x] ECポータル（`ec_app.py`）: L3コア3本 + E6(デモ版) のみ表示、4アプリ・¥25万
 
-**Step 2: E6（広告ROI分析）にML+SHAP追加**
-- [ ] E2(ec-what-if)のLightGBM+SHAPパイプラインをE6に流用実装
-- [ ] 広告チャネル別ROAS予測 + SHAP要因分析を追加
+**Step 2: E6（広告ROI分析）にML+SHAP追加** ✅ 完了（2026-05-02）
+- [x] LightGBM+SHAPパイプライン実装（tab4「ML予測+SHAP分析」）
+- [x] requirements修正（scikit-learn/lightgbm/shap追加）、NameError修正
 
-**Step 3: T4・E6をStreamlit Cloudにデプロイ**（Step 1 より先行可）
-- [ ] T4（離反予測）デプロイ — URL: km-shigyou-churn.streamlit.app（仮）
-- [ ] E6（広告ROI）デプロイ — URL: km-ec-ad-roi.streamlit.app（仮）
-- [ ] ポータルのURL更新
+**Step 3: T4・E6をStreamlit Cloudにデプロイ** ✅ 完了（2026-05-02）
+- [x] T4（離反予測）— https://km-shigyou-churn.streamlit.app
+- [x] E6（広告ROI）— https://km-ec-ad-roi.streamlit.app
 
 **Step 4: GTM実行開始**（→ P1に合流）
 - [ ] ゼロイチアウトリーチ戦術書作成
 - [ ] ビザスク・ココナラ登録
 - [ ] コールド開始
 
-### 🟠 P1: Go-to-Market 実行（v2 Phase 0 = M1=2026年5月）
+### 🟠 P1: Go-to-Market 実行（v2 Phase 0 = M1=2026年5月）← **現在ここ**
 
 - [ ] **最初の 5社ヒアリング**（士業 3 + EC 2）
 - [ ] **初回有料契約 1社**（v2 Phase 0 完了条件 M3末）
@@ -85,7 +86,7 @@
 
 ### 🟡 P2: プロトタイプの商業化準備
 
-- [x] Streamlit Cloud デプロイ 8本完了（2026-04-20）
+- [x] Streamlit Cloud デプロイ 10本完了（2026-05-02）
 - [x] ec-what-if R² 改善済み（-0.16 → 0.74、2026-04-19）
 - [ ] `pilot-contract-template.md` 法務レビュー
 - [ ] 稼働時間記録運用開始（v2 時給 KPI 用）
@@ -107,17 +108,17 @@
 
 ## 完了（直近）
 
-- 2026-04-30: **E1/E3 重複コード除去完了** — `08-ec-app-roles.md` 準拠。E3: matplotlib削除→E1参照、E1: 高リスク顧客リスト削除→E3参照。helpers.py+app.py分割パターン確立
-- 2026-04-30: **タイムアウト知見文書化** — `07-execution-timeout.md` に MCP push ファイル分割パターン（≤250行/≤2,500トークン）追加、CLAUDE.md 更新
-- 2026-04-24: **アプリポートフォリオ分析 v2完了** — 全18アプリ棚卸し、3批評者レビュー40件対応、バンドルWTP再計算
+- 2026-05-02: **P0 Step3 完了** — T4（km-shigyou-churn）+ E6（km-ec-ad-roi）Streamlit Cloud デプロイ、ユーザー自身で実施
+- 2026-05-02: **P0 Step2 完了** — E6に LightGBM+SHAP 追加（tab4）、requirements修正（sklearn/lightgbm/shap）、NameError修正
+- 2026-05-02: **P0 Step1 完了** — ec_app.py: 4アプリ・¥25万に修正。streamlit_app.py: 修正確認済み
+- 2026-04-30: **E1/E3 重複コード除去完了** — `08-ec-app-roles.md` 準拠。helpers.py+app.py分割パターン確立
+- 2026-04-30: **タイムアウト知見文書化** — `07-execution-timeout.md` に MCP push ファイル分割パターン（≤250行/≤2,500トークン）追加
+- 2026-04-24: **アプリポートフォリオ分析 v2完了** — 全18アプリ棚卸し、3批評者レビュー40件対応
 - 2026-04-20: **P0 価格変更の全ファイル波及監査完了** — 全8ファイルがv0.3価格に整合済みを確認
 - 2026-04-20: **Streamlit Cloud デプロイ完了** — L3 6本 + ポータル 2本、URL 確定
 - 2026-04-20: **リカバリプロトコル導入** — progress.md + CLAUDE.md + 07-execution-timeout.md
 - 2026-04-19: **ec-what-if R² 改善** — サンプルデータ再設計 R²=-0.16→0.74
 - 2026-04-19: **リポジトリルール整備** — `docs/rules/` 7本作成、CLAUDE.md をルール参照構造に再構築
-- 2026-04-16: `pricing-and-scope.md` v0.3 更新、戦略整合性確認完了、main への 2段階マージ完了
-- 2026-04-09: 営業アセット改善ラウンド（新規 7 + 改善 2 + 5 批評者レビュー）
-- 2026-04-08: L3 キラー機能実装（士業 3 + EC 3）
 
 ---
 
