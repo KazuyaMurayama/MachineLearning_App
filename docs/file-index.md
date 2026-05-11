@@ -1,6 +1,6 @@
 # リポジトリ ファイルインデックス
 
-> 最終更新: 2026-04-30
+> 最終更新: 2026-05-11（v2.1.1整合アップデート）
 > 対象: `main` ブランチ（全ファイルを main に集約。ブランチ作成は `docs/rules/04-git-rules.md` で禁止）
 > 新規ファイル作成・大幅変更時は本ファイルを必ず更新する（`docs/rules/03-file-index-rules.md` 参照）
 
@@ -128,12 +128,21 @@
 
 ### 5-2. 事業整合・品質
 
-| ファイル | 概要 |
-|---------|------|
-| `docs/shigyou-business-alignment.md` | 士業 MVP × 事業計画整合 |
-| `docs/ec-business-alignment.md` | EC MVP × 事業計画整合 |
-| `docs/quality-scoring-rubric.md` | 5 軸 100 点品質採点基準 |
-| `docs/improvement-backlog.md` | 改善バックログ |
+| ファイル | 概要 | 最終更新 |
+|---------|------|---------|
+| `docs/shigyou-business-alignment.md` | 士業 MVP × 事業計画整合 | 2026-04-08 |
+| `docs/ec-business-alignment.md` | EC MVP × 事業計画整合（**v2.1.1整合済**） | **2026-05-10** |
+| `docs/quality-scoring-rubric.md` | 5 軸 100 点品質採点基準 | 2026-04-08 |
+| `docs/improvement-backlog.md` | 改善バックログ | 2026-04-30 |
+
+> **ec-business-alignment.md v2.1.1 更新内容**（2026-05-10）:
+> - L1価格を¥125,000→**¥60,000/月**に修正（3ヶ月PoC固定）
+> - 競合脅威追加: Shopify Magic（高）/ Klaviyo（高）/ GPT+CI（高）
+> - 「逆SHAP」廃止→「ML予測+月次レビュー+IT補助金対応+日本特化」に統一
+> - L3「未パイロット・商業稼働に至っていない」を結論・注記に明記
+> - 価格帯を¥6-25万に統一（全文書整合済み）
+>
+> **事業計画連携**: [freelance-compass 統合事業計画 v2.1.1 INDEX](https://github.com/KazuyaMurayama/freelance-compass/blob/main/outputs/integrated-business-plan-v2.md)
 
 ### 5-3. 営業アセット（`docs/sales-assets/`）
 
@@ -141,7 +150,7 @@
 
 | ファイル | ID | 用途 |
 |---------|:--:|------|
-| `pricing-and-scope.md` | SA-PRC | 料金 SSOT（⚠️ v0.3） |
+| `pricing-and-scope.md` | SA-PRC | 料金 SSOT（⚠️ v2.1.1との整合要確認） |
 | `pilot-proposal-template.md` | SA-PRO | パイロット提案書 |
 | `demo-script-15min.md` | — | 15 分デモ |
 | `demo-tech-checklist.md` | SA-DEMO | デモ技術チェックリスト |
