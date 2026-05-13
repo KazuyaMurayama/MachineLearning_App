@@ -142,7 +142,7 @@
 > - L3「未パイロット・商業稼働に至っていない」を結論・注記に明記
 > - 価格帯を¥6-25万に統一（全文書整合済み）
 >
-> **事業計画連携**: [freelance-compass 統合事業計画 v2.1.1 INDEX](https://github.com/KazuyaMurayama/freelance-compass/blob/main/outputs/integrated-business-plan-v2.md)
+> **事業計画連携**: [freelance-compass 統合事業計画 v2.1.1 INDEX](https://github.com/KazuyaMurayama/freelance-compass/blob/main/outputs/integrated-business-plan-v2.1.1.md)
 
 ### 5-3. 営業アセット（`docs/sales-assets/`）
 
