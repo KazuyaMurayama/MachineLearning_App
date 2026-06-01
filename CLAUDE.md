@@ -56,7 +56,7 @@ streamlit run ec_app.py         # EC
 - 成果物・スクリプトは本リポジトリ内のみに保存。`C:\\Users\\user\\Desktop` への出力禁止（ユーザー明示指定時を除く）。
 
 <!-- SKILLS_RULES_START -->
-## Skill 起動ルール（v2.1 / 2026-05-29）
+## Skill 起動ルール（v2.2 / 2026-06-01）
 以下のスキルは **必須・スキップ禁止**。該当シーンでは SKILL.md を読んでから作業を開始すること。
 
 - **新機能実装・設計を始める前に必ず** `.claude/skills/sp-brainstorming/SKILL.md` でアイデアを出し、`.claude/skills/sp-writing-plans/SKILL.md` で計画を作成してから着手する
@@ -64,4 +64,10 @@ streamlit run ec_app.py         # EC
 - **アーキ図・フロー図が必要な時は必ず** `.claude/skills/mermaid-agents365/SKILL.md` を読んでからダイアグラムを作成する
 - **成果物の納品・コミット前、または品質チェック（QC）・レビューフェーズに入る時は必ず** `.claude/skills/sp-verification-before-completion/SKILL.md` のチェックリストを実行する
 - **要件調査が真に必要な時のみ** `.claude/skills/research-deep/SKILL.md` を読んで Web リサーチを実行する
+### ブランチ管理（絶対厳守）
+- **デフォルト: mainへ直接コミット**。ブランチ作成はユーザーが明示的に指示した場合のみ。
+- ブランチを作成した場合、必ず `main` へマージ → ブランチ削除 → push を完了してから作業完了とする。
+- ブランチにファイルを置いたまま回答を完了することを禁止。「完了 = mainにマージ済み＆push済み」。
+- ブランチが残存している場合は、次セッション開始時に `git branch -a` で確認し、即マージ・削除する。
+
 <!-- SKILLS_RULES_END -->
