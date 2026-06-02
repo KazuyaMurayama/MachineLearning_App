@@ -1,74 +1,89 @@
-# CLAUDE.md
+# MachineLearning_App — Claude Code 運用ルール
+
+Streamlit + LightGBM ベースの回帰予測アプリケーション。CSV/Excel をアップロードし、機械学習モデルを構築・予測を行う Web アプリ。
+
+> **本ファイルは VSCode版 / Web版 Claude Code（claude.ai）の両方で本リポジトリの単独完結ガイド**。
+> Web版はグローバル `~/.claude/CLAUDE.md` を参照しない前提で、本リポの運用に必要な全ルールをここに集約。
 
 > 本ファイルは軽量・最小限に保つ。詳細ルールは `docs/rules/` に分散。
 
-## セッション開始時に必ず読むファイル
+---
 
-0. **`progress.md`** — 中断タスクの進捗確認（未完了があれば続きから再開）
-1. **`docs/file-index.md`** — リポジトリ全ファイルの索引
-2. **`docs/context-handoff.md`** — 現行状況・不変条件・戦略整合・撤退基準
-3. **`tasks.md`** — セッション間引継ぎタスク（次にやること）
-4. **`docs/sessions/`** — 日付別セッション要約（最新を先に読む）
+## 0. セッション開始時の参照順序
+1. `tasks.md` — 未完了タスク（存在する場合）
+2. `FILE_INDEX.md` — ファイル一覧（存在する場合）
+3. `docs/rules/` — 詳細ルール一覧
+4. このCLAUDE.md — ルール入口
 
-## ルール（`docs/rules/` を必ず遵守）
+---
 
-| # | ファイル | 内容 |
-|:-:|---------|------|
-| 01 | `docs/rules/01-response-rules.md` | 回答の基本ルール（要約先行・客観的・選択肢+推奨） |
-| 02 | `docs/rules/02-task-management.md` | tasks.md 一元管理・細分化・即時保存 |
-| 03 | `docs/rules/03-file-index-rules.md` | file-index.md 網羅性・優先度明示 |
-| 04 | `docs/rules/04-git-rules.md` | **ブランチ作成禁止**・main 直接コミット |
-| 05 | `docs/rules/05-model-usage.md` | Opus=計画/分析、Sonnet=実行/サブタスク |
-| 06 | `docs/rules/06-deliverable-rules.md` | 成果物は GitHub ハイパーリンクで報告 |
-| 07 | `docs/rules/07-execution-timeout.md` | タイムアウト対策・MCP pushファイル分割（≤250行）・progress.md チェックポイント |
-| 08 | `docs/rules/08-ec-app-roles.md` | EC L3コア3本（E1/E2/E3）の機能境界・重複禁止ルール |
+## 1. 機能（README より）
+- **データ入力**: CSV/Excel ファイルのアップロード
+- **モデル**: LightGBM（回帰）
+- **UI**: Streamlit によるインタラクティブ可視化
+- **下流**: 18 Streamlit アプリ実装と顧客獲得（freelance-compass 上流戦略と整合）
 
-## プロジェクト概要
+---
 
-Streamlit + LightGBM + SHAP による、士業 / EC 向け AI 経営パートナー。L3 パイロット顧客獲得フェーズ。
+## 2. 関連リポジトリ
+| リポ | 役割 |
+|---|---|
+| [KazuyaMurayama/freelance-compass](https://github.com/KazuyaMurayama/freelance-compass) | 上流：事業戦略・意思決定 |
+| [KazuyaMurayama/customer_segment_analysis](https://github.com/KazuyaMurayama/customer_segment_analysis) | 顧客セグメント特定 |
+| [KazuyaMurayama/streamlit-sales-dashboard](https://github.com/KazuyaMurayama/streamlit-sales-dashboard) | 売上KPIダッシュボード（姉妹アプリ） |
 
-- 士業ポータル: `streamlit_app.py` / EC ポータル: `ec_app.py` / ML コア: `app.py`
+---
 
-## 開発コマンド
+## 3. 開発者情報・命名ルール
 
-```bash
-pip install -r requirements.txt
-streamlit run streamlit_app.py  # 士業
-streamlit run ec_app.py         # EC
-```
+| 種別 | 表記 | 用途 |
+|---|---|---|
+| **システム識別子（変更不可）** | `KazuyaMurayama` | GitHub ユーザー名 / URL / `@KazuyaMurayama` |
+| **システム識別子（変更不可）** | `kazuya.murayama.21@gmail.com` | git `user.email` / 連絡先 |
+| **表記名（人間として記載する場合）** | **男座員也（Kazuya Oza / おざ かずや）** | ドキュメント本文の著者名 / コミット message 中の自己言及 |
 
-## 不変条件（詳細は `docs/context-handoff.md`）
+- ドキュメント本文等で開発者名を**人間として**記載する際は **男座員也 / Kazuya Oza** を使用
+- 「Murayama」「村山」「Otokoza」「おとこざ」を**表記名**として誤用しない（システム識別子としての `KazuyaMurayama` は許容）
 
-- `pricing-and-scope.md` が料金 SSOT（L3 士業 ¥20万 / EC ¥25万、v0.3 確定）
-- ec-what-if R²=0.74（2026-04-19 改善済み）
-- パイロット実績 0 社
+---
 
-## 開発者情報・命名ルール
+## 4. ツール実行・Git・ファイル保存
+- 確認不要・即実行（事前確認文を出力しない）
+- 例外（事前確認必須）: main への `git push --force`、`gh repo delete`
+- **ブランチ管理**: デフォルトはmainへ直接コミット。ブランチ作成は明示指示時のみ。万一作成した場合はmainマージ→削除→push完了で「完了」
+- **ファイル保存**: 本リポ内のみ。`C:\Users\user\Desktop` への出力禁止
 
-このリポジトリの開発者・所有者は **男座員也（Kazuya Oza / おざ かずや）** です。
+---
 
-- ドキュメント・コード・コミット等で開発者名を記載する際は必ず **男座員也** または **Kazuya Oza** を使用する
-- 「Murayama」「村山」「Otokoza」「おとこざ」など誤表記は使用しない
-- 英語表記: **Kazuya Oza** / 日本語表記: **男座員也**（おざ かずや）
-- AIアシスタントが生成するドキュメントでも本ルールを遵守すること
+## 5. 成果物報告ルール
 
-## ファイル保存ルール
-- 成果物・スクリプトは本リポジトリ内のみに保存。`C:\\Users\\user\\Desktop` への出力禁止（ユーザー明示指定時を除く）。
+| 成果物 | 説明 | リンク |
+|---|---|---|
+| file.py | 1行説明 | [開く](https://github.com/KazuyaMurayama/MachineLearning_App/blob/main/path/to/file.py) |
 
-<!-- SKILLS_RULES_START -->
-## Skill 起動ルール（v2.2 / 2026-06-01）
-以下のスキルは **必須・スキップ禁止**。該当シーンでは SKILL.md を読んでから作業を開始すること。
+- Markdownリンク `[表示名](URL)` 形式必須 / `/blob/<実ブランチ>/<実パス>` 形式
+- **報告前にURL存在確認**：`Invoke-WebRequest -Uri https://api.github.com/repos/KazuyaMurayama/MachineLearning_App/contents/PATH?ref=main -UseBasicParsing` でステータス200確認
+- push完了後のみURL生成
 
-- **新機能実装・設計を始める前に必ず** `.claude/skills/sp-brainstorming/SKILL.md` でアイデアを出し、`.claude/skills/sp-writing-plans/SKILL.md` で計画を作成してから着手する
-- **複雑な多段タスクは** `.claude/skills/sp-executing-plans/SKILL.md` の手順で実行する
-- **アーキ図・フロー図が必要な時は必ず** `.claude/skills/mermaid-agents365/SKILL.md` を読んでからダイアグラムを作成する
-- **成果物の納品・コミット前、または品質チェック（QC）・レビューフェーズに入る時は必ず** `.claude/skills/sp-verification-before-completion/SKILL.md` のチェックリストを実行する
-- **要件調査が真に必要な時のみ** `.claude/skills/research-deep/SKILL.md` を読んで Web リサーチを実行する
+---
 
-### ブランチ管理（絶対厳守）
-- **デフォルト: mainへ直接コミット**。ブランチ作成はユーザーが明示的に指示した場合のみ。
-- ブランチを作成した場合、必ず `main` へマージ → ブランチ削除 → push を完了してから作業完了とする。
-- ブランチにファイルを置いたまま回答を完了することを禁止。「完了 = mainにマージ済み＆push済み」。
-- ブランチが残存している場合は、次セッション開始時に `git branch -a` で確認し、即マージ・削除する。
+## 6. ドキュメント日付ルール
+レポート系 .md 新規作成時は H1直下に `作成日: YYYY-MM-DD` / `最終更新日: YYYY-MM-DD` 必須。更新時は最終更新日のみ書き換え。除外: README / CLAUDE.md / FILE_INDEX / tasks.md / CHANGELOG / LICENSE。
 
-<!-- SKILLS_RULES_END -->
+---
+
+## 7. Skill 起動ルール
+
+| トリガー | スキル |
+|---|---|
+| EDA（探索的データ分析） | `.claude/skills/programmatic-eda/SKILL.md` |
+| データ品質監査 | `.claude/skills/data-quality-audit/SKILL.md` |
+| ビジネス指標計算 | `.claude/skills/business-metrics-calculator/SKILL.md` |
+| 時系列・トレンド分析 | `.claude/skills/time-series-analysis/SKILL.md` |
+| セグメンテーション・顧客分析 | `.claude/skills/segmentation-analysis/SKILL.md` |
+| 可視化設計 | `.claude/skills/visualization-builder/SKILL.md` |
+| ダッシュボード仕様定義 | `.claude/skills/dashboard-specification/SKILL.md` |
+| TDD で機能実装 | `.claude/skills/sp-test-driven-development/SKILL.md` |
+| バグ・エラー調査 | `.claude/skills/sp-systematic-debugging/SKILL.md` |
+| QC・レビュー前 | `.claude/skills/analysis-qa-checklist/SKILL.md` |
+| 成果物の納品・コミット前 | `.claude/skills/sp-verification-before-completion/SKILL.md` |
