@@ -1,6 +1,7 @@
 # タスク（セッション間引継ぎ用ランニングリスト）
 
-> 最終更新: 2026-05-02
+> **本ファイルは進捗管理のSSOT（単一の真実）です（2026-07-16 明記）**。`ISSUES.md`・`progress.md` は初期スコープ時代の記録としてアーカイブ済み（履歴のみ、進捗管理には使用しない）。
+> 最終更新: 2026-07-16（ヘッダ更新のみ。本文の事業進捗記載は前回セッション時点＝2026-05-02のまま。内容の再取材はしていない）
 > ブランチ: `main`（ブランチ作成は禁止、`docs/rules/04-git-rules.md` 参照）
 > 関連リポ: `kazuyamurayama/freelance-compass`（上流＝事業戦略）
 > 最新戦略: [freelance-compass/outputs/integrated-business-plan-v2.md](https://github.com/KazuyaMurayama/freelance-compass/blob/claude/review-repo-docs-2nBuQ/outputs/integrated-business-plan-v2.md)（2026-03-25）
@@ -124,7 +125,7 @@
 
 ## 既知のリスク
 
-- 🔴 パイロット実績 0 社 — v2 Phase 0 完了条件（M3末有料契約 1社）未達成
+- 🔴 ⚠️要ユーザー確認（事業継続判断）: パイロット実績 0 社 — v2 Phase 0 完了条件（M3末有料契約 1社）未達成
 - 🟠 `pilot-contract-template.md` 法務レビュー未完了
 - 🟠 既存人脈 0 段階のリード獲得戦略が未確立
 

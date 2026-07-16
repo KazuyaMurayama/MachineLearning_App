@@ -1,13 +1,14 @@
 # FILE_INDEX — MachineLearning_App
 
 > ⚠️ このファイルは自動生成です。手動編集は次回更新で上書きされます。
+> `apps/` 配下18アプリはディレクトリ単位で集約記載しています（各アプリの個別ファイル一覧は下記「apps/ 配下サマリー」参照）。
 
 | 項目 | 値 |
 |---|---|
 | リポジトリ | KazuyaMurayama/MachineLearning_App |
 | ブランチ | main |
-| 総ファイル数 | 217 |
-| 最終更新 | 2026-05-02 |
+| 総ファイル数 | 237 |
+| 最終更新 | 2026-07-16 |
 | 管理者 | 男座員也（Kazuya Oza） |
 
 ---
@@ -16,11 +17,13 @@
 
 | カテゴリ | ファイル数 |
 |---|---|
-| Documentation | 77 |
-| Code | 50 |
-| Data | 48 |
-| Config | 39 |
-| Other | 3 |
+| Documentation | 71件 |
+| Code | 18件 |
+| Data | 16件 |
+| Config | 7件 |
+| Other | 2件 |
+| apps/ 配下（18アプリ集約） | 123件 |
+| **合計** | **237件** |
 
 ---
 
@@ -30,61 +33,106 @@
 .
 ├── .claude/
 │   ├── commands/
-│   │   ... (4 items)
-│   └── settings.local.json
+│   │   ├── mvp-build.md
+│   │   ├── mvp-improve.md
+│   │   ├── mvp-plan.md
+│   │   └── mvp-quality.md
+│   ├── hooks/
+│   │   ├── md_table_check.py
+│   │   ├── post_bash_guard.py
+│   │   ├── pre_md_table_guard.py
+│   │   ├── pre_write_guard.py
+│   │   └── session_guard.py
+│   ├── skills/
+│   │   ├── branch-cleanup/
+│   │   │   └── SKILL.md
+│   │   ├── mermaid-agents365/
+│   │   │   ├── reference/
+│   │   │   │   ├── CLASS-ER.md
+│   │   │   │   ├── FLOWCHART.md
+│   │   │   │   ├── OTHER-TYPES.md
+│   │   │   │   └── SEQUENCE.md
+│   │   │   └── SKILL.md
+│   │   ├── sp-brainstorming/
+│   │   │   └── SKILL.md
+│   │   ├── sp-executing-plans/
+│   │   │   └── SKILL.md
+│   │   ├── sp-verification-before-completion/
+│   │   │   └── SKILL.md
+│   │   └── sp-writing-plans/
+│   │       └── SKILL.md
+│   ├── cross-repo.md
+│   ├── quality-rules.md
+│   ├── settings.json
+│   ├── settings.local.json
+│   └── visual-rules.md
 ├── .github/
 │   └── workflows/
-│       ... (1 items)
+│       ├── md-table-lint.yml
+│       └── patch-ec-what-if.yml
 ├── .streamlit/
 │   └── config.toml
 ├── apps/
-│   ├── common/
-│   │   ... (2 items)
-│   ├── compliance-pack/
-│   │   ... (4 items)
-│   ├── contract-draft/
-│   │   ... (4 items)
-│   ├── crosssell/
-│   │   ... (6 items)
-│   ├── doc-checker/
-│   │   ... (4 items)
-│   ├── ec-ad-roi/
-│   │   ... (6 items)
-│   ├── ec-dashboard/
-│   │   ... (6 items)
-│   ├── ec-demo/
-│   │   ... (6 items)
-│   ├── ec-executive-dashboard/
-│   │   ... (7 items)
-│   ├── ec-monthly-briefing/
-│   │   ... (7 items)
-│   ├── ec-rfm/
-│   │   ... (6 items)
-│   ├── ec-what-if/
-│   │   ... (7 items)
-│   ├── payment-alert/
-│   │   ... (6 items)
-│   ├── report-gen/
-│   │   ... (6 items)
-│   ├── service-lp/
-│   │   ... (4 items)
-│   ├── shigyou-briefing/
-│   │   ... (6 items)
-│   ├── shigyou-demo/
-│   │   ... (6 items)
-│   ├── shigyou-ltv/
-│   │   ... (6 items)
-│   └── shigyou-office-dashboard/
-│       ... (6 items)
+│   ├── common/  ... (2 items)
+│   ├── compliance-pack/  ... (4 items)
+│   ├── contract-draft/  ... (4 items)
+│   ├── crosssell/  ... (6 items)
+│   ├── doc-checker/  ... (4 items)
+│   ├── ec-ad-roi/  ... (6 items)
+│   ├── ec-dashboard/  ... (6 items)
+│   ├── ec-demo/  ... (9 items)
+│   ├── ec-executive-dashboard/  ... (11 items)
+│   ├── ec-monthly-briefing/  ... (10 items)
+│   ├── ec-rfm/  ... (6 items)
+│   ├── ec-what-if/  ... (11 items)
+│   ├── payment-alert/  ... (6 items)
+│   ├── report-gen/  ... (7 items)
+│   ├── service-lp/  ... (4 items)
+│   ├── shigyou-briefing/  ... (7 items)
+│   ├── shigyou-demo/  ... (7 items)
+│   ├── shigyou-ltv/  ... (6 items)
+│   └── shigyou-office-dashboard/  ... (7 items)
 ├── docs/
 │   ├── rules/
-│   │   ... (8 items)
+│   │   ├── 01-response-rules.md
+│   │   ├── 02-task-management.md
+│   │   ├── 03-file-index-rules.md
+│   │   ├── 04-git-rules.md
+│   │   ├── 05-model-usage.md
+│   │   ├── 06-deliverable-rules.md
+│   │   ├── 07-execution-timeout.md
+│   │   └── 08-ec-app-roles.md
 │   ├── sales-assets/
-│   │   ... (14 items)
+│   │   ├── _workspace/
+│   │   │   └── state.json
+│   │   ├── README.md
+│   │   ├── customer-pain-research.md
+│   │   ├── demo-script-15min.md
+│   │   ├── demo-tech-checklist.md
+│   │   ├── lead-list-framework.md
+│   │   ├── objection-handling.md
+│   │   ├── outreach-email-templates.md
+│   │   ├── pilot-contract-template.md
+│   │   ├── pilot-proposal-template.md
+│   │   ├── pricing-and-scope.md
+│   │   ├── prospect-research-template.md
+│   │   ├── ringi-summary-template.md
+│   │   └── roi-calculator.md
 │   ├── sessions/
-│   │   ... (2 items)
+│   │   ├── 2026-04-08-session-summary.md
+│   │   └── 2026-04-30-session-summary.md
 │   ├── task-improvement/
-│   │   ... (11 items)
+│   │   ├── 00-master-plan.md
+│   │   ├── 01-critical-thinking.md
+│   │   ├── 02-logical-analysis.md
+│   │   ├── 03-business-strategy.md
+│   │   ├── 04-ux-quality.md
+│   │   ├── 05-tech-review.md
+│   │   ├── 06-synthesis.md
+│   │   ├── 07-action-plan.md
+│   │   ├── 08-execution-log.md
+│   │   ├── 09-final-report.md
+│   │   └── smoke-test-result.json
 │   ├── app-portfolio-analysis.md
 │   ├── context-handoff.md
 │   ├── ec-business-alignment.md
@@ -123,276 +171,196 @@
 │   └── smoke_test.py
 ├── .gitignore
 ├── .python-version
-├── app.py
 ├── CLAUDE.md
-├── create_sample_data_all.py
-├── create_sample_data.py
-├── ec_app.py
 ├── FILE_INDEX.md
-├── generate_docs_html.py
 ├── ISSUES.md
+├── README.md
+├── Timeout_Prevention.md
+├── app.py
+├── create_sample_data.py
+├── create_sample_data_all.py
+├── ec_app.py
+├── generate_docs_html.py
 ├── packages.txt
 ├── progress.md
-├── README.md
 ├── requirements.txt
 ├── setup_fonts.py
 ├── start_app.bat
 ├── streamlit_app.py
-├── tasks.md
-└── Timeout_Prevention.md
+└── tasks.md
 ```
 
 ---
 
-## ファイル詳細
+## apps/ 配下サマリー（18アプリ・計123件）
 
-### Documentation (77件)
-
-<details>
-<summary>クリックして展開 (77件)</summary>
-
-| ファイル | サイズ | 説明 |
+| アプリ | ファイル数 | 概要 |
 |---|---|---|
-| `.claude/commands/mvp-build.md` | 4.0 KB | Claude Code 設定・スキル |
-| `.claude/commands/mvp-improve.md` | 3.0 KB | Claude Code 設定・スキル |
-| `.claude/commands/mvp-plan.md` | 2.4 KB | Claude Code 設定・スキル |
-| `.claude/commands/mvp-quality.md` | 4.1 KB | Claude Code 設定・スキル |
-| `apps/compliance-pack/packages.txt` | 15 B | ファイル |
-| `apps/contract-draft/packages.txt` | 15 B | ファイル |
-| `apps/crosssell/packages.txt` | 15 B | ファイル |
-| `apps/doc-checker/packages.txt` | 15 B | ファイル |
-| `apps/ec-ad-roi/packages.txt` | 15 B | ファイル |
-| `apps/ec-dashboard/packages.txt` | 15 B | ファイル |
-| `apps/ec-demo/packages.txt` | 15 B | ファイル |
-| `apps/ec-executive-dashboard/packages.txt` | 36 B | ファイル |
-| `apps/ec-monthly-briefing/packages.txt` | 36 B | ファイル |
-| `apps/ec-rfm/packages.txt` | 15 B | ファイル |
-| `apps/ec-what-if/packages.txt` | 45 B | ファイル |
-| `apps/payment-alert/packages.txt` | 15 B | ファイル |
-| `apps/report-gen/packages.txt` | 15 B | ファイル |
-| `apps/service-lp/packages.txt` | 15 B | ファイル |
-| `apps/shigyou-briefing/packages.txt` | 36 B | ファイル |
-| `apps/shigyou-demo/packages.txt` | 15 B | ファイル |
-| `apps/shigyou-ltv/packages.txt` | 36 B | ファイル |
-| `apps/shigyou-office-dashboard/packages.txt` | 36 B | ファイル |
-| `CLAUDE.md` | 2.7 KB | Claude Code プロジェクト設定・命名ルール |
-| `docs/app-portfolio-analysis.md` | 34.4 KB | Markdown ドキュメント |
-| `docs/context-handoff.md` | 7.6 KB | Markdown ドキュメント |
-| `docs/ec-business-alignment.md` | 9.5 KB | Markdown ドキュメント |
-| `docs/file-index.md` | 7.7 KB | Markdown ドキュメント |
-| `docs/improvement-backlog.md` | 6.9 KB | Markdown ドキュメント |
-| `docs/quality-scoring-rubric.md` | 6.2 KB | Markdown ドキュメント |
-| `docs/rules/01-response-rules.md` | 799 B | Markdown ドキュメント |
-| `docs/rules/02-task-management.md` | 1019 B | Markdown ドキュメント |
-| `docs/rules/03-file-index-rules.md` | 1.1 KB | Markdown ドキュメント |
-| `docs/rules/04-git-rules.md` | 867 B | Markdown ドキュメント |
-| `docs/rules/05-model-usage.md` | 919 B | Markdown ドキュメント |
-| `docs/rules/06-deliverable-rules.md` | 947 B | Markdown ドキュメント |
-| `docs/rules/07-execution-timeout.md` | 4.4 KB | Markdown ドキュメント |
-| `docs/rules/08-ec-app-roles.md` | 4.1 KB | Markdown ドキュメント |
-| `docs/sales-assets/customer-pain-research.md` | 6.2 KB | Markdown ドキュメント |
-| `docs/sales-assets/demo-script-15min.md` | 10.2 KB | Markdown ドキュメント |
-| `docs/sales-assets/demo-tech-checklist.md` | 8.0 KB | Markdown ドキュメント |
-| `docs/sales-assets/lead-list-framework.md` | 4.9 KB | Markdown ドキュメント |
-| `docs/sales-assets/objection-handling.md` | 14.7 KB | Markdown ドキュメント |
-| `docs/sales-assets/outreach-email-templates.md` | 4.2 KB | Markdown ドキュメント |
-| `docs/sales-assets/pilot-contract-template.md` | 8.4 KB | Markdown ドキュメント |
-| `docs/sales-assets/pilot-proposal-template.md` | 10.5 KB | Markdown ドキュメント |
-| `docs/sales-assets/pricing-and-scope.md` | 10.8 KB | Markdown ドキュメント |
-| `docs/sales-assets/prospect-research-template.md` | 2.9 KB | Markdown ドキュメント |
-| `docs/sales-assets/README.md` | 4.9 KB | リポジトリ概要・セットアップ手順 |
-| `docs/sales-assets/ringi-summary-template.md` | 3.0 KB | Markdown ドキュメント |
-| `docs/sales-assets/roi-calculator.md` | 6.9 KB | Markdown ドキュメント |
-| `docs/sessions/2026-04-08-session-summary.md` | 15.5 KB | Markdown ドキュメント |
-| `docs/sessions/2026-04-30-session-summary.md` | 2.6 KB | Markdown ドキュメント |
-| `docs/shigyou-business-alignment.md` | 14.0 KB | Markdown ドキュメント |
-| `docs/step1_usecase_catalog.md` | 31.0 KB | Markdown ドキュメント |
-| `docs/step2_monetization_scoring.md` | 26.8 KB | Markdown ドキュメント |
-| `docs/step3_prioritization.md` | 18.1 KB | Markdown ドキュメント |
-| `docs/step4_marketing_strategy.md` | 28.8 KB | Markdown ドキュメント |
-| `docs/step5_strategy_review.md` | 24.9 KB | Markdown ドキュメント |
-| `docs/step6_revised_strategy.md` | 29.0 KB | Markdown ドキュメント |
-| `docs/step7_second_review.md` | 39.8 KB | Markdown ドキュメント |
-| `docs/task-improvement/00-master-plan.md` | 3.8 KB | Markdown ドキュメント |
-| `docs/task-improvement/01-critical-thinking.md` | 16.7 KB | Markdown ドキュメント |
-| `docs/task-improvement/02-logical-analysis.md` | 17.7 KB | Markdown ドキュメント |
-| `docs/task-improvement/03-business-strategy.md` | 9.7 KB | Markdown ドキュメント |
-| `docs/task-improvement/04-ux-quality.md` | 9.1 KB | Markdown ドキュメント |
-| `docs/task-improvement/05-tech-review.md` | 18.3 KB | Markdown ドキュメント |
-| `docs/task-improvement/06-synthesis.md` | 16.5 KB | Markdown ドキュメント |
-| `docs/task-improvement/07-action-plan.md` | 11.5 KB | Markdown ドキュメント |
-| `docs/task-improvement/08-execution-log.md` | 3.7 KB | Markdown ドキュメント |
-| `docs/task-improvement/09-final-report.md` | 10.6 KB | Markdown ドキュメント |
-| `FILE_INDEX.md` | 4.7 KB | （このファイル）全ファイルインデックス |
-| `ISSUES.md` | 12.9 KB | Markdown ドキュメント |
-| `packages.txt` | 36 B | ファイル |
-| `progress.md` | 930 B | Markdown ドキュメント |
-| `README.md` | 4.3 KB | リポジトリ概要・セットアップ手順 |
-| `tasks.md` | 6.5 KB | タスク管理・セッション履歴 |
-| `Timeout_Prevention.md` | 4.9 KB | タイムアウト対策ガイド |
+| `apps/common/` | 2件 | 共通ライブラリ（逆SHAPエンジン） |
+| `apps/compliance-pack/` | 4件 | 士業向け安心パッケージ |
+| `apps/contract-draft/` | 4件 | 契約書ドラフトAI |
+| `apps/crosssell/` | 6件 | 顧問先クロスセル分析 |
+| `apps/doc-checker/` | 4件 | 申請書類チェッカー |
+| `apps/ec-ad-roi/` | 6件 | 広告ROI分析 |
+| `apps/ec-dashboard/` | 6件 | EC売上ダッシュボード |
+| `apps/ec-demo/` | 9件 | 顧客離脱予測＋需要予測デモ |
+| `apps/ec-executive-dashboard/` | 11件 | EC経営ダッシュボード（L3コア） |
+| `apps/ec-monthly-briefing/` | 10件 | EC月次AIブリーフィングレポート（L3コア） |
+| `apps/ec-rfm/` | 6件 | 顧客RFM分析 |
+| `apps/ec-what-if/` | 11件 | What-Ifシミュレーター（L3コア） |
+| `apps/payment-alert/` | 6件 | 請求・入金遅延アラート |
+| `apps/report-gen/` | 7件 | 月次レポート自動生成 |
+| `apps/service-lp/` | 4件 | 統合サービスLP＋AI経営診断 |
+| `apps/shigyou-briefing/` | 7件 | 月次AIブリーフィングレポート（L3コア） |
+| `apps/shigyou-demo/` | 7件 | 顧問先離反予測デモ |
+| `apps/shigyou-ltv/` | 6件 | 顧問先LTV予測＋不採算フラグ |
+| `apps/shigyou-office-dashboard/` | 7件 | 事務所経営ダッシュボード（L3コア） |
 
-</details>
-
-### Code (50件)
-
-| ファイル | サイズ | 説明 |
-|---|---|---|
-| `app.py` | 23.2 KB | Python スクリプト |
-| `apps/common/__init__.py` | - | Python スクリプト |
-| `apps/common/reverse_shap.py` | 8.4 KB | Python スクリプト |
-| `apps/compliance-pack/app.py` | 21.5 KB | Python スクリプト |
-| `apps/contract-draft/app.py` | 23.3 KB | Python スクリプト |
-| `apps/crosssell/app.py` | 28.5 KB | Python スクリプト |
-| `apps/crosssell/create_sample_data.py` | 3.3 KB | Python スクリプト |
-| `apps/doc-checker/app.py` | 40.3 KB | Python スクリプト |
-| `apps/ec-ad-roi/app.py` | 36.1 KB | Python スクリプト |
-| `apps/ec-ad-roi/create_sample_data.py` | 2.6 KB | Python スクリプト |
-| `apps/ec-dashboard/app.py` | 37.5 KB | Python スクリプト |
-| `apps/ec-dashboard/create_sample_data.py` | 2.0 KB | Python スクリプト |
-| `apps/ec-demo/app.py` | 31.8 KB | Python スクリプト |
-| `apps/ec-demo/create_sample_data.py` | 9.4 KB | Python スクリプト |
-| `apps/ec-executive-dashboard/app.py` | 8.6 KB | Python スクリプト |
-| `apps/ec-executive-dashboard/create_sample_data.py` | 4.1 KB | Python スクリプト |
-| `apps/ec-executive-dashboard/helpers.py` | 11.7 KB | Python スクリプト |
-| `apps/ec-monthly-briefing/app.py` | 8.9 KB | Python スクリプト |
-| `apps/ec-monthly-briefing/create_sample_data.py` | 3.1 KB | Python スクリプト |
-| `apps/ec-monthly-briefing/helpers.py` | 16.4 KB | Python スクリプト |
-| `apps/ec-rfm/app.py` | 33.5 KB | Python スクリプト |
-| `apps/ec-rfm/create_sample_data.py` | 5.0 KB | Python スクリプト |
-| `apps/ec-what-if/app.py` | 32.0 KB | Python スクリプト |
-| `apps/ec-what-if/create_sample_data.py` | 7.6 KB | Python スクリプト |
-| `apps/ec-what-if/data_setup.py` | 1.1 KB | Python スクリプト |
-| `apps/payment-alert/app.py` | 24.5 KB | Python スクリプト |
-| `apps/payment-alert/create_sample_data.py` | 4.0 KB | Python スクリプト |
-| `apps/report-gen/app.py` | 33.0 KB | Python スクリプト |
-| `apps/report-gen/create_sample_data.py` | 4.2 KB | Python スクリプト |
-| `apps/service-lp/app.py` | 29.4 KB | Python スクリプト |
-| `apps/shigyou-briefing/app.py` | 27.1 KB | Python スクリプト |
-| `apps/shigyou-briefing/create_sample_data.py` | 3.2 KB | Python スクリプト |
-| `apps/shigyou-demo/app.py` | 37.1 KB | Python スクリプト |
-| `apps/shigyou-demo/create_sample_data.py` | 8.3 KB | Python スクリプト |
-| `apps/shigyou-ltv/app.py` | 34.5 KB | Python スクリプト |
-| `apps/shigyou-ltv/create_sample_data.py` | 3.9 KB | Python スクリプト |
-| `apps/shigyou-office-dashboard/app.py` | 21.7 KB | Python スクリプト |
-| `apps/shigyou-office-dashboard/create_sample_data.py` | 5.5 KB | Python スクリプト |
-| `create_sample_data_all.py` | 16.6 KB | Python スクリプト |
-| `create_sample_data.py` | 3.6 KB | Python スクリプト |
-| `ec_app.py` | 10.1 KB | Python スクリプト |
-| `generate_docs_html.py` | 13.2 KB | Python スクリプト |
-| `modules/__init__.py` | 260 B | Python スクリプト |
-| `modules/data_loader.py` | 2.6 KB | Python スクリプト |
-| `modules/evaluation.py` | 2.3 KB | Python スクリプト |
-| `modules/model.py` | 6.0 KB | Python スクリプト |
-| `modules/shap_analysis.py` | 9.6 KB | Python スクリプト |
-| `scripts/smoke_test.py` | 6.9 KB | Python スクリプト |
-| `setup_fonts.py` | 1.2 KB | Python スクリプト |
-| `streamlit_app.py` | 10.2 KB | Python スクリプト |
-
-### Data (48件)
-
-| ファイル | サイズ | 説明 |
-|---|---|---|
-| `.claude/settings.local.json` | 554 B | JSON データ |
-| `.github/workflows/patch-ec-what-if.yml` | 2.0 KB | GitHub Actions ワークフロー |
-| `apps/crosssell/sample_data/crosssell_data.csv` | 11.1 KB | CSV データ |
-| `apps/ec-ad-roi/sample_data/ad_performance.csv` | 4.1 KB | CSV データ |
-| `apps/ec-dashboard/sample_data/daily_sales.csv` | 133.7 KB | CSV データ |
-| `apps/ec-demo/sample_data/ec_customers_target.csv` | 11.2 KB | CSV データ |
-| `apps/ec-demo/sample_data/ec_customers_train.csv` | 56.4 KB | CSV データ |
-| `apps/ec-demo/sample_data/ec_sales_target.csv` | 90.0 KB | CSV データ |
-| `apps/ec-demo/sample_data/ec_sales_train.csv` | 1.2 MB | CSV データ |
-| `apps/ec-executive-dashboard/sample_data/ads.csv` | 4.3 KB | CSV データ |
-| `apps/ec-executive-dashboard/sample_data/cross_segment.csv` | 1.0 KB | CSV データ |
-| `apps/ec-executive-dashboard/sample_data/customers.csv` | 17.3 KB | CSV データ |
-| `apps/ec-executive-dashboard/sample_data/orders.csv` | 14.1 KB | CSV データ |
-| `apps/ec-executive-dashboard/sample_data/products.csv` | 2.8 KB | CSV データ |
-| `apps/ec-monthly-briefing/sample_data/ads.csv` | 4.3 KB | CSV データ |
-| `apps/ec-monthly-briefing/sample_data/customers.csv` | 17.3 KB | CSV データ |
-| `apps/ec-monthly-briefing/sample_data/orders.csv` | 14.1 KB | CSV データ |
-| `apps/ec-monthly-briefing/sample_data/products.csv` | 2.8 KB | CSV データ |
-| `apps/ec-rfm/sample_data/purchase_history.csv` | 217.5 KB | CSV データ |
-| `apps/ec-what-if/sample_data/ads.csv` | 4.3 KB | CSV データ |
-| `apps/ec-what-if/sample_data/customers.csv` | 17.3 KB | CSV データ |
-| `apps/ec-what-if/sample_data/orders.csv` | 14.1 KB | CSV データ |
-| `apps/ec-what-if/sample_data/products.csv` | 2.8 KB | CSV データ |
-| `apps/ec-what-if/sample_data/training_data.csv` | 27.7 KB | CSV データ |
-| `apps/payment-alert/sample_data/payment_data.csv` | 164.3 KB | CSV データ |
-| `apps/report-gen/sample_data/trial_balance_current.csv` | 971 B | CSV データ |
-| `apps/report-gen/sample_data/trial_balance_prev.csv` | 962 B | CSV データ |
-| `apps/shigyou-briefing/sample_data/briefing_master.csv` | 10.8 KB | CSV データ |
-| `apps/shigyou-briefing/sample_data/monthly_history.csv` | 440 B | CSV データ |
-| `apps/shigyou-demo/sample_data/shigyou_target.csv` | 2.3 KB | CSV データ |
-| `apps/shigyou-demo/sample_data/shigyou_train.csv` | 10.9 KB | CSV データ |
-| `apps/shigyou-ltv/sample_data/ltv_train.csv` | 15.8 KB | CSV データ |
-| `apps/shigyou-office-dashboard/sample_data/monthly_kpi.csv` | 377 B | CSV データ |
-| `apps/shigyou-office-dashboard/sample_data/office_master.csv` | 12.9 KB | CSV データ |
-| `docs/sales-assets/_workspace/state.json` | 4.6 KB | JSON データ |
-| `docs/task-improvement/smoke-test-result.json` | 6.7 KB | JSON データ |
-| `sample_data/1_salary_target.csv` | 3.4 KB | CSV データ |
-| `sample_data/1_salary_train.csv` | 37.8 KB | CSV データ |
-| `sample_data/2_realestate_target.csv` | 3.7 KB | CSV データ |
-| `sample_data/2_realestate_train.csv` | 40.3 KB | CSV データ |
-| `sample_data/3_sales_target.csv` | 3.4 KB | CSV データ |
-| `sample_data/3_sales_train.csv` | 36.3 KB | CSV データ |
-| `sample_data/4_ltv_target.csv` | 3.4 KB | CSV データ |
-| `sample_data/4_ltv_train.csv` | 36.9 KB | CSV データ |
-| `sample_data/5_turnover_target.csv` | 1.8 KB | CSV データ |
-| `sample_data/5_turnover_train.csv` | 19.8 KB | CSV データ |
-| `sample_data/target.csv` | 2.5 KB | CSV データ |
-| `sample_data/train.csv` | 28.2 KB | CSV データ |
-
-### Config (39件)
-
-| ファイル | サイズ | 説明 |
-|---|---|---|
-| `.gitignore` | 630 B | Git 除外設定 |
-| `.streamlit/config.toml` | 261 B | TOML 設定 |
-| `apps/compliance-pack/.streamlit/config.toml` | 158 B | TOML 設定 |
-| `apps/compliance-pack/requirements.txt` | 18 B | Python 依存パッケージリスト |
-| `apps/contract-draft/.streamlit/config.toml` | 158 B | TOML 設定 |
-| `apps/contract-draft/requirements.txt` | 18 B | Python 依存パッケージリスト |
-| `apps/crosssell/.streamlit/config.toml` | 185 B | TOML 設定 |
-| `apps/crosssell/requirements.txt` | 92 B | Python 依存パッケージリスト |
-| `apps/doc-checker/.streamlit/config.toml` | 185 B | TOML 設定 |
-| `apps/doc-checker/requirements.txt` | 18 B | Python 依存パッケージリスト |
-| `apps/ec-ad-roi/.streamlit/config.toml` | 185 B | TOML 設定 |
-| `apps/ec-ad-roi/requirements.txt` | 141 B | Python 依存パッケージリスト |
-| `apps/ec-dashboard/.streamlit/config.toml` | 185 B | TOML 設定 |
-| `apps/ec-dashboard/requirements.txt` | 92 B | Python 依存パッケージリスト |
-| `apps/ec-demo/.streamlit/config.toml` | 158 B | TOML 設定 |
-| `apps/ec-demo/requirements.txt` | 141 B | Python 依存パッケージリスト |
-| `apps/ec-executive-dashboard/.streamlit/config.toml` | 140 B | TOML 設定 |
-| `apps/ec-executive-dashboard/requirements.txt` | 64 B | Python 依存パッケージリスト |
-| `apps/ec-monthly-briefing/.streamlit/config.toml` | 140 B | TOML 設定 |
-| `apps/ec-monthly-briefing/requirements.txt` | 64 B | Python 依存パッケージリスト |
-| `apps/ec-rfm/.streamlit/config.toml` | 185 B | TOML 設定 |
-| `apps/ec-rfm/requirements.txt` | 92 B | Python 依存パッケージリスト |
-| `apps/ec-what-if/.streamlit/config.toml` | 140 B | TOML 設定 |
-| `apps/ec-what-if/requirements.txt` | 113 B | Python 依存パッケージリスト |
-| `apps/payment-alert/.streamlit/config.toml` | 185 B | TOML 設定 |
-| `apps/payment-alert/requirements.txt` | 92 B | Python 依存パッケージリスト |
-| `apps/report-gen/.streamlit/config.toml` | 158 B | TOML 設定 |
-| `apps/report-gen/requirements.txt` | 92 B | Python 依存パッケージリスト |
-| `apps/service-lp/.streamlit/config.toml` | 158 B | TOML 設定 |
-| `apps/service-lp/requirements.txt` | 50 B | Python 依存パッケージリスト |
-| `apps/shigyou-briefing/.streamlit/config.toml` | 140 B | TOML 設定 |
-| `apps/shigyou-briefing/requirements.txt` | 64 B | Python 依存パッケージリスト |
-| `apps/shigyou-demo/.streamlit/config.toml` | 158 B | TOML 設定 |
-| `apps/shigyou-demo/requirements.txt` | 141 B | Python 依存パッケージリスト |
-| `apps/shigyou-ltv/.streamlit/config.toml` | 140 B | TOML 設定 |
-| `apps/shigyou-ltv/requirements.txt` | 113 B | Python 依存パッケージリスト |
-| `apps/shigyou-office-dashboard/.streamlit/config.toml` | 140 B | TOML 設定 |
-| `apps/shigyou-office-dashboard/requirements.txt` | 64 B | Python 依存パッケージリスト |
-| `requirements.txt` | 141 B | Python 依存パッケージリスト |
-
-### Other (3件)
-
-| ファイル | サイズ | 説明 |
-|---|---|---|
-| `.python-version` | 5 B | ファイル |
-| `docs/index.html` | 287.5 KB | ファイル |
-| `start_app.bat` | 203 B | ファイル |
+> 各アプリの内訳ファイル（`app.py` / `create_sample_data.py` / `requirements.txt` / `.streamlit/config.toml` / `sample_data/*.csv` 等）は概ね共通パターンのため個別列挙を省略。詳細はリポジトリを直接参照するか `docs/app-portfolio-analysis.md` を参照。
 
 ---
 
-_自動生成: 2026-05-02 | 管理者: 男座員也（Kazuya Oza）_
+## ファイル詳細（apps/ 以外）
+
+### Documentation (71件)
+
+| ファイル | サイズ | 説明 |
+|---|---|---|
+| `.claude/commands/mvp-build.md` | 4.1 KB | Claude Code カスタムスラッシュコマンド定義 |
+| `.claude/commands/mvp-improve.md` | 3.1 KB | Claude Code カスタムスラッシュコマンド定義 |
+| `.claude/commands/mvp-plan.md` | 2.5 KB | Claude Code カスタムスラッシュコマンド定義 |
+| `.claude/commands/mvp-quality.md` | 4.2 KB | Claude Code カスタムスラッシュコマンド定義 |
+| `.claude/cross-repo.md` | 3.5 KB | 他リポジトリ参照ルール（WebFetch/GitHub REST API経由の取得手順） |
+| `.claude/quality-rules.md` | 3.0 KB | 品質ガードレール（ファイル生成前・push前・成果物報告前に参照） |
+| `.claude/skills/branch-cleanup/SKILL.md` | 6.6 KB | Claude Code スキル定義（branch-cleanup） |
+| `.claude/skills/mermaid-agents365/SKILL.md` | 7.6 KB | Claude Code スキル定義（mermaid-agents365） |
+| `.claude/skills/mermaid-agents365/reference/CLASS-ER.md` | 2.1 KB | mermaid-agents365スキルの参照資料（CLASS-ER.md） |
+| `.claude/skills/mermaid-agents365/reference/FLOWCHART.md` | 1.6 KB | mermaid-agents365スキルの参照資料（FLOWCHART.md） |
+| `.claude/skills/mermaid-agents365/reference/OTHER-TYPES.md` | 2.0 KB | mermaid-agents365スキルの参照資料（OTHER-TYPES.md） |
+| `.claude/skills/mermaid-agents365/reference/SEQUENCE.md` | 1.7 KB | mermaid-agents365スキルの参照資料（SEQUENCE.md） |
+| `.claude/skills/sp-brainstorming/SKILL.md` | 10.5 KB | Claude Code スキル定義（sp-brainstorming） |
+| `.claude/skills/sp-executing-plans/SKILL.md` | 2.5 KB | Claude Code スキル定義（sp-executing-plans） |
+| `.claude/skills/sp-verification-before-completion/SKILL.md` | 4.2 KB | Claude Code スキル定義（sp-verification-before-completion） |
+| `.claude/skills/sp-writing-plans/SKILL.md` | 6.1 KB | Claude Code スキル定義（sp-writing-plans） |
+| `.claude/visual-rules.md` | 3.9 KB | レポートMDのビジュアル自動付与ルール |
+| `CLAUDE.md` | 15.1 KB | Claude Code プロジェクト設定・命名ルール |
+| `FILE_INDEX.md` | 20.3 KB | （このファイル）全ファイルインデックス |
+| `ISSUES.md` | 13.7 KB | 初期スコープ（単独MLアプリ）開発時Issue記録（アーカイブ済み・履歴保持） |
+| `README.md` | 8.5 KB | リポジトリ概要・セットアップ手順（18アプリポートフォリオ、2026-07-16全面改訂） |
+| `Timeout_Prevention.md` | 5.0 KB | Claude Code実行タイムアウト対策ガイド |
+| `docs/app-portfolio-analysis.md` | 35.0 KB | 18アプリの重要度分類・統合方針の分析 |
+| `docs/context-handoff.md` | 7.7 KB | セッション間の不変条件・戦略整合メモ |
+| `docs/ec-business-alignment.md` | 9.9 KB | EC事業の戦略整合ドキュメント |
+| `docs/file-index.md` | 8.7 KB | 旧ファイル索引（docs内部用、詳細はFILE_INDEX.md参照） |
+| `docs/improvement-backlog.md` | 7.0 KB | 改善バックログ |
+| `docs/quality-scoring-rubric.md` | 6.3 KB | 品質スコアリング基準 |
+| `docs/rules/01-response-rules.md` | 807 B | 行動ルール（01-response-rules.md） |
+| `docs/rules/02-task-management.md` | 1.0 KB | 行動ルール（02-task-management.md） |
+| `docs/rules/03-file-index-rules.md` | 1.2 KB | 行動ルール（03-file-index-rules.md） |
+| `docs/rules/04-git-rules.md` | 888 B | 行動ルール（04-git-rules.md） |
+| `docs/rules/05-model-usage.md` | 947 B | 行動ルール（05-model-usage.md） |
+| `docs/rules/06-deliverable-rules.md` | 976 B | 行動ルール（06-deliverable-rules.md） |
+| `docs/rules/07-execution-timeout.md` | 4.5 KB | 行動ルール（07-execution-timeout.md） |
+| `docs/rules/08-ec-app-roles.md` | 4.2 KB | 行動ルール（08-ec-app-roles.md） |
+| `docs/sales-assets/README.md` | 5.0 KB | 営業資産ディレクトリの概要 |
+| `docs/sales-assets/customer-pain-research.md` | 6.4 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/demo-script-15min.md` | 10.4 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/demo-tech-checklist.md` | 8.2 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/lead-list-framework.md` | 5.0 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/objection-handling.md` | 14.9 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/outreach-email-templates.md` | 4.3 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/pilot-contract-template.md` | 8.5 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/pilot-proposal-template.md` | 10.7 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/pricing-and-scope.md` | 11.0 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/prospect-research-template.md` | 3.0 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/ringi-summary-template.md` | 3.1 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sales-assets/roi-calculator.md` | 7.1 KB | 営業資産ドキュメント（提案・契約テンプレート等） |
+| `docs/sessions/2026-04-08-session-summary.md` | 15.8 KB | セッション要約記録 |
+| `docs/sessions/2026-04-30-session-summary.md` | 2.6 KB | セッション要約記録 |
+| `docs/shigyou-business-alignment.md` | 14.2 KB | 士業事業の戦略整合ドキュメント |
+| `docs/step1_usecase_catalog.md` | 31.5 KB | 事業戦略ステップ資料（step1_usecase_catalog.md） |
+| `docs/step2_monetization_scoring.md` | 27.2 KB | 事業戦略ステップ資料（step2_monetization_scoring.md） |
+| `docs/step3_prioritization.md` | 18.5 KB | 事業戦略ステップ資料（step3_prioritization.md） |
+| `docs/step4_marketing_strategy.md` | 29.4 KB | 事業戦略ステップ資料（step4_marketing_strategy.md） |
+| `docs/step5_strategy_review.md` | 25.3 KB | 事業戦略ステップ資料（step5_strategy_review.md） |
+| `docs/step6_revised_strategy.md` | 29.5 KB | 事業戦略ステップ資料（step6_revised_strategy.md） |
+| `docs/step7_second_review.md` | 40.4 KB | 事業戦略ステップ資料（step7_second_review.md） |
+| `docs/task-improvement/00-master-plan.md` | 3.9 KB | タスク改善プロセス記録（00-master-plan.md） |
+| `docs/task-improvement/01-critical-thinking.md` | 16.8 KB | タスク改善プロセス記録（01-critical-thinking.md） |
+| `docs/task-improvement/02-logical-analysis.md` | 17.8 KB | タスク改善プロセス記録（02-logical-analysis.md） |
+| `docs/task-improvement/03-business-strategy.md` | 9.8 KB | タスク改善プロセス記録（03-business-strategy.md） |
+| `docs/task-improvement/04-ux-quality.md` | 9.2 KB | タスク改善プロセス記録（04-ux-quality.md） |
+| `docs/task-improvement/05-tech-review.md` | 18.5 KB | タスク改善プロセス記録（05-tech-review.md） |
+| `docs/task-improvement/06-synthesis.md` | 16.7 KB | タスク改善プロセス記録（06-synthesis.md） |
+| `docs/task-improvement/07-action-plan.md` | 11.7 KB | タスク改善プロセス記録（07-action-plan.md） |
+| `docs/task-improvement/08-execution-log.md` | 3.7 KB | タスク改善プロセス記録（08-execution-log.md） |
+| `docs/task-improvement/09-final-report.md` | 10.8 KB | タスク改善プロセス記録（09-final-report.md） |
+| `progress.md` | 1.3 KB | 長時間タスク中断・再開用チェックポイント（アーカイブ済み・履歴保持） |
+| `tasks.md` | 7.1 KB | タスク管理・進捗管理のSSOT |
+
+### Code (18件)
+
+| ファイル | サイズ | 説明 |
+|---|---|---|
+| `.claude/hooks/md_table_check.py` | 8.6 KB | GFMパイプテーブルの列数整合性チェックフック |
+| `.claude/hooks/post_bash_guard.py` | 1.4 KB | PostToolUseフック（git push後の成果物報告ルール想起） |
+| `.claude/hooks/pre_md_table_guard.py` | 4.7 KB | PreToolUseフック（Markdownテーブル列数崩れのWrite/Edit拒否） |
+| `.claude/hooks/pre_write_guard.py` | 1.6 KB | PreToolUseフック（Desktop直下等リポ外へのファイル生成拒否） |
+| `.claude/hooks/session_guard.py` | 2.4 KB | Stopフック（セッション終了時のブランチ・未pushチェック） |
+| `app.py` | 23.7 KB | 単独MLアプリ本体（初期スコープ・汎用LightGBM回帰予測） |
+| `create_sample_data.py` | 3.7 KB | app.py用サンプルデータ生成スクリプト |
+| `create_sample_data_all.py` | 17.0 KB | 複数ビジネス事例のサンプルデータ生成スクリプト |
+| `ec_app.py` | 10.4 KB | ECポータル（apps/ec-* 系アプリのランチャー） |
+| `generate_docs_html.py` | 13.7 KB | docs/配下MDをHTML化するスクリプト |
+| `modules/__init__.py` | 270 B | modulesパッケージ初期化 |
+| `modules/data_loader.py` | 2.7 KB | データ読み込み処理（app.py用） |
+| `modules/evaluation.py` | 2.4 KB | 評価指標算出処理（app.py用） |
+| `modules/model.py` | 6.2 KB | LightGBMモデル処理（app.py用） |
+| `modules/shap_analysis.py` | 9.9 KB | SHAP解析処理（app.py用） |
+| `scripts/smoke_test.py` | 7.1 KB | 全アプリ一括スモークテストスクリプト |
+| `setup_fonts.py` | 1.2 KB | Streamlit Cloud環境の日本語フォントセットアップスクリプト |
+| `streamlit_app.py` | 10.4 KB | 士業ポータル（apps/shigyou-* 系アプリのランチャー） |
+
+### Data (16件)
+
+| ファイル | サイズ | 説明 |
+|---|---|---|
+| `.claude/settings.json` | 856 B | Claude Code 共有設定 |
+| `.claude/settings.local.json` | 579 B | Claude Code ローカル設定 |
+| `docs/sales-assets/_workspace/state.json` | 4.7 KB | 営業資産ワークスペースの状態データ |
+| `docs/task-improvement/smoke-test-result.json` | 7.0 KB | タスク改善プロセスのスモークテスト結果データ |
+| `sample_data/1_salary_target.csv` | 3.5 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/1_salary_train.csv` | 38.8 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/2_realestate_target.csv` | 3.8 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/2_realestate_train.csv` | 41.1 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/3_sales_target.csv` | 3.5 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/3_sales_train.csv` | 36.9 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/4_ltv_target.csv` | 3.5 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/4_ltv_train.csv` | 37.6 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/5_turnover_target.csv` | 1.9 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/5_turnover_train.csv` | 20.3 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/target.csv` | 2.6 KB | app.py用サンプルデータ（CSV） |
+| `sample_data/train.csv` | 29.2 KB | app.py用サンプルデータ（CSV） |
+
+### Config (7件)
+
+| ファイル | サイズ | 説明 |
+|---|---|---|
+| `.github/workflows/md-table-lint.yml` | 374 B | GitHub Actions ワークフロー |
+| `.github/workflows/patch-ec-what-if.yml` | 2.1 KB | GitHub Actions ワークフロー |
+| `.gitignore` | 697 B | Git除外設定 |
+| `.python-version` | 6 B | Pythonバージョン指定（3.11） |
+| `.streamlit/config.toml` | 276 B | Streamlit設定（ルートapp.py用） |
+| `packages.txt` | 38 B | aptパッケージリスト（Streamlit Cloud用） |
+| `requirements.txt` | 150 B | Python依存パッケージリスト（ルート・app.py用） |
+
+### Other (2件)
+
+| ファイル | サイズ | 説明 |
+|---|---|---|
+| `docs/index.html` | 290.6 KB | generate_docs_html.pyで生成されたドキュメント閲覧用HTML |
+| `start_app.bat` | 213 B | app.py起動用Windowsバッチファイル |
+
+---
+
+_自動生成: 2026-07-16 | 管理者: 男座員也（Kazuya Oza）_
