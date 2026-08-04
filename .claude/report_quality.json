@@ -1,0 +1,11 @@
+{
+  "mode": "warn",
+  "checks": [
+    "numeric",
+    "rigor"
+  ],
+  "include": [
+    "docs/"
+  ],
+  "_why": "warn運用。レポートmd 0件/全71件。include=docs"
+}
