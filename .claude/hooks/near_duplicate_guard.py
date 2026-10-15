@@ -257,15 +257,38 @@ def _git(root, args, timeout=10):
         return None
 
 
+_ROOTS = {}
+
+
 def _git_root(path):
-    d = path if os.path.isdir(path) else os.path.dirname(path)
+    """path を含む作業ツリーの最上位（.git のディレクトリかファイルがある所）。git を呼ばずに上へたどる。
+    WHY（2026-10-15 実測）: ターンで触ったファイルごとに git rev-parse を呼び、Windows では1回約0.4秒、
+    12回で約4.9秒を使って比較の前に期限（TIME_BUDGET 5秒）を使い切り、毎回「打ち切った」になっていた。"""
+    d = os.path.abspath(path if os.path.isdir(path) else os.path.dirname(path))
     while d and not os.path.isdir(d):
         nxt = os.path.dirname(d)
         if nxt == d:
             return None
         d = nxt
-    out = _git(d, ["rev-parse", "--show-toplevel"]) if d else None
-    return os.path.abspath(out.strip()) if out else None
+    seen = []
+    while d:
+        if d in _ROOTS:
+            r = _ROOTS[d]
+            break
+        seen.append(d)
+        if os.path.exists(os.path.join(d, ".git")):
+            r = d
+            break
+        nxt = os.path.dirname(d)
+        if nxt == d:
+            r = None
+            break
+        d = nxt
+    else:
+        r = None
+    for x in seen:
+        _ROOTS[x] = r
+    return r
 
 
 def repo_files(root):
@@ -1220,12 +1243,10 @@ def on_stop(ev):
         if found_warn:
             msg.append("このターンで変わった（自分では書いていない）ファイルに、ほぼ同じ内容の生きたファイルがある"
                        "（止めない）。\n" + _fmt_pairs(found_warn))
-        _emit({"systemMessage": "⚠ near_duplicate_guard: " + "\n".join(msg) + (("\n" + note) if note else "")})
+        _emit({"systemMessage": "⚠ near_duplicate_guard: " + "\n".join(msg)})
     elif cut:
-        # 黙って通さない: 見られなかったことを利用者に見える形で知らせる（止めはしない）
+        # 打ち切りは画面に出さず _log_cut のログにだけ残す（2026-10-15 依頼者指示。_log_cut の WHY）
         _record_firing("near_duplicate_guard", ev)
-        _emit({"systemMessage": "⚠ " + note + " このターンで作成・変更したファイルに、ほぼ同じ内容の"
-               "ファイルが無いことは確認できていない。"})
 
 
 def on_pre_tool(ev):
